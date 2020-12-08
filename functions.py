@@ -1,12 +1,13 @@
-from scipy import integrate, stats
+from scipy import integrate
 import numpy as np
-import matplotlib.pyplot as plt
-from pytest import approx
 
-uniform = lambda x: 1  # a constant PDF equal to 1 corresponds to the uniform prior
-jeffreys = stats.beta(a=1/2, b=1/2).pdf  # Jeffreys prior PDF is a beta(1/2,1/2). See https://en.wikipedia.org/wiki/Jeffreys_prior#Bernoulli_trial
+def generalized_laplace(trials, failures, virtual_successes, virtual_failures=None, ftp=None):
+	if ftp is not None:
+		if virtual_failures is not None and virtual_successes is not None:
+			raise ValueError("Provide exactly two of virtual_failures, virtual_successes, and ftp")
+		if virtual_failures is None:
+			virtual_failures = (virtual_successes/ftp)-virtual_successes
 
-def generalized_laplace(trials, failures, virtual_successes=1, virtual_failures=1):
 	successes = trials - failures
 	next_trial_p = (virtual_successes + successes) / (trials + virtual_successes + virtual_failures)
 	return next_trial_p
@@ -48,22 +49,7 @@ def forecast_bayes(failures, prior, forecast_years):
 	p_success_by_target = 1 - p_failure_by_target
 	return p_success_by_target
 
-# Verify that Bayes with uniform prior corresponds to Laplace
-assert approx(
-	forecast_bayes(failures=5, prior=uniform, forecast_years=3)) == \
-	forecast_generalized_laplace(failures=5, forecast_years=3)
-
-# Verify that Bayes with Jeffrey's prior corresponds to modified laplace with 0.5 virtual successes and failures
-assert approx(
-	forecast_bayes(failures=5, prior=jeffreys, forecast_years=3)) == \
-	forecast_generalized_laplace(failures=5, forecast_years=3, virtual_failures=0.5, virtual_successes=0.5)
-
-# Verify the more general proposition, from Appendix 2.2, that virtual_succeses == alpha, etc.
-# (Appendix 2.2: "The parameterisation of Beta distributions used in the semi-informative priors framework").
-alpha = 0.5
-beta = 1.23
-beta_distribution = stats.beta(a=alpha,b=beta).pdf
-
-assert approx(
-	forecast_bayes(failures=5,prior=beta_distribution,forecast_years=3)) == \
-	forecast_generalized_laplace(failures=5,forecast_years=3,virtual_successes=alpha,virtual_failures=beta)
+def fourParamFramework(ftp,regime_start=1956,forecast_from=2020,forecast_to=2036,virtual_successes=1):
+	virtual_failures = (virtual_successes/ftp)-virtual_successes
+	failures = forecast_from-regime_start
+	return forecast_generalized_laplace(failures=failures,forecast_years=forecast_to-forecast_from,virtual_successes=virtual_successes,virtual_failures=virtual_failures)
