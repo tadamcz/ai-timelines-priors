@@ -1,12 +1,34 @@
 import sections
 import warnings
+from time import sleep
+from termcolor import colored
+
+def setup_warning_catcher():
+    """ Wrap warnings.showwarning with code that records warnings. """
+
+    caught_warnings = []
+    original_showwarning = warnings.showwarning
+
+    def custom_showwarning(*args,  **kwargs):
+        caught_warnings.append(args[0])
+        return original_showwarning(*args, **kwargs)
+
+    warnings.showwarning = custom_showwarning
+    return caught_warnings
+caught_warnings_list = setup_warning_catcher()
 
 def warn_if_unequal(vetting, report, location=None):
 	if not vetting == report:
 		warnstring = '''
-		In section ''' + str(location) + '''
-		Vetting value ''' + str(vetting) +''' is not equal to
-		Report value ''' + str(report)
+		In section ''' + str(location) + ''', vetting value
+		''' + str(vetting) +''' is not equal to
+		report value
+		'''+ str(report)
+
+		sleep(.01)
+		# I tried setting sys.stdout.flush() instead of sleep(), but it didn't work for getting the
+		# warnings in the right order. sleep() is very hacky but OK for this purpose.
+
 		warnings.warn(warnstring)
 
 section4_2 = [12,
@@ -42,8 +64,8 @@ section5_2_3_t2_left = [
 [52,43,23,8.7],
 [7.6,6.4,3.6,1.4]
 ]
+print(colored("The differences below are all in the first column, ftp=1/50",'red'))
 warn_if_unequal(sections.section5_2_3_t2_left(), section5_2_3_t2_left, "5.2.3 Table 2, Left part")
-
 
 section5_2_3_t2_right = [
 [34,14,4.8],
@@ -52,3 +74,22 @@ section5_2_3_t2_right = [
 ]
 warn_if_unequal(sections.section5_2_3_t2_right(), section5_2_3_t2_right, "5.2.3 Table 2, Right part")
 
+section5_3_t1 =[ # I am adding significant figures to the last column, e.g. 0.2 becomes 0.23.
+[19,12,11,3.7,0.23],
+[12,8.9,8.4,3.2,0.22],
+[4.7,4.2,4.1,2.3,0.22],
+[1.5,1.5,1.5,1.2,0.20]
+]
+print(colored("The differences below are very minor, likely rounding errors",'red'))
+warn_if_unequal(sections.section5_3_t1(), section5_3_t1, "5.3 Table 1")
+
+section5_3_t2 = [
+[6.4,5.3,7.3,20],
+[5.3,4,5,8.9],
+[2.9,2.7,3.1,4.2],
+[1.3,1.2,1.3,1.4]
+]
+print(colored("The differences below are for the cells (1/100,168) and (1/1000,0)",'red'))
+warn_if_unequal(sections.section5_3_t2(),section5_3_t2,"5.3 Table 2")
+
+assert len(caught_warnings_list) == 3

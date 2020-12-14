@@ -110,3 +110,46 @@ def section5_2_3_t2_right():
 	print("Section 5.2.3, Table 2")
 	print("Right side, 1 virtual success")
 	return section5_2_3_t2(virtual_successes=1,ftps=[1/100,1/300,1/1000],header=["First-trial probability","1/100","1/300","1/1000"])
+
+
+def section5_3_t1():
+	print("Section 5.3 Table 1")
+	headers = ["First-trial probability","2000","1956","1945","1650","5000 BC"]
+
+	print_output = [headers]
+	return_output =[]
+
+	regime_starts = [2000,1956,1945,1650,-5000]
+	for ftp in [1/50,1/100,1/300,1/1000]:
+		prAGI = [functions.fourParamFramework(ftp,regime_start=r) for r in regime_starts]
+		prAGI = [i*100 for i in prAGI]
+
+		prAGI_perc = round(prAGI,2)
+		prAGI_str = round(prAGI, 2, type=str)
+
+		print_output.append(['1/'+str(int(1/ftp))]+[str(i)+'%' for i in prAGI_str])
+		return_output.append(prAGI_perc)
+	print(columnar(print_output,no_borders=True))
+	return return_output
+
+def section5_3_t2():
+	print("Section 5.3 Table 2")
+
+	header1 = [""]+["Trials 5000 BC-1956"]*4
+	header2 = [""]*5
+	header3 = ["ftp", 168, 220,139,0]
+	print_output = [header1,header2,header3]
+	return_output = []
+
+	trials_before_1956 = [168,220,139,0]
+	for ftp in [1/2,1/100,1/300,1/1000]:
+		prAGI = [functions.fourParamFramework(ftp,regime_start=1956-i) for i in trials_before_1956]
+		prAGI = [i * 100 for i in prAGI]
+
+		prAGI_perc = round(prAGI, 2)
+		prAGI_str = round(prAGI, 2, type=str)
+
+		print_output.append(['1/' + str(int(1 / ftp))] + [str(i) + '%' for i in prAGI_str])
+		return_output.append(prAGI_perc)
+	print(columnar(print_output, no_borders=True))
+	return return_output
