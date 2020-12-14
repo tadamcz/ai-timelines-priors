@@ -13,10 +13,15 @@ def generalized_laplace(trials, failures, virtual_successes, virtual_failures=No
 	return next_trial_p
 
 
-def forecast_generalized_laplace(failures, forecast_years, virtual_successes=1, virtual_failures=1):
+def forecast_generalized_laplace(failures, forecast_years, virtual_successes, virtual_failures=None, ftp=None):
+	kwargs = {}
+	if virtual_failures is not None:
+		kwargs['virtual_failures'] = virtual_failures
+	if ftp is not None:
+		kwargs['ftp'] = ftp
 	p_failure_by_target = 1
 	for i in range(forecast_years):
-		p_failure = 1 - generalized_laplace(failures, failures, virtual_successes, virtual_failures)
+		p_failure = 1 - generalized_laplace(failures, failures, virtual_successes, **kwargs)
 		p_failure_by_target = p_failure_by_target * p_failure
 		failures += 1
 	p_success_by_target = 1 - p_failure_by_target
