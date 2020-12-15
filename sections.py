@@ -18,7 +18,7 @@ def section4_2():
 	return_output = []
 
 	for ftp in [1/50,1/100,1/200,1/300,1/500,1/1000,1/2000,1/3000]:
-		pragi = functions.fourParamFramework(ftp=ftp, regime_start=1956, forecast_from=2020, forecast_to=2036, virtual_successes=1)
+		pragi = functions.fourParamFrameworkCalendar(ftp=ftp, regime_start=1956, forecast_from=2020, forecast_to=2036, virtual_successes=1)
 		pragi_perc = round(pragi * 100, 2)
 		pragi_str = round(pragi*100, 2,type=str)
 
@@ -57,9 +57,9 @@ def section5_2_3_t1():
 	print_output.append(header)
 	for vs in [.1,.25,.5,1,2,4,10]:
 		pragi = [
-			functions.fourParamFramework(ftp=1/100,virtual_successes=vs),
-			functions.fourParamFramework(ftp=1/300, virtual_successes=vs),
-			functions.fourParamFramework(ftp=1/1000, virtual_successes=vs)]
+			functions.fourParamFrameworkCalendar(ftp=1 / 100, virtual_successes=vs),
+			functions.fourParamFrameworkCalendar(ftp=1 / 300, virtual_successes=vs),
+			functions.fourParamFrameworkCalendar(ftp=1 / 1000, virtual_successes=vs)]
 		pragi = [round(x*100,2) for x in pragi]
 		return_output.append(pragi)
 
@@ -76,7 +76,7 @@ def section5_2_3_t2(virtual_successes,ftps,header):
 
 	prAGIfirst50 = [functions.forecast_generalized_laplace(failures=0,forecast_years=50,virtual_successes=virtual_successes,ftp=ftp) for ftp in ftps]
 	prAGIfirst100 = [functions.forecast_generalized_laplace(failures=0, forecast_years=100, virtual_successes=virtual_successes, ftp=ftp) for ftp in ftps]
-	prAGI2036 = [functions.fourParamFramework(ftp,virtual_successes=virtual_successes) for ftp in ftps]
+	prAGI2036 = [functions.fourParamFrameworkCalendar(ftp, virtual_successes=virtual_successes) for ftp in ftps]
 
 	prAGIfirst100 = [i*100 for i in prAGIfirst100]
 	prAGIfirst50 =  [i*100 for i in prAGIfirst50]
@@ -121,7 +121,7 @@ def section5_3_t1():
 
 	regime_starts = [2000,1956,1945,1650,-5000]
 	for ftp in [1/50,1/100,1/300,1/1000]:
-		prAGI = [functions.fourParamFramework(ftp,regime_start=r) for r in regime_starts]
+		prAGI = [functions.fourParamFrameworkCalendar(ftp, regime_start=r) for r in regime_starts]
 		prAGI = [i*100 for i in prAGI]
 
 		prAGI_perc = round(prAGI,2)
@@ -143,7 +143,7 @@ def section5_3_t2():
 
 	trials_before_1956 = [168,220,139,0]
 	for ftp in [1/2,1/100,1/300,1/1000]:
-		prAGI = [functions.fourParamFramework(ftp,regime_start=1956-i) for i in trials_before_1956]
+		prAGI = [functions.fourParamFrameworkCalendar(ftp, regime_start=1956 - i) for i in trials_before_1956]
 		prAGI = [i * 100 for i in prAGI]
 
 		prAGI_perc = round(prAGI, 2)
@@ -153,3 +153,11 @@ def section5_3_t2():
 		return_output.append(prAGI_perc)
 	print(columnar(print_output, no_borders=True))
 	return return_output
+
+def section_6_1_2():
+	print("Section 6.1.2")
+	for ftp_cal_equiv in [1/50,1/100,1/300]:
+		for g_act in [3 / 100, 7 / 100, 11 / 100, 16 / 100, 21 / 100]:
+			print(round(functions.fourParamFrameworkResearcher(g_act=g_act, g_exp=4.3 / 100, ftp_cal_equiv=ftp_cal_equiv) * 100, 2))
+		print("")
+section_6_1_2()

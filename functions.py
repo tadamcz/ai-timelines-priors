@@ -1,4 +1,4 @@
-from scipy import integrate
+from scipy import integrate, optimize
 import numpy as np
 
 def generalized_laplace(trials, failures, virtual_successes, virtual_failures=None, ftp=None):
@@ -54,7 +54,47 @@ def forecast_bayes(failures, prior, forecast_years):
 	p_success_by_target = 1 - p_failure_by_target
 	return p_success_by_target
 
-def fourParamFramework(ftp,regime_start=1956,forecast_from=2020,forecast_to=2036,virtual_successes=1):
+def fourParamFrameworkCalendar(ftp, regime_start=1956, forecast_from=2020, forecast_to=2036, virtual_successes=1):
 	virtual_failures = (virtual_successes/ftp)-virtual_successes
 	failures = forecast_from-regime_start
 	return forecast_generalized_laplace(failures=failures,forecast_years=forecast_to-forecast_from,virtual_successes=virtual_successes,virtual_failures=virtual_failures)
+
+def solveFor_ftp_res(g_exp=4.3/100,ftp_cal=1/300):
+	'''
+	To determine ftp_res, solve for ftp_res:
+	PrAgi_ResModel(ftp_res,g_exp) = PrAgi_CalModel(ftp_cal)
+	Where g_exp and ftp_cal are constants
+	'''
+	PrAgi_ResModel = lambda ftp_res: fourParamFrameworkResearcher(g_act=g_exp,ftp_res=ftp_res)
+	PrAgi_CalModel = fourParamFrameworkCalendar(ftp_cal)
+
+	# we solve f_to_solve=0
+	f_to_solve = lambda ftp_res: PrAgi_ResModel(ftp_res)-PrAgi_CalModel
+
+	bound = 1e-9
+	sol_leftbound,sol_rightbound = bound,1-bound
+	ftp_res_solution = optimize.brentq(f_to_solve,sol_leftbound,sol_rightbound)
+
+	return ftp_res_solution
+
+def fourParamFrameworkResearcher(g_act, ftp_res=None, ftp_cal_equiv=None, g_exp=None, regime_start=1956, forecast_from=2020, forecast_to=2036, virtual_successes=1):
+	if ftp_cal_equiv is not None and g_exp is not None:
+		method = 'indirect'
+	if ftp_res is not None:
+		method = 'direct'
+
+	if ftp_res is not None and (ftp_cal_equiv is not None or g_exp is not None):
+		raise ValueError("Supply either (ftp_cal_equiv and g_exp) or supply ftp_res")
+
+	if method == 'indirect':
+		ftp_res = solveFor_ftp_res(g_exp,ftp_cal_equiv)
+
+	n_trials_per_year = g_act*100 # because 1 trial = 1% increase
+
+	failures = int((forecast_from - regime_start)*n_trials_per_year)
+	n_trials_forecast = int((forecast_to - forecast_from)*n_trials_per_year)
+
+	return forecast_generalized_laplace(failures=failures,
+										   forecast_years=n_trials_forecast,
+										   virtual_successes=virtual_successes,
+										   ftp=ftp_res)
