@@ -154,10 +154,24 @@ def section5_3_t2():
 	print(columnar(print_output, no_borders=True))
 	return return_output
 
-def section_6_1_2():
+def section6_1_2():
 	print("Section 6.1.2")
-	for ftp_cal_equiv in [1/50,1/100,1/300]:
-		for g_act in [3 / 100, 7 / 100, 11 / 100, 16 / 100, 21 / 100]:
-			print(round(functions.fourParamFrameworkResearcher(g_act=g_act, g_exp=4.3 / 100, ftp_cal_equiv=ftp_cal_equiv) * 100, 2))
-		print("")
-section_6_1_2()
+	header = ["","g_act=3%","g_act=7%","g_act=11%","g_act=16%","g_act=21%"]
+	print_output = [header]
+	return_output = []
+
+	for ftp_cal_equiv in [1/50,1/100,1/300,1/1000]:
+		prAGI = [functions.fourParamFrameworkResearcher(g_act=g_act, g_exp=4.3/100, ftp_cal_equiv=ftp_cal_equiv) \
+																for g_act in [3/100,7/100,11/100,16/100,21/100]]
+
+		prAGI = [i * 100 for i in prAGI]
+
+		prAGI_perc = round(prAGI, 2)
+		prAGI_str = round(prAGI, 2, type=str)
+
+		row_name = 'ftp_cal = 1/' + str(int(1 / ftp_cal_equiv))
+		print_output.append([row_name] + [str(i) + '%' for i in prAGI_str])
+		return_output.append(prAGI_perc)
+
+	print(columnar(print_output, no_borders=True))
+	return return_output

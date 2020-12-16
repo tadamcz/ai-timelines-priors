@@ -30,6 +30,7 @@ def warn_if_unequal(vetting, report, location=None):
 		# warnings in the right order. sleep() is very hacky but OK for this purpose.
 
 		warnings.warn(warnstring)
+		print("\n\n")
 
 section4_2 = [12,
 			  8.9,
@@ -92,4 +93,13 @@ section5_3_t2 = [
 print(colored("The differences below are for the cells (1/100,168) and (1/1000,0)",'red'))
 warn_if_unequal(sections.section5_3_t2(),section5_3_t2,"5.3 Table 2")
 
-assert len(caught_warnings_list) == 3
+section6_1_2 = [
+[11,14,16,17,18],
+[7.2,11,13,15,16],
+[3.2,6.1,8.2,9.7,11], # changed 6 to 6.1 and 8 to 8.2 for consistent use of 2 significant digits
+[1.1,2.3,3.3,4.4,5.3]
+]
+print(colored("There are several differences below, all on the second significant digit (so they are relatively minior)",'red'))
+warn_if_unequal(sections.section6_1_2(),section6_1_2,"6.1.2")
+
+assert len(caught_warnings_list) == 4
