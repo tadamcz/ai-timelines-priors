@@ -98,3 +98,59 @@ def fourParamFrameworkResearcher(g_act, ftp_res=None, ftp_cal_equiv=None, g_exp=
 										   forecast_years=n_trials_forecast,
 										   virtual_successes=virtual_successes,
 										   ftp=ftp_res)
+
+def solveFor_ftp_comp(ftp_res,relative_impact_research_compute):
+	res_trials = 1   # arbitrary
+	comp_trials = relative_impact_research_compute*res_trials
+
+
+	# Number of trials that occur in both models, before the `res_trials` of the research model are compared to `comp_trials` of
+	# the computation model. This is arbitrary and does not affect the outcome
+	n = 5
+
+	PrAGI_ResModel = forecast_generalized_laplace(failures=n,virtual_successes=1,ftp=ftp_res, forecast_years=res_trials)
+	PrAGI_CompModel = lambda ftp_comp: forecast_generalized_laplace(failures=n, virtual_successes=1, ftp=ftp_comp, forecast_years=comp_trials)
+
+	# we solve f_to_solve=0
+	f_to_solve = lambda ftp_comp: PrAGI_CompModel(ftp_comp) - PrAGI_ResModel
+
+	bound = 1e-9
+	sol_leftbound, sol_rightbound = bound, 1 - bound
+	ftp_comp_solution = optimize.brentq(f_to_solve, sol_leftbound, sol_rightbound)
+
+	return ftp_comp_solution
+
+def solveFor_ftp_comp_indirect(ftp_cal,relative_impact_research_compute,g_exp):
+	ftp_res = solveFor_ftp_res(g_exp=g_exp,ftp_cal=ftp_cal)
+	return solveFor_ftp_comp(ftp_res, relative_impact_research_compute)
+
+def increaseCompAB(price_A,biggest_spend_A,price_B,biggest_spend_B):
+	factor = (biggest_spend_B/biggest_spend_A)/(price_B/price_A)
+	trials = np.log(factor)/np.log(1.01)
+
+	return trials
+
+
+def fourParamFrameworkComp(relative_impact_research_compute=None,
+						   biggest_spend_2036=None,
+						   ftp_cal_equiv=None,
+						   g_exp=4.3/100,
+						   virtual_successes=1,
+						   ftp_comp=None):
+	'''
+	The most indirect method, from biggest_spend_2036 + ftp_cal_equiv, g_exp, and relative_impact_research_compute.
+	The most direct method: from biggest_spend_2036 + ftp_comp.
+	'''
+
+
+	if ftp_comp is None:
+		ftp_comp = solveFor_ftp_comp_indirect(ftp_cal_equiv,relative_impact_research_compute,g_exp)
+
+	failures = int(increaseCompAB(price_A=1,price_B=1e-11, biggest_spend_A=1, biggest_spend_B = 4.6e6))
+	n_trials_forecast = int(increaseCompAB(price_A=1,price_B=1e-2,biggest_spend_A=4.6e6,biggest_spend_B=biggest_spend_2036))
+
+
+	return forecast_generalized_laplace(failures=failures,
+										forecast_years=n_trials_forecast,
+										virtual_successes=virtual_successes,
+										ftp=ftp_comp)
