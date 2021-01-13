@@ -124,33 +124,141 @@ def solveFor_ftp_comp_indirect(ftp_cal,relative_impact_research_compute,g_exp):
 	ftp_res = solveFor_ftp_res(g_exp=g_exp,ftp_cal=ftp_cal)
 	return solveFor_ftp_comp(ftp_res, relative_impact_research_compute)
 
-def increaseCompAB(price_A,biggest_spend_A,price_B,biggest_spend_B):
-	factor = (biggest_spend_B/biggest_spend_A)/(price_B/price_A)
-	trials = np.log(factor)/np.log(1.01)
+def NumberIncreaseQuantity(start,end,increment=1/100):
+	return int(np.log(end/start)/np.log(1+increment))
 
-	return trials
+def NumberIncreaseCompAB(price_start, biggest_spend_start, price_end, biggest_spend_end, increment=1/100):
+	factor = (biggest_spend_end / biggest_spend_start) / (price_end / price_start)
+	trials = np.log(factor)/np.log(1+increment)
+	return int(trials)
 
 
 def fourParamFrameworkComp(relative_impact_research_compute=None,
-						   biggest_spend_2036=None,
+						   forecast_to_year=None,
+						   regime_start_year=None,
+						   biggest_spends_method=None,  # 'aggressive' or 'conservative'
 						   ftp_cal_equiv=None,
-						   g_exp=4.3/100,
 						   virtual_successes=1,
 						   ftp_comp=None):
 	'''
-	The most indirect method, from biggest_spend_2036 + ftp_cal_equiv, g_exp, and relative_impact_research_compute.
-	The most direct method: from biggest_spend_2036 + ftp_comp.
+	The most indirect method, from biggest_spend_end + ftp_cal_equiv, g_exp, and relative_impact_research_compute.
+	The most direct method: from biggest_spend_end + ftp_comp.
 	'''
 
+	# Dictionaries copied directly from Tom's code without checking
+	prices = {
+		1800: 10**-6,
+		1956: 10**-6,
+		1970: 10**-7,
+		2000: 10**-12,
+		2008: 10**-16,
+		2020: 10**-17,
+		2021: 10**-17.2,
+		2022: 10**-17.4,
+		2023: 10**-17.6,
+		2024: 10**-17.8,
+		2025: 10**-18,
+		2026: 10**-18.1,
+		2027: 10**-18.2,
+		2028: 10**-18.3,
+		2029: 10**-18.4,
+		2030: 10**-18.5,
+		2031: 10**-18.6,
+		2032: 10**-18.7,
+		2033: 10**-18.8,
+		2034: 10**-18.9,
+		2035: 10**-18.95,
+		2036: 10**-19,
+	}
+
+	biggest_spends_conservative = {
+		1956: 10**1,
+		2020: 10**6.7,
+		2021: 10**6.78,
+		2022: 10**6.86,
+		2023: 10**6.94,
+		2024: 10**7.02,
+		2025: 10**7.1,
+		2026: 10**7.18,
+		2027: 10**7.26,
+		2028: 10**7.35,
+		2029: 10**7.43,
+		2030: 10**7.51,
+		2031: 10**7.59,
+		2032: 10**7.67,
+		2033: 10**7.75,
+		2034: 10**7.83,
+		2035: 10**7.91,
+		2036: 10**8,
+	}
+
+	biggest_spends_aggressive = {
+		1956: 10**1,
+		2020: 10**6.7,
+		2021: 10**7.0,
+		2022: 10**7.25,
+		2023: 10**7.5,
+		2024: 10**7.8,
+		2025: 10**8.05,
+		2026: 10**8.3,
+		2027: 10**8.6,
+		2028: 10**8.85,
+		2029: 10**9.1,
+		2030: 10**9.4,
+		2031: 10**9.65,
+		2032: 10**9.9,
+		2033: 10**10.2,
+		2034: 10**10.45,
+		2035: 10**10.7,
+		2036: 10**11,
+	}
+
+	if biggest_spends_method == 'aggressive':
+		biggest_spends = biggest_spends_aggressive
+	if biggest_spends_method == 'conservative':
+		biggest_spends = biggest_spends_conservative
 
 	if ftp_comp is None:
-		ftp_comp = solveFor_ftp_comp_indirect(ftp_cal_equiv,relative_impact_research_compute,g_exp)
+		ftp_comp = solveFor_ftp_comp_indirect(ftp_cal_equiv,relative_impact_research_compute,g_exp=4.3/100)
 
-	failures = int(increaseCompAB(price_A=1,price_B=1e-11, biggest_spend_A=1, biggest_spend_B = 4.6e6))
-	n_trials_forecast = int(increaseCompAB(price_A=1,price_B=1e-2,biggest_spend_A=4.6e6,biggest_spend_B=biggest_spend_2036))
+	n_failures_regime_start_to_now = NumberIncreaseCompAB(price_start=prices[regime_start_year],
+															  price_end=prices[2020],
+															  biggest_spend_start=biggest_spends[regime_start_year],
+															  biggest_spend_end= biggest_spends[2020])
+
+	n_trials_forecast = NumberIncreaseCompAB(price_start=prices[2020],
+												 price_end=prices[forecast_to_year],
+												 biggest_spend_start=biggest_spends[2020],
+												 biggest_spend_end=biggest_spends[forecast_to_year])
 
 
-	return forecast_generalized_laplace(failures=failures,
+	return forecast_generalized_laplace(failures=n_failures_regime_start_to_now,
 										forecast_years=n_trials_forecast,
 										virtual_successes=virtual_successes,
 										ftp=ftp_comp)
+
+
+
+# def evolutionaryAnchor(biggest_spend_2036):
+#
+# 	c_initial = 1
+# 	c_evolution = 1e41
+#
+# 	n_trials_initial_to_evolution = NumberIncreaseQuantity(c_initial,c_evolution)
+#
+# 	PrAGI_CompModel = lambda ftp_comp: forecast_generalized_laplace(failures=0, virtual_successes=1, ftp=ftp_comp, forecast_years=n_trials_initial_to_evolution)
+#
+# 	f_to_solve = lambda ftp_comp: PrAGI_CompModel(ftp_comp) - .5
+#
+# 	bound = 1e-9
+# 	sol_leftbound, sol_rightbound = bound, 1 - bound
+# 	ftp_comp_solution = optimize.brentq(f_to_solve, sol_leftbound, sol_rightbound)
+#
+# 	c_brain_debug = 1e21
+# 	n_trials_initial_to_brain_debug = NumberIncreaseQuantity(c_initial,c_brain_debug)
+#
+# 	return fourParamFrameworkComp(ftp_comp=ftp_comp_solution,
+# 								  biggest_spend_end=biggest_spend_2036,
+# 								  failures_yet=n_trials_initial_to_brain_debug)
+#
+# print(evolutionaryAnchor(100e6),evolutionaryAnchor(100e9))

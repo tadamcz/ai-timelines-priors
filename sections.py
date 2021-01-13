@@ -178,17 +178,18 @@ def section6_1_2():
 	return return_output
 
 ## From here on, I only create the print output (not the return output), since Tom at OpenPhil has asked me to directly edit the document.
-
-def section6_2_from_res_helper(biggest_spend_2036):
-	print("Section 6.2, table with ",biggest_spend_2036/1e9,"billion spend by 2036")
+def section6_2_from_research_helper(biggest_spends_method):
+	print("Section 6.2, table with biggest_spends_method:",biggest_spends_method)
 	columns = [1,5,10]
 	df = pd.DataFrame(columns=columns)
 
 	for ftp_cal_equiv in [1 / 50, 1 / 100, 1 / 300, 1 / 1000, 1/3000]:
 		dict_comprehension = {relative_impact_research_compute:
 								  functions.fourParamFrameworkComp(relative_impact_research_compute=relative_impact_research_compute,
-																  biggest_spend_2036=biggest_spend_2036,
-																  ftp_cal_equiv=ftp_cal_equiv)
+																   regime_start_year=1956,
+																   forecast_to_year=2036,
+																   biggest_spends_method=biggest_spends_method,
+																   ftp_cal_equiv=ftp_cal_equiv)
 							  for relative_impact_research_compute in columns}
 		dict_comprehension = {k:round(v*100,2,type=str)+"%" for k,v in dict_comprehension.items()}
 		row_name = 'ftp_cal = 1/' + str(int(1 / ftp_cal_equiv))
@@ -198,6 +199,6 @@ def section6_2_from_res_helper(biggest_spend_2036):
 	df.columns = ["X="+str(x) for x in columns]  # rename the columns
 	print(df)
 
-def section6_2_from_res():
-	section6_2_from_res_helper(100e6)
-	section6_2_from_res_helper(100e9)
+def section6_2_from_research():
+	section6_2_from_research_helper('conservative')
+	section6_2_from_research_helper('aggressive')
