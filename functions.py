@@ -1,5 +1,6 @@
 from scipy import integrate, optimize
 import numpy as np
+from collections import OrderedDict
 
 def generalized_laplace(trials, failures, virtual_successes, virtual_failures=None, ftp=None):
 	if ftp is not None:
@@ -127,16 +128,78 @@ def solveFor_ftp_comp_indirect(ftp_cal,relative_impact_research_compute,g_exp):
 def NumberIncreaseQuantity(start,end,increment=1/100):
 	return int(np.log(end/start)/np.log(1+increment))
 
-def NumberIncreaseCompAB(price_start, biggest_spend_start, price_end, biggest_spend_end, increment=1/100):
-	factor = (biggest_spend_end / biggest_spend_start) / (price_end / price_start)
-	trials = np.log(factor)/np.log(1+increment)
-	return int(trials)
-
+# Dictionaries copied directly from Tom's code without checking
+compute_prices = {
+	1800: 10**-6,
+	1956: 10**-6,
+	1970: 10**-7,
+	2000: 10**-12,
+	2008: 10**-16,
+	2020: 10**-17,
+	2021: 10**-17.2,
+	2022: 10**-17.4,
+	2023: 10**-17.6,
+	2024: 10**-17.8,
+	2025: 10**-18,
+	2026: 10**-18.1,
+	2027: 10**-18.2,
+	2028: 10**-18.3,
+	2029: 10**-18.4,
+	2030: 10**-18.5,
+	2031: 10**-18.6,
+	2032: 10**-18.7,
+	2033: 10**-18.8,
+	2034: 10**-18.9,
+	2035: 10**-18.95,
+	2036: 10**-19,
+}
+biggest_spends_conservative = {
+	1956: 10**1,
+	2020: 10**6.7,
+	2021: 10**6.78,
+	2022: 10**6.86,
+	2023: 10**6.94,
+	2024: 10**7.02,
+	2025: 10**7.1,
+	2026: 10**7.18,
+	2027: 10**7.26,
+	2028: 10**7.35,
+	2029: 10**7.43,
+	2030: 10**7.51,
+	2031: 10**7.59,
+	2032: 10**7.67,
+	2033: 10**7.75,
+	2034: 10**7.83,
+	2035: 10**7.91,
+	2036: 10**8,
+}
+biggest_spends_aggressive = {
+	1956: 10**1,
+	2020: 10**6.7,
+	2021: 10**7.0,
+	2022: 10**7.25,
+	2023: 10**7.5,
+	2024: 10**7.8,
+	2025: 10**8.05,
+	2026: 10**8.3,
+	2027: 10**8.6,
+	2028: 10**8.85,
+	2029: 10**9.1,
+	2030: 10**9.4,
+	2031: 10**9.65,
+	2032: 10**9.9,
+	2033: 10**10.2,
+	2034: 10**10.45,
+	2035: 10**10.7,
+	2036: 10**11,
+}
 
 def fourParamFrameworkComp(relative_impact_research_compute=None,
 						   forecast_to_year=None,
 						   regime_start_year=None,
 						   biggest_spends_method=None,  # 'aggressive' or 'conservative'
+						   computation_at_regime_start=None,
+						   computation_at_forecasted_time=None,
 						   ftp_cal_equiv=None,
 						   virtual_successes=1,
 						   ftp_comp=None):
@@ -145,91 +208,18 @@ def fourParamFrameworkComp(relative_impact_research_compute=None,
 	The most direct method: from biggest_spend_end + ftp_comp.
 	'''
 
-	# Dictionaries copied directly from Tom's code without checking
-	prices = {
-		1800: 10**-6,
-		1956: 10**-6,
-		1970: 10**-7,
-		2000: 10**-12,
-		2008: 10**-16,
-		2020: 10**-17,
-		2021: 10**-17.2,
-		2022: 10**-17.4,
-		2023: 10**-17.6,
-		2024: 10**-17.8,
-		2025: 10**-18,
-		2026: 10**-18.1,
-		2027: 10**-18.2,
-		2028: 10**-18.3,
-		2029: 10**-18.4,
-		2030: 10**-18.5,
-		2031: 10**-18.6,
-		2032: 10**-18.7,
-		2033: 10**-18.8,
-		2034: 10**-18.9,
-		2035: 10**-18.95,
-		2036: 10**-19,
-	}
-
-	biggest_spends_conservative = {
-		1956: 10**1,
-		2020: 10**6.7,
-		2021: 10**6.78,
-		2022: 10**6.86,
-		2023: 10**6.94,
-		2024: 10**7.02,
-		2025: 10**7.1,
-		2026: 10**7.18,
-		2027: 10**7.26,
-		2028: 10**7.35,
-		2029: 10**7.43,
-		2030: 10**7.51,
-		2031: 10**7.59,
-		2032: 10**7.67,
-		2033: 10**7.75,
-		2034: 10**7.83,
-		2035: 10**7.91,
-		2036: 10**8,
-	}
-
-	biggest_spends_aggressive = {
-		1956: 10**1,
-		2020: 10**6.7,
-		2021: 10**7.0,
-		2022: 10**7.25,
-		2023: 10**7.5,
-		2024: 10**7.8,
-		2025: 10**8.05,
-		2026: 10**8.3,
-		2027: 10**8.6,
-		2028: 10**8.85,
-		2029: 10**9.1,
-		2030: 10**9.4,
-		2031: 10**9.65,
-		2032: 10**9.9,
-		2033: 10**10.2,
-		2034: 10**10.45,
-		2035: 10**10.7,
-		2036: 10**11,
-	}
-
-	if biggest_spends_method == 'aggressive':
-		biggest_spends = biggest_spends_aggressive
-	if biggest_spends_method == 'conservative':
-		biggest_spends = biggest_spends_conservative
-
 	if ftp_comp is None:
 		ftp_comp = solveFor_ftp_comp_indirect(ftp_cal_equiv,relative_impact_research_compute,g_exp=4.3/100)
 
-	n_failures_regime_start_to_now = NumberIncreaseCompAB(price_start=prices[regime_start_year],
-															  price_end=prices[2020],
-															  biggest_spend_start=biggest_spends[regime_start_year],
-															  biggest_spend_end= biggest_spends[2020])
 
-	n_trials_forecast = NumberIncreaseCompAB(price_start=prices[2020],
-												 price_end=prices[forecast_to_year],
-												 biggest_spend_start=biggest_spends[2020],
-												 biggest_spend_end=biggest_spends[forecast_to_year])
+	computation2020 = getComputationAmountForYear(2020, biggest_spends_method)
+
+	if computation_at_regime_start is None and computation_at_forecasted_time is None:
+		computation_at_regime_start = getComputationAmountForYear(regime_start_year, biggest_spends_method)
+		computation_at_forecasted_time = getComputationAmountForYear(forecast_to_year, biggest_spends_method)
+
+	n_failures_regime_start_to_now = NumberIncreaseQuantity(computation_at_regime_start,computation2020)
+	n_trials_forecast = NumberIncreaseQuantity(computation2020, computation_at_forecasted_time)
 
 
 	return forecast_generalized_laplace(failures=n_failures_regime_start_to_now,
@@ -238,27 +228,68 @@ def fourParamFrameworkComp(relative_impact_research_compute=None,
 										ftp=ftp_comp)
 
 
+def getYearForComputationAmount(c,biggest_spends_method):
+	if biggest_spends_method == 'aggressive':
+		biggest_spends = biggest_spends_aggressive
+	if biggest_spends_method == 'conservative':
+		biggest_spends = biggest_spends_conservative
 
-# def evolutionaryAnchor(biggest_spend_2036):
-#
-# 	c_initial = 1
-# 	c_evolution = 1e41
-#
-# 	n_trials_initial_to_evolution = NumberIncreaseQuantity(c_initial,c_evolution)
-#
-# 	PrAGI_CompModel = lambda ftp_comp: forecast_generalized_laplace(failures=0, virtual_successes=1, ftp=ftp_comp, forecast_years=n_trials_initial_to_evolution)
-#
-# 	f_to_solve = lambda ftp_comp: PrAGI_CompModel(ftp_comp) - .5
-#
-# 	bound = 1e-9
-# 	sol_leftbound, sol_rightbound = bound, 1 - bound
-# 	ftp_comp_solution = optimize.brentq(f_to_solve, sol_leftbound, sol_rightbound)
-#
-# 	c_brain_debug = 1e21
-# 	n_trials_initial_to_brain_debug = NumberIncreaseQuantity(c_initial,c_brain_debug)
-#
-# 	return fourParamFrameworkComp(ftp_comp=ftp_comp_solution,
-# 								  biggest_spend_end=biggest_spend_2036,
-# 								  failures_yet=n_trials_initial_to_brain_debug)
-#
-# print(evolutionaryAnchor(100e6),evolutionaryAnchor(100e9))
+	computation_to_year = OrderedDict()
+	year_to_computation = OrderedDict()
+	for year,price in compute_prices.items():
+		try:
+			computation_to_year[biggest_spends[year]/price] = year
+			year_to_computation[year] = biggest_spends[year]/price
+		except KeyError:
+			pass
+
+	# special case: if between 1956 and 2020, assume 2000 (my understanding is that Tom does this)
+	if year_to_computation[1956]<c<year_to_computation[2020]:
+		return 2000
+
+	# otherwise, return the first year the computation was greater than c
+	for computation,year in computation_to_year.items():
+		if computation>c:
+			return year
+
+def getComputationAmountForYear(y, biggest_spends_method):
+	if biggest_spends_method == 'aggressive':
+		biggest_spends = biggest_spends_aggressive
+	if biggest_spends_method == 'conservative':
+		biggest_spends = biggest_spends_conservative
+
+	year_to_computation = OrderedDict()
+	for year, price in compute_prices.items():
+		try:
+			year_to_computation[year] = biggest_spends[year] / price
+		except KeyError:
+			pass
+
+	return year_to_computation[y]
+
+
+def evolutionaryAnchor(biggest_spends_method):
+
+	c_initial = 1
+	c_evolution = 1e41
+
+	n_trials_initial_to_evolution = NumberIncreaseQuantity(c_initial,c_evolution)
+
+	PrAGI_CompModel = lambda ftp_comp: forecast_generalized_laplace(failures=0, virtual_successes=1, ftp=ftp_comp, forecast_years=n_trials_initial_to_evolution)
+
+	f_to_solve = lambda ftp_comp: PrAGI_CompModel(ftp_comp) - .5
+
+	bound = 1e-9
+	sol_leftbound, sol_rightbound = bound, 1 - bound
+	ftp_comp_solution = optimize.brentq(f_to_solve, sol_leftbound, sol_rightbound)
+
+	c_brain_debug = 1e21
+
+	computation_at_forecasted_time = getComputationAmountForYear(2036, biggest_spends_method)
+
+	return fourParamFrameworkComp(computation_at_regime_start=c_brain_debug,
+								  computation_at_forecasted_time=computation_at_forecasted_time,
+								  biggest_spends_method=biggest_spends_method,
+								  ftp_comp=ftp_comp_solution)
+
+print(evolutionaryAnchor('conservative'),evolutionaryAnchor('aggressive'))
