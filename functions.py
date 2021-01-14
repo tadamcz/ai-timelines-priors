@@ -243,10 +243,6 @@ def getYearForComputationAmount(c,biggest_spends_method):
 		except KeyError:
 			pass
 
-	# special case: if between 1956 and 2020, assume 2000 (my understanding is that Tom does this)
-	if year_to_computation[1956]<c<year_to_computation[2020]:
-		return 2000
-
 	# otherwise, return the first year the computation was greater than c
 	for computation,year in computation_to_year.items():
 		if computation>c:
