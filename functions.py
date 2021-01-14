@@ -2,6 +2,8 @@ from scipy import integrate, optimize
 import numpy as np
 from collections import OrderedDict
 
+probability_solution_leftbound, probability_solution_rightbound = 1e-9, 1 - 1e-9
+
 def generalized_laplace(trials, failures, virtual_successes, virtual_failures=None, ftp=None):
 	if ftp is not None:
 		if virtual_failures is not None and virtual_successes is not None:
@@ -72,9 +74,7 @@ def solveFor_ftp_res(g_exp=4.3/100,ftp_cal=1/300):
 	# we solve f_to_solve=0
 	f_to_solve = lambda ftp_res: PrAgi_ResModel(ftp_res)-PrAgi_CalModel
 
-	bound = 1e-9
-	sol_leftbound,sol_rightbound = bound,1-bound
-	ftp_res_solution = optimize.brentq(f_to_solve,sol_leftbound,sol_rightbound)
+	ftp_res_solution = optimize.brentq(f_to_solve,probability_solution_leftbound,probability_solution_rightbound)
 
 	return ftp_res_solution
 
@@ -115,9 +115,7 @@ def solveFor_ftp_comp(ftp_res,relative_impact_research_compute):
 	# we solve f_to_solve=0
 	f_to_solve = lambda ftp_comp: PrAGI_CompModel(ftp_comp) - PrAGI_ResModel
 
-	bound = 1e-9
-	sol_leftbound, sol_rightbound = bound, 1 - bound
-	ftp_comp_solution = optimize.brentq(f_to_solve, sol_leftbound, sol_rightbound)
+	ftp_comp_solution = optimize.brentq(f_to_solve, probability_solution_leftbound, probability_solution_rightbound)
 
 	return ftp_comp_solution
 
@@ -278,9 +276,7 @@ def evolutionaryAnchor(biggest_spends_method):
 
 	f_to_solve = lambda ftp_comp: PrAGI_CompModel(ftp_comp) - .5
 
-	bound = 1e-9
-	sol_leftbound, sol_rightbound = bound, 1 - bound
-	ftp_comp_solution = optimize.brentq(f_to_solve, sol_leftbound, sol_rightbound)
+	ftp_comp_solution = optimize.brentq(f_to_solve, probability_solution_leftbound, probability_solution_rightbound)
 
 	c_brain_debug = 1e21
 
@@ -304,9 +300,7 @@ def lifetimeAnchor(biggest_spends_method):
 
 	f_to_solve = lambda ftp_comp: PrAGI_CompModel(ftp_comp) - .5
 
-	bound = 1e-9
-	sol_leftbound, sol_rightbound = bound, 1 - bound
-	ftp_comp_solution = optimize.brentq(f_to_solve, sol_leftbound, sol_rightbound)
+	ftp_comp_solution = optimize.brentq(f_to_solve, probability_solution_leftbound, probability_solution_rightbound)
 
 	return fourParamFrameworkComp(forecast_to_year=2036,
 						   			regime_start_year=1956,
