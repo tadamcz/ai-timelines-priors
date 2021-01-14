@@ -306,3 +306,13 @@ def lifetimeAnchor(biggest_spends_method):
 						   			regime_start_year=1956,
 								  	biggest_spends_method=biggest_spends_method,
 								  	ftp_comp=ftp_comp_solution)
+
+def logUniform(biggest_spends_method):
+	p_agi_by_evo_c = .8
+	OOMs_2020_to_evo_c = 41 - np.log10(getComputationAmountForYear(2020,biggest_spends_method))
+
+	p_agi_per_OOM = p_agi_by_evo_c/OOMs_2020_to_evo_c
+
+	OOMs_2020_to_2036 = np.log10(getComputationAmountForYear(2036,biggest_spends_method)) - np.log10(getComputationAmountForYear(2020,biggest_spends_method))
+
+	return p_agi_per_OOM*OOMs_2020_to_2036

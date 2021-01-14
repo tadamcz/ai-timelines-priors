@@ -179,7 +179,7 @@ def section6_1_2():
 
 ## From here on, I only create the print output (not the return output), since Tom at OpenPhil has asked me to directly edit the document.
 def section6_2_from_research_helper(biggest_spends_method):
-	print("Section 6.2 from research, table with biggest_spends_method:",biggest_spends_method)
+	print("\nSection 6.2 from research, table with biggest_spends_method:",biggest_spends_method)
 	columns = [1,5,10]
 	df = pd.DataFrame(columns=columns)
 
@@ -204,7 +204,7 @@ def section6_2_from_research():
 	section6_2_from_research_helper('aggressive')
 
 def section6_2_from_biology():
-	print("Section 6.2 from biology")
+	print("\nSection 6.2 from biology")
 	columns = ['lifetime','evolutionary']
 	df = pd.DataFrame(columns=columns)
 
@@ -214,3 +214,11 @@ def section6_2_from_biology():
 		row = pd.Series(data=datadict,name=method)
 		df = df.append(row)
 	print(df)
+
+def section6_2_log_uniform():
+	print("\nSection 6.2: Log-uniform compute model")
+
+	c = float(functions.logUniform('conservative'))
+	a = float(functions.logUniform('aggressive'))
+	print('P(AGI by 2036) with conservative spend estimate',round(c*100,2,type=str)+"%")
+	print('P(AGI by 2036) with aggressive spend estimate', round(a*100,2,type=str)+"%")
