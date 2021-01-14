@@ -270,12 +270,15 @@ def getComputationAmountForYear(y, biggest_spends_method):
 
 def evolutionaryAnchor(biggest_spends_method):
 
-	c_initial = 1
+	c_initial = 1e21
 	c_evolution = 1e41
 
 	n_trials_initial_to_evolution = NumberIncreaseQuantity(c_initial,c_evolution)
 
-	PrAGI_CompModel = lambda ftp_comp: forecast_generalized_laplace(failures=0, virtual_successes=1, ftp=ftp_comp, forecast_years=n_trials_initial_to_evolution)
+	PrAGI_CompModel = lambda ftp_comp: forecast_generalized_laplace(failures=0,
+																	virtual_successes=1,
+																	ftp=ftp_comp,
+																	forecast_years=n_trials_initial_to_evolution)
 
 	f_to_solve = lambda ftp_comp: PrAGI_CompModel(ftp_comp) - .5
 
@@ -292,4 +295,24 @@ def evolutionaryAnchor(biggest_spends_method):
 								  biggest_spends_method=biggest_spends_method,
 								  ftp_comp=ftp_comp_solution)
 
-print(evolutionaryAnchor('conservative'),evolutionaryAnchor('aggressive'))
+def lifetimeAnchor(biggest_spends_method):
+	c_initial = getComputationAmountForYear(1956, biggest_spends_method)
+	c_lifetime = 1e24
+
+	n_trials_1956_to_lifetime = NumberIncreaseQuantity(c_initial, c_lifetime)
+
+	PrAGI_CompModel = lambda ftp_comp: forecast_generalized_laplace(failures=0,
+																	virtual_successes=1,
+																	ftp=ftp_comp,
+																	forecast_years=n_trials_1956_to_lifetime)
+
+	f_to_solve = lambda ftp_comp: PrAGI_CompModel(ftp_comp) - .5
+
+	bound = 1e-9
+	sol_leftbound, sol_rightbound = bound, 1 - bound
+	ftp_comp_solution = optimize.brentq(f_to_solve, sol_leftbound, sol_rightbound)
+
+	return fourParamFrameworkComp(forecast_to_year=2036,
+						   			regime_start_year=1956,
+								  	biggest_spends_method=biggest_spends_method,
+								  	ftp_comp=ftp_comp_solution)

@@ -179,7 +179,7 @@ def section6_1_2():
 
 ## From here on, I only create the print output (not the return output), since Tom at OpenPhil has asked me to directly edit the document.
 def section6_2_from_research_helper(biggest_spends_method):
-	print("Section 6.2, table with biggest_spends_method:",biggest_spends_method)
+	print("Section 6.2 from research, table with biggest_spends_method:",biggest_spends_method)
 	columns = [1,5,10]
 	df = pd.DataFrame(columns=columns)
 
@@ -202,3 +202,15 @@ def section6_2_from_research_helper(biggest_spends_method):
 def section6_2_from_research():
 	section6_2_from_research_helper('conservative')
 	section6_2_from_research_helper('aggressive')
+
+def section6_2_from_biology():
+	print("Section 6.2 from biology")
+	columns = ['lifetime','evolutionary']
+	df = pd.DataFrame(columns=columns)
+
+	for method in ['conservative','aggressive']:
+		datadict = {'lifetime':functions.lifetimeAnchor(method), 'evolutionary':functions.evolutionaryAnchor(method)}
+		datadict = {k:round(v*100,2,type=str)+"%" for k,v in datadict.items()}
+		row = pd.Series(data=datadict,name=method)
+		df = df.append(row)
+	print(df)
