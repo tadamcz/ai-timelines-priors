@@ -320,3 +320,33 @@ def logUniform(biggest_spends_method):
 	OOMs_2020_to_2036 = np.log10(getComputationAmountForYear(2036,biggest_spends_method)) - np.log10(getComputationAmountForYear(2020,biggest_spends_method))
 
 	return p_agi_per_OOM*OOMs_2020_to_2036
+
+def hyperPriorCalendar(ftps,initial_weights=None):
+
+	if initial_weights is None:
+		w = 1/len(ftps)
+		initial_weights = [w]*len(ftps)
+
+	if not len(initial_weights)==len(ftps):
+		raise ValueError
+
+	final_weights_unnormalized = []
+	for i in range(len(initial_weights)):
+		initial_weight = initial_weights[i]
+		ftp = ftps[i]
+
+		p2020noAGI = 1-fourParamFrameworkCalendar(ftp=ftp,regime_start=1956,forecast_from=1956,forecast_to=2020)
+
+		final_weight_unnormalized = initial_weight*p2020noAGI
+		final_weights_unnormalized.append(final_weight_unnormalized)
+
+	normalization_constant = sum(final_weights_unnormalized)
+	final_weights = []
+	for weight in final_weights_unnormalized:
+		final_weights.append(weight/normalization_constant)
+
+	prsAGI2036 = [fourParamFrameworkCalendar(ftp=ftp) for ftp in ftps]
+
+
+	return {'pr2036static':np.average(prsAGI2036), 'pr2036hyper':np.average(prsAGI2036,weights=final_weights),
+			'wts2020': final_weights}

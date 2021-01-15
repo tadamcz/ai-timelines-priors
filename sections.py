@@ -368,3 +368,30 @@ def section6_3_1_regimestart():
 	central,high = round(float(central) * 100, 2, type=str) + "%",round(float(high) * 100, 2, type=str) + "%"
 
 	print("Central:",central,"High:",high)
+
+def section_7_2_1():
+	print("\nSection 7.2.1 Effect of hyper prior updates: first-trial probability")
+
+	df = pd.DataFrame(columns=['pr2036static','pr2036hyper','wts2020'])
+
+	row_inputs = [
+		[1/100,1/1000],
+		[1/10,1/100],
+		[1/10,1/100,1/1000],
+		[1/1000,1/10000]
+	]
+
+	for input in row_inputs:
+		rowname = str(input)
+
+		datadict = functions.hyperPriorCalendar(input)
+
+		for k,v in datadict.items():
+			if isinstance(v, list):
+				datadict[k] = [round(float(i) * 100, 2, type=str)+"%" for i in v]
+			if isinstance(v, np.float):
+				datadict[k] = round(float(v) * 100, 2, type=str)+"%"
+
+		df = df.append(pd.Series(name=rowname, data=datadict))
+
+	print(df)
