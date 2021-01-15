@@ -315,17 +315,19 @@ def section6_3_1_virtual_succ():
 	ftp_cal_equiv = 1 / 100
 	df = section6_3_1_helper_research(g_act, ftp_cal_equiv, g_exp, rowname, df)
 
-	rowname = 'Computation, low: TODO'
-	ftp_cal_equiv = 1 / 3000
-	relative_impact_research_compute = 5
-	biggest_spends_method = '50/50'
+	rowname = 'Computation, low'
+	ftp_cal_equiv = 1 / 1000
+	relative_impact_research_compute = 10
+	biggest_spends_method = 'conservative'
 	df = section6_3_1_helper_comp(ftp_cal_equiv, relative_impact_research_compute, biggest_spends_method, rowname, df)
 
 	rowname = 'Computation, central'
-	ftp_cal_equiv = 1/300
-	relative_impact_research_compute=1
-	biggest_spends_method = '50/50'
-	df = section6_3_1_helper_comp(ftp_cal_equiv,relative_impact_research_compute, biggest_spends_method, rowname, df)
+	left = 0.5*(functions.lifetimeAnchor('conservative',virtual_successes=1)+functions.lifetimeAnchor('aggressive',virtual_successes=1))
+	right = 0.5 * (functions.lifetimeAnchor('conservative', virtual_successes=.5) + functions.lifetimeAnchor('aggressive', virtual_successes=.5))
+	left = round(float(left) * 100, 2, type=str) + "%"
+	right = round(float(right) * 100, 2, type=str) + "%"
+	df = df.append(pd.Series(name=rowname, data={'1 VS': left, '0.5 VS': right}))
+
 
 	rowname = 'Computation, high'
 	ftp_cal_equiv = 1 / 300
