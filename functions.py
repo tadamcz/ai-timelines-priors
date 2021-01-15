@@ -2,7 +2,9 @@ from scipy import integrate, optimize
 import numpy as np
 from collections import OrderedDict
 
+# Global variables
 probability_solution_leftbound, probability_solution_rightbound = 1e-9, 1 - 1e-9
+trial_increment = 1/100
 
 def generalized_laplace(trials, failures, virtual_successes, virtual_failures=None, ftp=None):
 	if ftp is not None:
@@ -90,7 +92,7 @@ def fourParamFrameworkResearcher(g_act, ftp_res=None, ftp_cal_equiv=None, g_exp=
 	if method == 'indirect':
 		ftp_res = solveFor_ftp_res(g_exp,ftp_cal_equiv)
 
-	n_trials_per_year = g_act*100 # because 1 trial = 1% increase
+	n_trials_per_year = g_act*(1/trial_increment)
 
 	failures = int((forecast_from - regime_start)*n_trials_per_year)
 	n_trials_forecast = int((forecast_to - forecast_from)*n_trials_per_year)
@@ -123,7 +125,7 @@ def solveFor_ftp_comp_indirect(ftp_cal,relative_impact_research_compute,g_exp):
 	ftp_res = solveFor_ftp_res(g_exp=g_exp,ftp_cal=ftp_cal)
 	return solveFor_ftp_comp(ftp_res, relative_impact_research_compute)
 
-def NumberIncreaseQuantity(start,end,increment=1/100):
+def NumberIncreaseQuantity(start,end,increment=trial_increment):
 	return int(np.log(end/start)/np.log(1+increment))
 
 # Dictionaries copied directly from Tom's code without checking
