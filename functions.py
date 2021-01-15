@@ -41,11 +41,8 @@ def _noAIupdate_bayes_single(p_density):
 
 def noAIupdate_bayes(failures, prior):
 	p_density = prior
-	plot_domain = np.linspace(0, 1, 50)
 	for i in range(failures):
 		p_density = _noAIupdate_bayes_single(p_density)
-	# plt.plot(plot_domain,p_density(plot_domain))
-	# plt.show()
 	return p_density
 
 
@@ -308,11 +305,11 @@ def lifetimeAnchor(biggest_spends_method,virtual_successes=1,regime_start_year=1
 	ftp_comp_solution = optimize.brentq(f_to_solve, probability_solution_leftbound, probability_solution_rightbound)
 
 	return fourParamFrameworkComp(forecast_to_year=forecast_to_year,
-								  forecast_from_year=forecast_from_year,
-						   			regime_start_year=regime_start_year,
-								  	biggest_spends_method=biggest_spends_method,
-								  	ftp_comp=ftp_comp_solution,
-								  	virtual_successes=virtual_successes)
+									forecast_from_year=forecast_from_year,
+									regime_start_year=regime_start_year,
+									biggest_spends_method=biggest_spends_method,
+									ftp_comp=ftp_comp_solution,
+									virtual_successes=virtual_successes)
 
 def logUniform(biggest_spends_method):
 	p_agi_by_evo_c = .8
@@ -348,10 +345,11 @@ def hyperPriorCalendar(ftps,initial_weights=None):
 	for weight in final_weights_unnormalized:
 		final_weights.append(weight/normalization_constant)
 
-	prsAGI2036 = [fourParamFrameworkCalendar(ftp=ftp) for ftp in ftps]
+	psAGI2036 = [fourParamFrameworkCalendar(ftp=ftp) for ftp in ftps]
 
 
-	return {'pr2036static':np.average(prsAGI2036), 'pr2036hyper':np.average(prsAGI2036,weights=final_weights),
+	return {'pr2036static':np.average(psAGI2036),
+			'pr2036hyper':np.average(psAGI2036,weights=final_weights),
 			'wts2020': final_weights}
 
 def hyperPriorTrialDef(rule2name, g_act=None, regime_start=1956, rel_imp_res_comp=None, g_exp=4.3/100, biohypothesis=None):
@@ -360,22 +358,22 @@ def hyperPriorTrialDef(rule2name, g_act=None, regime_start=1956, rel_imp_res_com
 
 	rule1_pAGI2036 = fourParamFrameworkCalendar(ftp=1/300)
 	rule1_pNoAGI2020 = 1 - fourParamFrameworkCalendar(ftp=1/300, forecast_from=regime_start,forecast_to=2020)
-	prsAGI2036 = [rule1_pAGI2036]
+	psAGI2036 = [rule1_pAGI2036]
 
 	if rule2name == 'res-year':
 		rule2_pNoAGI2020 = 1 - fourParamFrameworkResearcher(g_exp=g_exp,
-													  g_act=g_act,
-													  ftp_cal_equiv=1/300,
-													  regime_start=regime_start,
-													  forecast_from=regime_start,
-													  forecast_to=2020)
+															g_act=g_act,
+															ftp_cal_equiv=1/300,
+															regime_start=regime_start,
+															forecast_from=regime_start,
+															forecast_to=2020)
 
-		pr2036AGIStatic = fourParamFrameworkResearcher(g_exp=g_exp,
-													  g_act=g_act,
-													  ftp_cal_equiv=1/300,
-													  regime_start=regime_start)
+		pAGI2036Static = fourParamFrameworkResearcher(g_exp=g_exp,
+															g_act=g_act,
+															ftp_cal_equiv=1/300,
+															regime_start=regime_start)
 
-		prsAGI2036.append(pr2036AGIStatic)
+		psAGI2036.append(pAGI2036Static)
 
 
 	if rule2name == 'computation':
@@ -386,40 +384,39 @@ def hyperPriorTrialDef(rule2name, g_act=None, regime_start=1956, rel_imp_res_com
 															regime_start_year=regime_start,
 															forecast_from_year=regime_start,
 															forecast_to_year=2020,
-														  biggest_spends_method='aggressive')
+															biggest_spends_method='aggressive')
 
-			pr2036AGIStatic = fourParamFrameworkComp(g_exp=g_exp,
-														 ftp_cal_equiv=1 / 300,
-														 rel_imp_res_comp=rel_imp_res_comp,
-														 regime_start_year=regime_start,
-														  biggest_spends_method='aggressive')
+			pAGI2036Static = fourParamFrameworkComp(g_exp=g_exp,
+															ftp_cal_equiv=1 / 300,
+															rel_imp_res_comp=rel_imp_res_comp,
+															regime_start_year=regime_start,
+															biggest_spends_method='aggressive')
 
-			prsAGI2036.append(pr2036AGIStatic)
+			psAGI2036.append(pAGI2036Static)
 
 		else:
 			if biohypothesis == 'lifetime':
 				rule2_pNoAGI2020 = 1 - lifetimeAnchor(biggest_spends_method='aggressive',
-												regime_start_year=regime_start,
-												forecast_from_year=regime_start,
-												forecast_to_year=2020)
+														regime_start_year=regime_start,
+														forecast_from_year=regime_start,
+														forecast_to_year=2020)
 
-				pr2036AGIStatic = lifetimeAnchor(biggest_spends_method='aggressive',
-												 regime_start_year=regime_start)
+				pAGI2036Static = lifetimeAnchor(biggest_spends_method='aggressive',
+														regime_start_year=regime_start)
 
-				prsAGI2036.append(pr2036AGIStatic)
+				psAGI2036.append(pAGI2036Static)
 
 			if biohypothesis == 'evolution':
 				rule2_pNoAGI2020 = 1 - evolutionaryAnchor(biggest_spends_method='aggressive',forecast_to_year=2020)
 
-				pr2036AGIStatic = evolutionaryAnchor(biggest_spends_method='aggressive')
+				pAGI2036Static = evolutionaryAnchor(biggest_spends_method='aggressive')
 
-				prsAGI2036.append(pr2036AGIStatic)
+				psAGI2036.append(pAGI2036Static)
 
 	final_weights_unnormalized = initial_weights * np.asarray([rule1_pNoAGI2020,rule2_pNoAGI2020])
 	normalization_constant = sum(final_weights_unnormalized)
-	final_weights = []
-	for weight in final_weights_unnormalized:
-		final_weights.append(weight/normalization_constant)
+	final_weights = [weight/normalization_constant for weight in final_weights_unnormalized]
 
-	return {'pr2036static': np.average(prsAGI2036), 'pr2036hyper': np.average(prsAGI2036, weights=final_weights),
+	return {'pr2036static': np.average(psAGI2036),
+			'pr2036hyper': np.average(psAGI2036, weights=final_weights),
 			'wt2020': final_weights[1]}
