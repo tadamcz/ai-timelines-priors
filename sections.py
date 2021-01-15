@@ -184,13 +184,13 @@ def section6_2_comp_from_research(biggest_spends_method):
 	df = pd.DataFrame(columns=columns)
 
 	for ftp_cal_equiv in [1 / 50, 1 / 100, 1 / 300, 1 / 1000, 1/3000]:
-		dict_comprehension = {relative_impact_research_compute:
-								  functions.fourParamFrameworkComp(relative_impact_research_compute=relative_impact_research_compute,
+		dict_comprehension = {rel_imp_res_comp:
+								  functions.fourParamFrameworkComp(rel_imp_res_comp=rel_imp_res_comp,
 																   regime_start_year=1956,
 																   forecast_to_year=2036,
 																   biggest_spends_method=biggest_spends_method,
 																   ftp_cal_equiv=ftp_cal_equiv)
-							  for relative_impact_research_compute in columns}
+							  for rel_imp_res_comp in columns}
 		dict_comprehension = {k:round(v*100,2,type=str)+"%" for k,v in dict_comprehension.items()}
 		row_name = 'ftp_cal = 1/' + str(int(1 / ftp_cal_equiv))
 		row = pd.Series(data=dict_comprehension, name=row_name)
@@ -232,7 +232,7 @@ def section6_2_3(virtual_successes=1, disp=True):
 		datadict = {'lifetime':functions.lifetimeAnchor(method,virtual_successes=virtual_successes),
 					'evolutionary':functions.evolutionaryAnchor(method,virtual_successes=virtual_successes),
 					'log-uniform':functions.logUniform(method),
-					'from research':functions.fourParamFrameworkComp(relative_impact_research_compute=5,
+					'from research':functions.fourParamFrameworkComp(rel_imp_res_comp=5,
 																	 ftp_cal_equiv=1 / 300,
 																	 biggest_spends_method=method,
 																	 virtual_successes=virtual_successes)
@@ -259,34 +259,34 @@ def section6_3_1_helper_research(g_act, ftp_cal_equiv, g_exp, rowname, df):
 	right = round(right * 100, 2, type=str) + "%"
 	return df.append(pd.Series(name=rowname,data={'1 VS':left, '0.5 VS':right}))
 
-def section6_3_1_helper_comp(ftp_cal_equiv,relative_impact_research_compute,biggest_spends_method, rowname,df):
+def section6_3_1_helper_comp(ftp_cal_equiv, rel_imp_res_comp, biggest_spends_method, rowname, df):
 
 	if biggest_spends_method == '50/50':
 		left = 1/2 * (functions.fourParamFrameworkComp(ftp_cal_equiv=ftp_cal_equiv,
-											relative_impact_research_compute=relative_impact_research_compute,
-											biggest_spends_method='aggressive')+
+													   rel_imp_res_comp=rel_imp_res_comp,
+													   biggest_spends_method='aggressive')+
 					  functions.fourParamFrameworkComp(ftp_cal_equiv=ftp_cal_equiv,
-												 relative_impact_research_compute=relative_impact_research_compute,
-												 biggest_spends_method='conservative'))
+													   rel_imp_res_comp=rel_imp_res_comp,
+													   biggest_spends_method='conservative'))
 
 		right = 1 / 2 * (functions.fourParamFrameworkComp(ftp_cal_equiv=ftp_cal_equiv,
-														 relative_impact_research_compute=relative_impact_research_compute,
-														 biggest_spends_method='aggressive',
+														  rel_imp_res_comp=rel_imp_res_comp,
+														  biggest_spends_method='aggressive',
 														  virtual_successes=0.5) +
 						functions.fourParamFrameworkComp(ftp_cal_equiv=ftp_cal_equiv,
-														 relative_impact_research_compute=relative_impact_research_compute,
+														 rel_imp_res_comp=rel_imp_res_comp,
 														 biggest_spends_method='conservative',
 														 virtual_successes=0.5))
 
 	else:
 		left = functions.fourParamFrameworkComp(ftp_cal_equiv=ftp_cal_equiv,
-														 relative_impact_research_compute=relative_impact_research_compute,
-														 biggest_spends_method=biggest_spends_method)
+												rel_imp_res_comp=rel_imp_res_comp,
+												biggest_spends_method=biggest_spends_method)
 
 		right =functions.fourParamFrameworkComp(ftp_cal_equiv=ftp_cal_equiv,
-														  relative_impact_research_compute=relative_impact_research_compute,
-														  biggest_spends_method=biggest_spends_method,
-														  virtual_successes=0.5)
+												rel_imp_res_comp=rel_imp_res_comp,
+												biggest_spends_method=biggest_spends_method,
+												virtual_successes=0.5)
 
 	left = round(left * 100, 2, type=str) + "%"
 	right = round(right * 100, 2, type=str) + "%"
@@ -317,9 +317,9 @@ def section6_3_1_virtual_succ():
 
 	rowname = 'Computation, low'
 	ftp_cal_equiv = 1 / 1000
-	relative_impact_research_compute = 10
+	rel_imp_res_comp = 10
 	biggest_spends_method = 'conservative'
-	df = section6_3_1_helper_comp(ftp_cal_equiv, relative_impact_research_compute, biggest_spends_method, rowname, df)
+	df = section6_3_1_helper_comp(ftp_cal_equiv, rel_imp_res_comp, biggest_spends_method, rowname, df)
 
 	rowname = 'Computation, central'
 	left = 0.5*(functions.lifetimeAnchor('conservative',virtual_successes=1)+functions.lifetimeAnchor('aggressive',virtual_successes=1))
@@ -331,9 +331,9 @@ def section6_3_1_virtual_succ():
 
 	rowname = 'Computation, high'
 	ftp_cal_equiv = 1 / 300
-	relative_impact_research_compute = 1
+	rel_imp_res_comp = 1
 	biggest_spends_method = 'aggressive'
-	df = section6_3_1_helper_comp(ftp_cal_equiv, relative_impact_research_compute, biggest_spends_method, rowname, df)
+	df = section6_3_1_helper_comp(ftp_cal_equiv, rel_imp_res_comp, biggest_spends_method, rowname, df)
 
 	rowname = 'Computation, central, bracketed weigh. avg.'
 	left = section6_2_3(virtual_successes=1, disp=False)
@@ -343,15 +343,15 @@ def section6_3_1_virtual_succ():
 	df = df.append(pd.Series(name=rowname, data={'1 VS': left, '0.5 VS': right}))
 
 	rowname = 'Computation, high, bracketed weigh. avg.'
-	left = 0.5*(functions.fourParamFrameworkComp(relative_impact_research_compute=1,
-									 ftp_cal_equiv=1/300,
-									 biggest_spends_method='aggressive',
-									 virtual_successes=1) +
+	left = 0.5*(functions.fourParamFrameworkComp(rel_imp_res_comp=1,
+												 ftp_cal_equiv=1/300,
+												 biggest_spends_method='aggressive',
+												 virtual_successes=1) +
 				functions.logUniform('aggressive'))
-	right = 0.5*(functions.fourParamFrameworkComp(relative_impact_research_compute=1,
-									 ftp_cal_equiv=1/300,
-									 biggest_spends_method='aggressive',
-									 virtual_successes=.5) +
+	right = 0.5*(functions.fourParamFrameworkComp(rel_imp_res_comp=1,
+												  ftp_cal_equiv=1/300,
+												  biggest_spends_method='aggressive',
+												  virtual_successes=.5) +
 				functions.logUniform('aggressive'))
 	left = round(float(left) * 100, 2, type=str) + "%"
 	right = round(float(right) * 100, 2, type=str) + "%"
@@ -395,3 +395,55 @@ def section_7_2_1():
 		df = df.append(pd.Series(name=rowname, data=datadict))
 
 	print(df)
+
+def appendix8():
+	print("Appendix 8: using a hyper-prior on different trial definitions")
+	df = pd.DataFrame(columns=['pr2036static', 'pr2036hyper', 'wt2020'])
+
+	row_inputs = [
+		{'rule2name':'res-year',
+		 'g_act':11/100,
+		 'regime_start':1956},
+
+		{'rule2name': 'res-year',
+		 'g_act': 21 / 100,
+		 'regime_start': 1956},
+
+		{'rule2name': 'res-year',
+		 'g_act': 21 / 100,
+		 'regime_start': 2000},
+
+		{'rule2name': 'computation',
+		 'g_exp': 4.3 / 100,
+		 'rel_imp_res_comp': 5,
+		 'regime_start': 1956},
+
+		{'rule2name': 'computation',
+		 'g_exp':4.3/100,
+		 'rel_imp_res_comp':1,
+		 'regime_start': 1956},
+
+		{'rule2name': 'computation',
+		 'biohypothesis':'lifetime',
+		 'regime_start': 1956},
+
+		{'rule2name': 'computation',
+		 'biohypothesis': 'evolution'},
+	]
+
+	for input_kwargs in row_inputs:
+		rowname = str(input_kwargs)
+
+		datadict = functions.hyperPriorTrialDef(**input_kwargs)
+
+		for k, v in datadict.items():
+			if isinstance(v, list):
+				datadict[k] = [round(float(i) * 100, 2, type=str) + "%" for i in v]
+			if isinstance(v, np.float):
+				datadict[k] = round(float(v) * 100, 2, type=str) + "%"
+
+		df = df.append(pd.Series(name=rowname, data=datadict))
+
+	print(df.to_string())
+
+appendix8()

@@ -102,9 +102,9 @@ def fourParamFrameworkResearcher(g_act, ftp_res=None, ftp_cal_equiv=None, g_exp=
 										   virtual_successes=virtual_successes,
 										   ftp=ftp_res)
 
-def solveFor_ftp_comp(ftp_res,relative_impact_research_compute):
+def solveFor_ftp_comp(ftp_res, rel_imp_res_comp):
 	res_trials = 1   # arbitrary
-	comp_trials = relative_impact_research_compute*res_trials
+	comp_trials = rel_imp_res_comp * res_trials
 
 
 	# Number of trials that occur in both models, before the `res_trials` of the research model are compared to `comp_trials` of
@@ -121,9 +121,9 @@ def solveFor_ftp_comp(ftp_res,relative_impact_research_compute):
 
 	return ftp_comp_solution
 
-def solveFor_ftp_comp_indirect(ftp_cal,relative_impact_research_compute,g_exp):
+def solveFor_ftp_comp_indirect(ftp_cal, rel_imp_res_comp, g_exp):
 	ftp_res = solveFor_ftp_res(g_exp=g_exp,ftp_cal=ftp_cal)
-	return solveFor_ftp_comp(ftp_res, relative_impact_research_compute)
+	return solveFor_ftp_comp(ftp_res, rel_imp_res_comp)
 
 def NumberIncreaseQuantity(start,end,increment=trial_increment):
 	return int(np.log(end/start)/np.log(1+increment))
@@ -194,7 +194,8 @@ biggest_spends_aggressive = {
 	2036: 10**11,
 }
 
-def fourParamFrameworkComp(relative_impact_research_compute=None,
+def fourParamFrameworkComp(rel_imp_res_comp=None,
+						   forecast_from_year=2020,
 						   forecast_to_year=2036,
 						   regime_start_year=1956,
 						   biggest_spends_method=None,  # 'aggressive' or 'conservative'
@@ -202,17 +203,18 @@ def fourParamFrameworkComp(relative_impact_research_compute=None,
 						   computation_at_forecasted_time=None,
 						   ftp_cal_equiv=None,
 						   virtual_successes=1,
-						   ftp_comp=None):
+						   ftp_comp=None,
+						   g_exp=4.3/100):
 	'''
-	The most indirect method, from biggest_spend_end + ftp_cal_equiv, g_exp, and relative_impact_research_compute.
+	The most indirect method, from biggest_spend_end + ftp_cal_equiv, g_exp, and rel_imp_res_comp.
 	The most direct method: from biggest_spend_end + ftp_comp.
 	'''
 
 	if ftp_comp is None:
-		ftp_comp = solveFor_ftp_comp_indirect(ftp_cal_equiv,relative_impact_research_compute,g_exp=4.3/100)
+		ftp_comp = solveFor_ftp_comp_indirect(ftp_cal_equiv, rel_imp_res_comp, g_exp=g_exp)
 
 
-	computation2020 = getComputationAmountForYear(2020, biggest_spends_method)
+	computation2020 = getComputationAmountForYear(forecast_from_year, biggest_spends_method)
 
 	if computation_at_regime_start is None and computation_at_forecasted_time is None:
 		computation_at_regime_start = getComputationAmountForYear(regime_start_year, biggest_spends_method)
@@ -264,7 +266,7 @@ def getComputationAmountForYear(y, biggest_spends_method):
 	return year_to_computation[y]
 
 
-def evolutionaryAnchor(biggest_spends_method,virtual_successes=1):
+def evolutionaryAnchor(biggest_spends_method,virtual_successes=1, forecast_to_year=2036):
 
 	c_initial = 1e21
 	c_evolution = 1e41
@@ -282,7 +284,7 @@ def evolutionaryAnchor(biggest_spends_method,virtual_successes=1):
 
 	c_brain_debug = 1e21
 
-	computation_at_forecasted_time = getComputationAmountForYear(2036, biggest_spends_method)
+	computation_at_forecasted_time = getComputationAmountForYear(forecast_to_year, biggest_spends_method)
 
 	return fourParamFrameworkComp(computation_at_regime_start=c_brain_debug,
 								  computation_at_forecasted_time=computation_at_forecasted_time,
@@ -290,23 +292,24 @@ def evolutionaryAnchor(biggest_spends_method,virtual_successes=1):
 								  ftp_comp=ftp_comp_solution,
 								  virtual_successes=virtual_successes)
 
-def lifetimeAnchor(biggest_spends_method,virtual_successes=1):
-	c_initial = getComputationAmountForYear(1956, biggest_spends_method)
+def lifetimeAnchor(biggest_spends_method,virtual_successes=1,regime_start_year=1956,forecast_from_year=2020,forecast_to_year=2036):
+	c_initial = getComputationAmountForYear(regime_start_year, biggest_spends_method)
 	c_lifetime = 1e24
 
-	n_trials_1956_to_lifetime = NumberIncreaseQuantity(c_initial, c_lifetime)
+	n_trials_reg_start_to_lifetime = NumberIncreaseQuantity(c_initial, c_lifetime)
 
 	PrAGI_CompModel = lambda ftp_comp: forecast_generalized_laplace(failures=0,
 																	virtual_successes=virtual_successes,
 																	ftp=ftp_comp,
-																	forecast_years=n_trials_1956_to_lifetime)
+																	forecast_years=n_trials_reg_start_to_lifetime)
 
 	f_to_solve = lambda ftp_comp: PrAGI_CompModel(ftp_comp) - .5
 
 	ftp_comp_solution = optimize.brentq(f_to_solve, probability_solution_leftbound, probability_solution_rightbound)
 
-	return fourParamFrameworkComp(forecast_to_year=2036,
-						   			regime_start_year=1956,
+	return fourParamFrameworkComp(forecast_to_year=forecast_to_year,
+								  forecast_from_year=forecast_from_year,
+						   			regime_start_year=regime_start_year,
 								  	biggest_spends_method=biggest_spends_method,
 								  	ftp_comp=ftp_comp_solution,
 								  	virtual_successes=virtual_successes)
@@ -335,9 +338,9 @@ def hyperPriorCalendar(ftps,initial_weights=None):
 		initial_weight = initial_weights[i]
 		ftp = ftps[i]
 
-		p2020noAGI = 1-fourParamFrameworkCalendar(ftp=ftp,regime_start=1956,forecast_from=1956,forecast_to=2020)
+		pNoAGI2020 = 1-fourParamFrameworkCalendar(ftp=ftp,regime_start=1956,forecast_from=1956,forecast_to=2020)
 
-		final_weight_unnormalized = initial_weight*p2020noAGI
+		final_weight_unnormalized = initial_weight*pNoAGI2020
 		final_weights_unnormalized.append(final_weight_unnormalized)
 
 	normalization_constant = sum(final_weights_unnormalized)
@@ -350,3 +353,73 @@ def hyperPriorCalendar(ftps,initial_weights=None):
 
 	return {'pr2036static':np.average(prsAGI2036), 'pr2036hyper':np.average(prsAGI2036,weights=final_weights),
 			'wts2020': final_weights}
+
+def hyperPriorTrialDef(rule2name, g_act=None, regime_start=1956, rel_imp_res_comp=None, g_exp=4.3/100, biohypothesis=None):
+
+	initial_weights = np.asarray([0.5,0.5])
+
+	rule1_pAGI2036 = fourParamFrameworkCalendar(ftp=1/300)
+	rule1_pNoAGI2020 = 1 - fourParamFrameworkCalendar(ftp=1/300, forecast_from=regime_start,forecast_to=2020)
+	prsAGI2036 = [rule1_pAGI2036]
+
+	if rule2name == 'res-year':
+		rule2_pNoAGI2020 = 1 - fourParamFrameworkResearcher(g_exp=g_exp,
+													  g_act=g_act,
+													  ftp_cal_equiv=1/300,
+													  regime_start=regime_start,
+													  forecast_from=regime_start,
+													  forecast_to=2020)
+
+		pr2036AGIStatic = fourParamFrameworkResearcher(g_exp=g_exp,
+													  g_act=g_act,
+													  ftp_cal_equiv=1/300,
+													  regime_start=regime_start)
+
+		prsAGI2036.append(pr2036AGIStatic)
+
+
+	if rule2name == 'computation':
+		if biohypothesis is None:
+			rule2_pNoAGI2020 = 1 - fourParamFrameworkComp(g_exp=g_exp,
+															ftp_cal_equiv=1/300,
+															rel_imp_res_comp=rel_imp_res_comp,
+															regime_start_year=regime_start,
+															forecast_from_year=regime_start,
+															forecast_to_year=2020,
+														  biggest_spends_method='aggressive')
+
+			pr2036AGIStatic = fourParamFrameworkComp(g_exp=g_exp,
+														 ftp_cal_equiv=1 / 300,
+														 rel_imp_res_comp=rel_imp_res_comp,
+														 regime_start_year=regime_start,
+														  biggest_spends_method='aggressive')
+
+			prsAGI2036.append(pr2036AGIStatic)
+
+		else:
+			if biohypothesis == 'lifetime':
+				rule2_pNoAGI2020 = 1 - lifetimeAnchor(biggest_spends_method='aggressive',
+												regime_start_year=regime_start,
+												forecast_from_year=regime_start,
+												forecast_to_year=2020)
+
+				pr2036AGIStatic = lifetimeAnchor(biggest_spends_method='aggressive',
+												 regime_start_year=regime_start)
+
+				prsAGI2036.append(pr2036AGIStatic)
+
+			if biohypothesis == 'evolution':
+				rule2_pNoAGI2020 = 1 - evolutionaryAnchor(biggest_spends_method='aggressive',forecast_to_year=2020)
+
+				pr2036AGIStatic = evolutionaryAnchor(biggest_spends_method='aggressive')
+
+				prsAGI2036.append(pr2036AGIStatic)
+
+	final_weights_unnormalized = initial_weights * np.asarray([rule1_pNoAGI2020,rule2_pNoAGI2020])
+	normalization_constant = sum(final_weights_unnormalized)
+	final_weights = []
+	for weight in final_weights_unnormalized:
+		final_weights.append(weight/normalization_constant)
+
+	return {'pr2036static': np.average(prsAGI2036), 'pr2036hyper': np.average(prsAGI2036, weights=final_weights),
+			'wt2020': final_weights[1]}
