@@ -193,8 +193,8 @@ biggest_spends_aggressive = {
 }
 
 def fourParamFrameworkComp(relative_impact_research_compute=None,
-						   forecast_to_year=None,
-						   regime_start_year=None,
+						   forecast_to_year=2036,
+						   regime_start_year=1956,
 						   biggest_spends_method=None,  # 'aggressive' or 'conservative'
 						   computation_at_regime_start=None,
 						   computation_at_forecasted_time=None,
@@ -262,7 +262,7 @@ def getComputationAmountForYear(y, biggest_spends_method):
 	return year_to_computation[y]
 
 
-def evolutionaryAnchor(biggest_spends_method):
+def evolutionaryAnchor(biggest_spends_method,virtual_successes=1):
 
 	c_initial = 1e21
 	c_evolution = 1e41
@@ -270,7 +270,7 @@ def evolutionaryAnchor(biggest_spends_method):
 	n_trials_initial_to_evolution = NumberIncreaseQuantity(c_initial,c_evolution)
 
 	PrAGI_CompModel = lambda ftp_comp: forecast_generalized_laplace(failures=0,
-																	virtual_successes=1,
+																	virtual_successes=virtual_successes,
 																	ftp=ftp_comp,
 																	forecast_years=n_trials_initial_to_evolution)
 
@@ -285,16 +285,17 @@ def evolutionaryAnchor(biggest_spends_method):
 	return fourParamFrameworkComp(computation_at_regime_start=c_brain_debug,
 								  computation_at_forecasted_time=computation_at_forecasted_time,
 								  biggest_spends_method=biggest_spends_method,
-								  ftp_comp=ftp_comp_solution)
+								  ftp_comp=ftp_comp_solution,
+								  virtual_successes=virtual_successes)
 
-def lifetimeAnchor(biggest_spends_method):
+def lifetimeAnchor(biggest_spends_method,virtual_successes=1):
 	c_initial = getComputationAmountForYear(1956, biggest_spends_method)
 	c_lifetime = 1e24
 
 	n_trials_1956_to_lifetime = NumberIncreaseQuantity(c_initial, c_lifetime)
 
 	PrAGI_CompModel = lambda ftp_comp: forecast_generalized_laplace(failures=0,
-																	virtual_successes=1,
+																	virtual_successes=virtual_successes,
 																	ftp=ftp_comp,
 																	forecast_years=n_trials_1956_to_lifetime)
 
@@ -305,7 +306,8 @@ def lifetimeAnchor(biggest_spends_method):
 	return fourParamFrameworkComp(forecast_to_year=2036,
 						   			regime_start_year=1956,
 								  	biggest_spends_method=biggest_spends_method,
-								  	ftp_comp=ftp_comp_solution)
+								  	ftp_comp=ftp_comp_solution,
+								  	virtual_successes=virtual_successes)
 
 def logUniform(biggest_spends_method):
 	p_agi_by_evo_c = .8
