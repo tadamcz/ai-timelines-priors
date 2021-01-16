@@ -369,7 +369,7 @@ def section6_3_1_regimestart():
 
 	print("Central:",central,"High:",high)
 
-def section_7_2_1():
+def section7_2_1():
 	print("\nSection 7.2.1 Effect of hyper prior updates: first-trial probability")
 
 	df = pd.DataFrame(columns=['pr2036static','pr2036hyper','wts2020'])
@@ -397,7 +397,7 @@ def section_7_2_1():
 	print(df)
 
 def appendix8():
-	print("Appendix 8: using a hyper-prior on different trial definitions")
+	print("\nAppendix 8: using a hyper-prior on different trial definitions")
 	df = pd.DataFrame()
 
 	row_inputs = [
