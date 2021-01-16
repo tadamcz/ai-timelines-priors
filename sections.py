@@ -384,7 +384,7 @@ def section_7_2_1():
 	for input in row_inputs:
 		rowname = str(input)
 
-		datadict = functions.hyperPriorCalendar(input)
+		datadict = functions.hyperPriorNCalendar(input)
 
 		for k,v in datadict.items():
 			if isinstance(v, list):
@@ -398,7 +398,7 @@ def section_7_2_1():
 
 def appendix8():
 	print("Appendix 8: using a hyper-prior on different trial definitions")
-	df = pd.DataFrame(columns=['pr2036static', 'pr2036hyper', 'wt2020'])
+	df = pd.DataFrame()
 
 	row_inputs = [
 		{'rule2name':'res-year',
@@ -434,7 +434,35 @@ def appendix8():
 	for input_kwargs in row_inputs:
 		rowname = str(input_kwargs)
 
-		datadict = functions.hyperPriorTrialDef(**input_kwargs)
+		datadict = functions.hyperPrior2TrialDef(**input_kwargs)
+
+		datadict = {k:round(float(v) * 100, 2, type=str) + "%" for k,v in datadict.items()}
+
+		df = df.append(pd.Series(name=rowname, data=datadict))
+
+	print(df.to_string())
+
+def section7_3():
+	print("\n7.3 Allow some probability that AGI is impossible")
+	df = pd.DataFrame()
+
+	input_rows = [
+		1 / 1000,
+		1 / 300,
+		1 / 200,
+		1 / 100,
+		1 / 50,
+		1 / 20,
+		1 / 10
+	]
+
+	for input_ftp in input_rows:
+		rowname = '1/'+str(1/input_ftp)
+		datadict = functions.hyperPriorNCalendar(ftps=[0, input_ftp], initial_weights=[.2, .8])
+		datadict['pr2036_imposs0'] = functions.fourParamFrameworkCalendar(input_ftp)
+		datadict['pr2036_imposs20'] = datadict.pop('pr2036hyper')
+		datadict['wt2020'] = datadict.pop('wts2020')[0]
+		del datadict['pr2036static']
 
 		for k, v in datadict.items():
 			if isinstance(v, list):
@@ -446,4 +474,61 @@ def appendix8():
 
 	print(df.to_string())
 
-appendix8()
+def appendix9():
+	print("\nAppendix 9: AGI Impossible")
+	df = pd.DataFrame()
+
+	row_inputs = [
+
+		{'rule2name': 'calendar',
+		 'rule2ftp': 1/300},
+
+		{'rule2name': 'res-year',
+		 'g_act': 11 / 100,
+		 'regime_start': 1956},
+
+		{'rule2name': 'res-year',
+		 'g_act': 21 / 100,
+		 'regime_start': 1956},
+
+		{'rule2name': 'res-year',
+		 'g_act': 21 / 100,
+		 'regime_start': 2000},
+
+		{'rule2name': 'computation',
+		 'g_exp': 4.3 / 100,
+		 'rel_imp_res_comp': 5,
+		 'regime_start': 1956},
+
+		{'rule2name': 'computation',
+		 'g_exp': 4.3 / 100,
+		 'rel_imp_res_comp': 1,
+		 'regime_start': 1956},
+
+		# {'rule2name': 'computation',
+		#  'biohypothesis': 'lifetime',
+		#  'regime_start': 1956},
+		#
+		# {'rule2name': 'computation',
+		#  'biohypothesis': 'evolution'},
+	]
+
+	for input_kwargs in row_inputs:
+		rowname = str(input_kwargs)
+
+		datadict = functions.hyperPrior2TrialDef(**input_kwargs,
+												 rule1ftp=0,
+												 initial_weights=[0.2,0.8])
+		del datadict['pr2036static']
+		datadict['pr2036_imposs20'] = datadict.pop('pr2036hyper')
+		datadict['wt2020'] = 1-datadict['wt2020']
+
+		datadict['pr2036_imposs0'] = functions.hyperPrior2TrialDef(**input_kwargs,
+												 rule1ftp=0,
+												 initial_weights=[0,1])['pr2036hyper']
+
+		datadict = {k: round(float(v) * 100, 2, type=str) + "%" for k, v in datadict.items()}
+
+		df = df.append(pd.Series(name=rowname, data=datadict))
+
+	print(df.to_string())

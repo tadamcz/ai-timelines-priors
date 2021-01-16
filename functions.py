@@ -7,6 +7,8 @@ probability_solution_leftbound, probability_solution_rightbound = 1e-9, 1 - 1e-9
 trial_increment = 1/100
 
 def generalized_laplace(trials, failures, virtual_successes, virtual_failures=None, ftp=None):
+	if ftp == 0:
+		return 0
 	if ftp is not None:
 		if virtual_failures is not None and virtual_successes is not None:
 			raise ValueError("Provide exactly two of virtual_failures, virtual_successes, and ftp")
@@ -57,6 +59,8 @@ def forecast_bayes(failures, prior, forecast_years):
 	return p_success_by_target
 
 def fourParamFrameworkCalendar(ftp, regime_start=1956, forecast_from=2020, forecast_to=2036, virtual_successes=1):
+	if ftp == 0:
+		return 0
 	virtual_failures = (virtual_successes/ftp)-virtual_successes
 	failures = forecast_from-regime_start
 	return forecast_generalized_laplace(failures=failures,forecast_years=forecast_to-forecast_from,virtual_successes=virtual_successes,virtual_failures=virtual_failures)
@@ -321,8 +325,10 @@ def logUniform(biggest_spends_method):
 
 	return p_agi_per_OOM*OOMs_2020_to_2036
 
-def hyperPriorCalendar(ftps,initial_weights=None):
-
+def hyperPriorNCalendar(ftps, initial_weights=None):
+	'''
+	As many rules as desired, all rules must take the calendar year as their trial definition.
+	'''
 	if initial_weights is None:
 		w = 1/len(ftps)
 		initial_weights = [w]*len(ftps)
@@ -330,12 +336,16 @@ def hyperPriorCalendar(ftps,initial_weights=None):
 	if not len(initial_weights)==len(ftps):
 		raise ValueError
 
+	psAGI2036 = []
 	final_weights_unnormalized = []
 	for i in range(len(initial_weights)):
 		initial_weight = initial_weights[i]
 		ftp = ftps[i]
 
 		pNoAGI2020 = 1-fourParamFrameworkCalendar(ftp=ftp,regime_start=1956,forecast_from=1956,forecast_to=2020)
+		pAGI2036 = fourParamFrameworkCalendar(ftp=ftp)
+
+		psAGI2036.append(pAGI2036)
 
 		final_weight_unnormalized = initial_weight*pNoAGI2020
 		final_weights_unnormalized.append(final_weight_unnormalized)
@@ -345,20 +355,41 @@ def hyperPriorCalendar(ftps,initial_weights=None):
 	for weight in final_weights_unnormalized:
 		final_weights.append(weight/normalization_constant)
 
-	psAGI2036 = [fourParamFrameworkCalendar(ftp=ftp) for ftp in ftps]
-
-
-	return {'pr2036static':np.average(psAGI2036),
+	return {'pr2036static':np.average(psAGI2036, weights=initial_weights),
 			'pr2036hyper':np.average(psAGI2036,weights=final_weights),
 			'wts2020': final_weights}
 
-def hyperPriorTrialDef(rule2name, g_act=None, regime_start=1956, rel_imp_res_comp=None, g_exp=4.3/100, biohypothesis=None):
+def hyperPrior2TrialDef(rule2name,
+						rule1ftp=1 / 300,
+						g_act=None,
+						regime_start=1956,
+						rel_imp_res_comp=None,
+						g_exp=4.3 / 100,
+						biohypothesis=None,
+						initial_weights=(.5,.5),
+						rule2ftp=None):
+	'''
+	Rule 1 takes the calendar year as its trial definition, with ftp `rule1ftp`
+	Rule 2 can take any trial definition
+	'''
 
-	initial_weights = np.asarray([0.5,0.5])
+	initial_weights = np.asarray(initial_weights)
 
-	rule1_pAGI2036 = fourParamFrameworkCalendar(ftp=1/300)
-	rule1_pNoAGI2020 = 1 - fourParamFrameworkCalendar(ftp=1/300, forecast_from=regime_start,forecast_to=2020)
+	rule1_pAGI2036 = fourParamFrameworkCalendar(ftp=rule1ftp)
+	rule1_pNoAGI2020 = 1 - fourParamFrameworkCalendar(ftp=rule1ftp, forecast_from=regime_start,forecast_to=2020)
+
 	psAGI2036 = [rule1_pAGI2036]
+
+	if rule2name == 'calendar':
+		rule2_pNoAGI2020 = 1 - fourParamFrameworkCalendar(ftp=rule2ftp,
+															regime_start=regime_start,
+															forecast_from=regime_start,
+															forecast_to=2020)
+
+		pAGI2036Static = fourParamFrameworkCalendar(ftp=rule2ftp,
+													  regime_start=regime_start)
+
+		psAGI2036.append(pAGI2036Static)
 
 	if rule2name == 'res-year':
 		rule2_pNoAGI2020 = 1 - fourParamFrameworkResearcher(g_exp=g_exp,
@@ -417,6 +448,6 @@ def hyperPriorTrialDef(rule2name, g_act=None, regime_start=1956, rel_imp_res_com
 	normalization_constant = sum(final_weights_unnormalized)
 	final_weights = [weight/normalization_constant for weight in final_weights_unnormalized]
 
-	return {'pr2036static': np.average(psAGI2036),
+	return {'pr2036static': np.average(psAGI2036, weights=initial_weights),
 			'pr2036hyper': np.average(psAGI2036, weights=final_weights),
 			'wt2020': final_weights[1]}
