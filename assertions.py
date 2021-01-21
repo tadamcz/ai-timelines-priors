@@ -3,6 +3,13 @@ import warnings
 from time import sleep
 from termcolor import colored
 
+'''
+NOTE: I used this file for the first part of the report, but then abandoned it after it became clear that it wasn't desired/needed.
+
+Refer to print_output.py, which prints the results for the entire report.
+'''
+
+
 def setup_warning_catcher():
     """ Wrap warnings.showwarning with code that records warnings. """
 
