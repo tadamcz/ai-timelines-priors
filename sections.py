@@ -3,6 +3,10 @@ import functions
 import numpy as np
 from sigfig import round as round_lib
 import pandas as pd
+from copy import deepcopy
+
+pd.options.display.width = 0
+pd.options.display.max_colwidth = 75
 
 def round(x,*args,**kwargs):
 	if isinstance(x,(float,int)):
@@ -372,25 +376,28 @@ def section6_3_1_regimestart():
 def section7_2_1():
 	print("\nSection 7.2.1 Effect of hyper prior updates: first-trial probability")
 
-	df = pd.DataFrame(columns=['pr2036static','pr2036hyper','wts2020'])
+	df = pd.DataFrame(columns=['pr2036static','pr2036hyper'])  # forces the columns to appear in this order
 
 	row_inputs = [
-		[1/100,1/1000],
-		[1/10,1/100],
-		[1/10,1/100,1/1000],
-		[1/1000,1/10000]
+		[{'ftp': 1/100}, {'ftp':1/1000}],
+		[{'ftp': 1/10}, {'ftp': 1/100}],
+		[{'ftp': 1/10}, {'ftp': 1/100}, {'ftp': 1/1000}],
+		[{'ftp': 1/1000}, {'ftp': 1/10000}]
 	]
 
-	for input in row_inputs:
-		rowname = str(input)
+	for input_list in row_inputs:
+		rowname = str([ToFractionStrings(i) for i in input_list])
 
-		datadict = functions.hyperPriorNCalendar(input)
+		for rule in input_list: # the same for every row in the table
+			rule['name'] = 'calendar'
+			rule['regime_start'] = 1956
+			rule['forecast_from'] = 2020
 
-		for k,v in datadict.items():
-			if isinstance(v, list):
-				datadict[k] = [round(float(i) * 100, 2, type=str)+"%" for i in v]
-			if isinstance(v, np.float):
-				datadict[k] = round(float(v) * 100, 2, type=str)+"%"
+		initial_weights = [1] * len(input_list)
+
+		datadict = functions.hyperPrior(rules=input_list,initial_weights=initial_weights)
+
+		datadict = ToPercentageStrings(datadict)
 
 		df = df.append(pd.Series(name=rowname, data=datadict))
 
@@ -398,55 +405,94 @@ def section7_2_1():
 
 def appendix8():
 	print("\nAppendix 8: using a hyper-prior on different trial definitions")
-	df = pd.DataFrame()
 
-	row_inputs = [   # Assumes aggressive compute spend where applicable
-		{'rule2name':'res-year',
-		 'g_act':11/100,
-		 'regime_start':1956},
+	df = pd.DataFrame(columns=['pr2036static','pr2036hyper'])  # forces the columns to appear in this order
 
-		{'rule2name': 'res-year',
-		 'g_act': 21 / 100,
-		 'regime_start': 1956},
+	# First rule is the same in all rows
+	rule1 = {'name':'calendar',
+			 'regime_start':1956,
+			 'ftp': 1/300
+			 }
 
-		{'rule2name': 'res-year',
-		 'g_act': 21 / 100,
-		 'regime_start': 2000},
+	row_inputs = [
+		[rule1,
+			{'name':'res-year',
+			 'ftp_cal_equiv':1/300,
+			 'g_exp':4.3/100,
+			 'g_act':11/100,
+			 'regime_start':1956}
+		 ],
 
-		{'rule2name': 'computation',
-		 'g_exp': 4.3 / 100,
-		 'rel_imp_res_comp': 5,
-		 'regime_start': 1956},
+		[rule1,
+		 	{'name': 'res-year',
+			 'ftp_cal_equiv':1/300,
+			 'g_exp':4.3/100,
+			 'g_act': 21 / 100,
+			 'regime_start': 1956},
+		],
 
-		{'rule2name': 'computation',
-		 'g_exp':4.3/100,
-		 'rel_imp_res_comp':1,
-		 'regime_start': 1956},
+		[rule1,
+		 	{'name': 'res-year',
+			 'ftp_cal_equiv':1/300,
+			 'g_exp':4.3/100,
+			 'g_act': 21 / 100,
+			 'regime_start': 2000}
+		],
 
-		{'rule2name': 'computation',
-		 'biohypothesis':'lifetime',
-		 'regime_start': 1956},
+		[rule1,
+		 	{'name': 'computation',
+			 'ftp_cal_equiv': 1 / 300,
+			 'g_exp': 4.3 / 100,
+			 'rel_imp_res_comp': 5,
+			 'regime_start': 1956,
+			 'biggest_spends_method':'aggressive'},
+		],
 
-		{'rule2name': 'computation',
-		 'biohypothesis': 'evolution'},
+		[rule1,
+		 	{'name': 'computation',
+			 'ftp_cal_equiv': 1/300,
+			 'g_exp':4.3/100,
+			 'rel_imp_res_comp':1,
+		 	 'regime_start': 1956,
+			 'biggest_spends_method':'aggressive'}
+		],
+
+		[rule1,
+		 	{'name': 'computation',
+			 'biohypothesis':'lifetime',
+			 'regime_start': 1956,
+			 'biggest_spends_method':'aggressive'},
+		],
+
+		[rule1,
+		 	{'name': 'computation',
+			 'biohypothesis': 'evolution'}
+		]
 	]
 
-	for input_kwargs in row_inputs:
-		rowname = str(input_kwargs)
 
-		datadict = functions.hyperPrior2TrialDef(**input_kwargs)  # Assumes aggressive compute spend where applicable
+	for input_list in row_inputs:
+		rowname = str(ToFractionStrings(input_list[1]))
 
-		datadict = {k:round(float(v) * 100, 2, type=str) + "%" for k,v in datadict.items()}
+		initial_weights = [1] * len(input_list)
+
+		datadict = functions.hyperPrior(input_list,initial_weights)
+
+		# We only display the second weight
+		datadict['wt2020'] = datadict['wts2020'][1]
+		del datadict['wts2020']
+
+		datadict = ToPercentageStrings(datadict)
 
 		df = df.append(pd.Series(name=rowname, data=datadict))
 
-	print(df.to_string())
+	print(df)
 
 def section7_3():
 	print("\n7.3 Allow some probability that AGI is impossible")
-	df = pd.DataFrame()
+	df = pd.DataFrame(columns=['pr2036 calendar-year','pr2036 20% impossible'])  # forces this order
 
-	input_rows = [
+	input_ftps = [
 		1 / 1000,
 		1 / 300,
 		1 / 200,
@@ -456,81 +502,155 @@ def section7_3():
 		1 / 10
 	]
 
-	for input_ftp in input_rows:
-		rowname = '1/'+str(1/input_ftp)
-		datadict = functions.hyperPriorNCalendar(ftps=[0, input_ftp], initial_weights=[.2, .8])
-		datadict['pr2036_imposs0'] = functions.fourParamFrameworkCalendar(input_ftp)
-		datadict['pr2036_imposs20'] = datadict.pop('pr2036hyper')
-		datadict['wt2020'] = datadict.pop('wts2020')[0]
+	rows = []
+	for input_ftp in input_ftps:
+		rows.append(
+			[
+				{'name':'calendar', # Rule 1
+				 'regime_start':1956,
+				  'ftp': input_ftp},
+
+				 {'name':'impossible'}  # Rule 2
+			]
+		)
+
+	for row in rows:
+		rowname = ToFractionStrings(row[0]['ftp'])
+
+		datadict = functions.hyperPrior(row, initial_weights=[.8, .2])
+		datadict['pr2036 20% impossible'] = datadict.pop('pr2036hyper')
+		datadict['wt2020'] = datadict.pop('wts2020')[1]
 		del datadict['pr2036static']
 
-		for k, v in datadict.items():
-			if isinstance(v, list):
-				datadict[k] = [round(float(i) * 100, 2, type=str) + "%" for i in v]
-			if isinstance(v, np.float):
-				datadict[k] = round(float(v) * 100, 2, type=str) + "%"
+		datadict['pr2036 calendar-year'] = functions.fourParamFrameworkCalendar(row[0]['ftp'])
+
+		datadict = ToPercentageStrings(datadict)
 
 		df = df.append(pd.Series(name=rowname, data=datadict))
 
-	print(df.to_string())
+	print(df)
 
 def appendix9():
 	print("\nAppendix 9: AGI Impossible")
-	df = pd.DataFrame()
+	df = pd.DataFrame(columns=['pr2036 No Hyper','pr2036 20% impossible'])  # forces order
 
-	row_inputs = [  # Assumes aggressive compute spend where applicable
+	rule2 = {'name':'impossible'}  # the same in every row
 
-		{'rule2name': 'calendar',
-		 'rule2ftp': 1/300},
+	row_inputs = [
+		[
+			{'name': 'calendar',
+			 'ftp': 1/300,
+			 'regime_start':1956},
 
-		{'rule2name': 'res-year',
-		 'g_act': 11 / 100,
-		 'regime_start': 1956},
+		rule2],
 
-		{'rule2name': 'res-year',
-		 'g_act': 21 / 100,
-		 'regime_start': 1956},
+		[
+			{'name': 'res-year',
+			 'ftp_cal_equiv':1/300,
+			 'g_act': 11 / 100,
+			 'g_exp': 4.3/100,
+			 'regime_start': 1956},
 
-		{'rule2name': 'res-year',
-		 'g_act': 21 / 100,
-		 'regime_start': 2000},
+		rule2],
 
-		{'rule2name': 'computation',
-		 'g_exp': 4.3 / 100,
-		 'rel_imp_res_comp': 5,
-		 'regime_start': 1956},
+		[
+			{'name': 'res-year',
+			 'ftp_cal_equiv':1/300,
+			 'g_act': 21 / 100,
+			 'g_exp': 4.3/100,
+			 'regime_start': 1956},
 
-		{'rule2name': 'computation',
-		 'g_exp': 4.3 / 100,
-		 'rel_imp_res_comp': 1,
-		 'regime_start': 1956},
+		rule2],
 
-		{'rule2name': 'computation',
-		 'biohypothesis': 'lifetime',
-		 'regime_start': 1956},
+		[
+			{'name': 'res-year',
+			 'ftp_cal_equiv':1/300,
+			 'g_act': 21 / 100,
+			 'g_exp': 4.3/100,
+			 'regime_start': 2000},
 
-		{'rule2name': 'computation',
-		 'biohypothesis': 'evolution'},
+		rule2],
 
-		{'rule2name': 'computation-loguniform'},
+		[
+			{'name': 'computation',
+			 'biggest_spends_method':'aggressive',
+			 'ftp_cal_equiv':1/300,
+			 'g_exp': 4.3 / 100,
+			 'rel_imp_res_comp': 5,
+			 'regime_start': 1956},
+
+		rule2],
+
+		[
+			{'name': 'computation',
+			 'biggest_spends_method':'aggressive',
+			 'ftp_cal_equiv':1/300,
+			 'g_exp': 4.3 / 100,
+			 'rel_imp_res_comp': 1,
+			 'regime_start': 1956},
+
+		rule2],
+
+		[
+			{'name': 'computation',
+			 'biggest_spends_method':'aggressive',
+			 'biohypothesis': 'lifetime',
+			 'regime_start': 1956},
+
+		rule2],
+
+		[
+			{'name': 'computation',
+			 'biggest_spends_method':'aggressive',
+			 'biohypothesis': 'evolution'},
+
+		rule2],
+
+		[
+			{'name': 'computation-loguniform',
+			 'biggest_spends_method':'aggressive'},
+
+		rule2],
 	]
 
-	for input_kwargs in row_inputs:
-		rowname = str(input_kwargs)
+	for row in row_inputs:
+		rowname = str(row)
 
-		datadict = functions.hyperPrior2TrialDef(**input_kwargs,
-												 rule1ftp=0,
-												 initial_weights=[0.2,0.8])
+		datadict = functions.hyperPrior(row, initial_weights=[0.8,0.2])
 		del datadict['pr2036static']
-		datadict['pr2036_imposs20'] = datadict.pop('pr2036hyper')
-		datadict['wt2020'] = 1-datadict['wt2020']
 
-		datadict['pr2036_imposs0'] = functions.hyperPrior2TrialDef(**input_kwargs,  # Assumes aggressive compute spend where applicable
-												 rule1ftp=0,
-												 initial_weights=[0,1])['pr2036hyper']
+		datadict['pr2036 20% impossible'] = datadict.pop('pr2036hyper')
+		datadict['wt2020'] = datadict.pop('wts2020')[1]
 
-		datadict = {k: round(float(v) * 100, 2, type=str) + "%" for k, v in datadict.items()}
+		datadict['pr2036 No Hyper'] = functions.hyperPrior(row, initial_weights=[1,0])['pr2036hyper']
+
+		datadict = ToPercentageStrings(datadict)
 
 		df = df.append(pd.Series(name=rowname, data=datadict))
 
-	print(df.to_string())
+	print(df)
+
+
+def ToPercentageStrings(input):
+	if isinstance(input, dict):
+		input = deepcopy(input)
+		for k, v in input.items():
+			if isinstance(v, (list, np.ndarray)):
+				input[k] = [round(float(i) * 100, 2, type=str) + "%" for i in v]
+			if isinstance(v, np.float):
+				input[k] = round(float(v) * 100, 2, type=str) + "%"
+		return input
+	if isinstance(input, (float, int)):
+		return round(input * 100, 2, type=str) + "%"
+
+def ToFractionStrings(input):
+	if isinstance(input, dict):
+		input = deepcopy(input)
+		for k, v in input.items():
+			if isinstance(v, (list, np.ndarray)):
+				input[k] = ['1/' + str(int((1 / float(i)))) for i in v]
+			if isinstance(v, np.float):
+				input[k] = '1/' + str(int((1 / float(v))))
+		return input
+	if isinstance(input, (float, int)):
+		return '1/'+str(int((1 /input)))

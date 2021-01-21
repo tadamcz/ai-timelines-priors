@@ -338,137 +338,86 @@ def logUniform(biggest_spends_method,forecast_from=2020,forecast_to=2036):
 
 	return p_per_OOM_after_start * OOMs_in_brain_to_evo_and_start_to_end
 
-def hyperPriorNCalendar(ftps, initial_weights=None):
-	'''
-	As many rules as desired, all rules must take the calendar year as their trial definition.
-	'''
-	if initial_weights is None:
-		w = 1/len(ftps)
-		initial_weights = [w]*len(ftps)
-
-	if not len(initial_weights)==len(ftps):
-		raise ValueError
-
+def hyperPrior(rules: list, initial_weights: list) -> dict:
 	psAGI2036 = []
-	final_weights_unnormalized = []
-	for i in range(len(initial_weights)):
-		initial_weight = initial_weights[i]
-		ftp = ftps[i]
+	psNoAGI2020 = []
 
-		pNoAGI2020 = 1-fourParamFrameworkCalendar(ftp=ftp,regime_start=1956,forecast_from=1956,forecast_to=2020)
-		pAGI2036 = fourParamFrameworkCalendar(ftp=ftp)
+	for rule in rules:
+		if rule['name'] == 'calendar':
+			pNoAGI2020 = 1 - fourParamFrameworkCalendar(ftp=rule['ftp'],
+														  regime_start=rule['regime_start'],
+														  forecast_from=rule['regime_start'],
+														  forecast_to=2020)
 
-		psAGI2036.append(pAGI2036)
+			pAGI2036Static = fourParamFrameworkCalendar(ftp=rule['ftp'],
+														regime_start=rule['regime_start'])
 
-		final_weight_unnormalized = initial_weight*pNoAGI2020
-		final_weights_unnormalized.append(final_weight_unnormalized)
+		if rule['name'] == 'res-year':
+			pNoAGI2020 = 1 - fourParamFrameworkResearcher(g_exp=rule['g_exp'],
+																g_act=rule['g_act'],
+																ftp_cal_equiv=rule['ftp_cal_equiv'],
+																regime_start=rule['regime_start'],
+																forecast_from=rule['regime_start'],
+																forecast_to=2020)
 
+			pAGI2036Static = fourParamFrameworkResearcher(g_exp=rule['g_exp'],
+														  g_act=rule['g_act'],
+														  ftp_cal_equiv=rule['ftp_cal_equiv'],
+														  regime_start=rule['regime_start'])
+
+		if rule['name'] == 'computation':
+			if not 'biohypothesis' in rule:
+				pNoAGI2020 = 1 - fourParamFrameworkComp(g_exp=rule['g_exp'],
+															  ftp_cal_equiv=rule['ftp_cal_equiv'],
+															  rel_imp_res_comp=rule['rel_imp_res_comp'],
+															  regime_start_year=rule['regime_start'],
+															  forecast_from_year=rule['regime_start'],
+															  forecast_to_year=2020,
+															  biggest_spends_method=rule['biggest_spends_method'])
+
+				pAGI2036Static = fourParamFrameworkComp(g_exp=rule['g_exp'],
+														ftp_cal_equiv=rule['ftp_cal_equiv'],
+														rel_imp_res_comp=rule['rel_imp_res_comp'],
+														regime_start_year=rule['regime_start'],
+														biggest_spends_method=rule['biggest_spends_method'])
+
+			else:
+				if rule['biohypothesis'] == 'lifetime':
+					pNoAGI2020 = 1 - lifetimeAnchor(biggest_spends_method=rule['biggest_spends_method'],
+														  regime_start_year=rule['regime_start'],
+														  forecast_from_year=rule['regime_start'],
+														  forecast_to_year=2020)
+
+					pAGI2036Static = lifetimeAnchor(biggest_spends_method=rule['biggest_spends_method'],
+													regime_start_year=rule['regime_start'])
+
+
+				if rule['biohypothesis'] == 'evolution':
+					pNoAGI2020 = 1 - evolutionaryAnchor(biggest_spends_method='aggressive', forecast_to_year=2020)
+
+					pAGI2036Static = evolutionaryAnchor(biggest_spends_method='aggressive')
+
+
+		if rule['name'] == 'computation-loguniform':
+			# Forecast-from should really be 'the beginning of time', but any year before brain debugging compute is achieved will give the same result.
+			# I take the earliest year that will not result in a KeyError.
+			pNoAGI2020 = 1 - logUniform(rule['biggest_spends_method'], forecast_from=1956, forecast_to=2020)
+
+			pAGI2036Static = logUniform(rule['biggest_spends_method'], forecast_from=2020, forecast_to=2036)
+
+
+		if rule['name'] == 'impossible':
+			pNoAGI2020 = 1
+			pAGI2036Static = 0
+
+		psNoAGI2020.append(pNoAGI2020)
+		psAGI2036.append(pAGI2036Static)
+
+	final_weights_unnormalized = np.asarray(initial_weights) * np.asarray(psNoAGI2020)
 	normalization_constant = sum(final_weights_unnormalized)
-	final_weights = []
-	for weight in final_weights_unnormalized:
-		final_weights.append(weight/normalization_constant)
+	final_weights = final_weights_unnormalized / normalization_constant
 
-	return {'pr2036static':np.average(psAGI2036, weights=initial_weights),
-			'pr2036hyper':np.average(psAGI2036,weights=final_weights),
-			'wts2020': final_weights}
+	return {'pr2036hyper':    np.average(psAGI2036, weights=final_weights),
+			'pr2036static':   np.average(psAGI2036, weights=initial_weights),
+			'wts2020':        final_weights}
 
-def hyperPrior2TrialDef(rule2name,
-						rule1ftp=1 / 300,
-						g_act=None,
-						regime_start=1956,
-						rel_imp_res_comp=None,
-						g_exp=4.3 / 100,
-						biohypothesis=None,
-						initial_weights=(.5,.5),
-						rule2ftp=None):
-	'''
-	Rule 1 takes the calendar year as its trial definition, with ftp `rule1ftp`
-	Rule 2 can take any trial definition
-	'''
-
-	initial_weights = np.asarray(initial_weights)
-
-	rule1_pAGI2036 = fourParamFrameworkCalendar(ftp=rule1ftp)
-	rule1_pNoAGI2020 = 1 - fourParamFrameworkCalendar(ftp=rule1ftp, forecast_from=regime_start,forecast_to=2020)
-
-	psAGI2036 = [rule1_pAGI2036]
-
-	if rule2name == 'calendar':
-		rule2_pNoAGI2020 = 1 - fourParamFrameworkCalendar(ftp=rule2ftp,
-															regime_start=regime_start,
-															forecast_from=regime_start,
-															forecast_to=2020)
-
-		pAGI2036Static = fourParamFrameworkCalendar(ftp=rule2ftp,
-													  regime_start=regime_start)
-
-		psAGI2036.append(pAGI2036Static)
-
-	if rule2name == 'res-year':
-		rule2_pNoAGI2020 = 1 - fourParamFrameworkResearcher(g_exp=g_exp,
-															g_act=g_act,
-															ftp_cal_equiv=1/300,
-															regime_start=regime_start,
-															forecast_from=regime_start,
-															forecast_to=2020)
-
-		pAGI2036Static = fourParamFrameworkResearcher(g_exp=g_exp,
-															g_act=g_act,
-															ftp_cal_equiv=1/300,
-															regime_start=regime_start)
-
-		psAGI2036.append(pAGI2036Static)
-
-	if rule2name == 'computation':
-		if biohypothesis is None:
-			rule2_pNoAGI2020 = 1 - fourParamFrameworkComp(g_exp=g_exp,
-															ftp_cal_equiv=1/300,
-															rel_imp_res_comp=rel_imp_res_comp,
-															regime_start_year=regime_start,
-															forecast_from_year=regime_start,
-															forecast_to_year=2020,
-															biggest_spends_method='aggressive')
-
-			pAGI2036Static = fourParamFrameworkComp(g_exp=g_exp,
-															ftp_cal_equiv=1 / 300,
-															rel_imp_res_comp=rel_imp_res_comp,
-															regime_start_year=regime_start,
-															biggest_spends_method='aggressive')
-
-			psAGI2036.append(pAGI2036Static)
-
-		else:
-			if biohypothesis == 'lifetime':
-				rule2_pNoAGI2020 = 1 - lifetimeAnchor(biggest_spends_method='aggressive',
-														regime_start_year=regime_start,
-														forecast_from_year=regime_start,
-														forecast_to_year=2020)
-
-				pAGI2036Static = lifetimeAnchor(biggest_spends_method='aggressive',
-														regime_start_year=regime_start)
-
-				psAGI2036.append(pAGI2036Static)
-
-			if biohypothesis == 'evolution':
-				rule2_pNoAGI2020 = 1 - evolutionaryAnchor(biggest_spends_method='aggressive',forecast_to_year=2020)
-
-				pAGI2036Static = evolutionaryAnchor(biggest_spends_method='aggressive')
-
-				psAGI2036.append(pAGI2036Static)
-
-	if rule2name == 'computation-loguniform':
-		# Forecast-from should really be 'the beginning of time', but any year before brain debugging compute is achieved will give the same result
-		# I take the earliest year that will not result in a KeyError.
-		rule2_pNoAGI2020 = 1 - logUniform('aggressive',forecast_from=1956,forecast_to=2020)
-
-		pAGI2036Static = logUniform('aggressive',forecast_from=2020,forecast_to=2036)
-
-		psAGI2036.append(pAGI2036Static)
-
-	final_weights_unnormalized = initial_weights * np.asarray([rule1_pNoAGI2020,rule2_pNoAGI2020])
-	normalization_constant = sum(final_weights_unnormalized)
-	final_weights = [weight/normalization_constant for weight in final_weights_unnormalized]
-
-	return {'pr2036static': np.average(psAGI2036, weights=initial_weights),
-			'pr2036hyper': np.average(psAGI2036, weights=final_weights),
-			'wt2020': final_weights[1]}
