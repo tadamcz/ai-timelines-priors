@@ -400,7 +400,7 @@ def appendix8():
 	print("\nAppendix 8: using a hyper-prior on different trial definitions")
 	df = pd.DataFrame()
 
-	row_inputs = [
+	row_inputs = [   # Assumes aggressive compute spend where applicable
 		{'rule2name':'res-year',
 		 'g_act':11/100,
 		 'regime_start':1956},
@@ -434,7 +434,7 @@ def appendix8():
 	for input_kwargs in row_inputs:
 		rowname = str(input_kwargs)
 
-		datadict = functions.hyperPrior2TrialDef(**input_kwargs)
+		datadict = functions.hyperPrior2TrialDef(**input_kwargs)  # Assumes aggressive compute spend where applicable
 
 		datadict = {k:round(float(v) * 100, 2, type=str) + "%" for k,v in datadict.items()}
 
@@ -478,7 +478,7 @@ def appendix9():
 	print("\nAppendix 9: AGI Impossible")
 	df = pd.DataFrame()
 
-	row_inputs = [
+	row_inputs = [  # Assumes aggressive compute spend where applicable
 
 		{'rule2name': 'calendar',
 		 'rule2ftp': 1/300},
@@ -505,12 +505,14 @@ def appendix9():
 		 'rel_imp_res_comp': 1,
 		 'regime_start': 1956},
 
-		# {'rule2name': 'computation',
-		#  'biohypothesis': 'lifetime',
-		#  'regime_start': 1956},
-		#
-		# {'rule2name': 'computation',
-		#  'biohypothesis': 'evolution'},
+		{'rule2name': 'computation',
+		 'biohypothesis': 'lifetime',
+		 'regime_start': 1956},
+
+		{'rule2name': 'computation',
+		 'biohypothesis': 'evolution'},
+
+		{'rule2name': 'computation-loguniform'},
 	]
 
 	for input_kwargs in row_inputs:
@@ -523,7 +525,7 @@ def appendix9():
 		datadict['pr2036_imposs20'] = datadict.pop('pr2036hyper')
 		datadict['wt2020'] = 1-datadict['wt2020']
 
-		datadict['pr2036_imposs0'] = functions.hyperPrior2TrialDef(**input_kwargs,
+		datadict['pr2036_imposs0'] = functions.hyperPrior2TrialDef(**input_kwargs,  # Assumes aggressive compute spend where applicable
 												 rule1ftp=0,
 												 initial_weights=[0,1])['pr2036hyper']
 

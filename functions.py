@@ -315,15 +315,28 @@ def lifetimeAnchor(biggest_spends_method,virtual_successes=1,regime_start_year=1
 									ftp_comp=ftp_comp_solution,
 									virtual_successes=virtual_successes)
 
-def logUniform(biggest_spends_method):
-	p_agi_by_evo_c = .8
-	OOMs_2020_to_evo_c = 41 - np.log10(getComputationAmountForYear(2020,biggest_spends_method))
+def logUniform(biggest_spends_method,forecast_from=2020,forecast_to=2036):
+	OOMs_evo_c = 41
+	OOMs_brain_debug = 21
 
-	p_agi_per_OOM = p_agi_by_evo_c/OOMs_2020_to_evo_c
+	# Unconditional probability mass between brain debug and evolution
+	p_agi_debug_to_evo = .8
 
-	OOMs_2020_to_2036 = np.log10(getComputationAmountForYear(2036,biggest_spends_method)) - np.log10(getComputationAmountForYear(2020,biggest_spends_method))
+	OOMs_start = np.log10(getComputationAmountForYear(forecast_from,biggest_spends_method))
+	OOMs_end = np.log10(getComputationAmountForYear(forecast_to, biggest_spends_method))
 
-	return p_agi_per_OOM*OOMs_2020_to_2036
+	# Number of orders of magnitude in the intersection of (brain debug,evolution) and (start,end)
+	# It is the number of orders of magnitude between start and evolution that have non-zero probability mass.
+	OOMs_in_brain_to_evo_and_start_to_end = min(OOMs_evo_c,OOMs_end) - max(OOMs_brain_debug,OOMs_start)
+
+	# Number of orders of magnitude in the intersection of (brain debug,evolution) and (start,evolution)
+	OOMs_in_brain_to_evo_and_start_to_evo = OOMs_evo_c - max(OOMs_brain_debug,OOMs_start)
+
+	# Probabilitiy per order of magnitude in the intersection of (brain debug,evolution) and (start,evolution), conditional on no AGI by start.
+	# It is the probability per order of magnitude remaining until evolution, once we have reached start.
+	p_per_OOM_after_start = p_agi_debug_to_evo/(OOMs_in_brain_to_evo_and_start_to_evo)
+
+	return p_per_OOM_after_start * OOMs_in_brain_to_evo_and_start_to_end
 
 def hyperPriorNCalendar(ftps, initial_weights=None):
 	'''
@@ -406,7 +419,6 @@ def hyperPrior2TrialDef(rule2name,
 
 		psAGI2036.append(pAGI2036Static)
 
-
 	if rule2name == 'computation':
 		if biohypothesis is None:
 			rule2_pNoAGI2020 = 1 - fourParamFrameworkComp(g_exp=g_exp,
@@ -443,6 +455,15 @@ def hyperPrior2TrialDef(rule2name,
 				pAGI2036Static = evolutionaryAnchor(biggest_spends_method='aggressive')
 
 				psAGI2036.append(pAGI2036Static)
+
+	if rule2name == 'computation-loguniform':
+		# Forecast-from should really be 'the beginning of time', but any year before brain debugging compute is achieved will give the same result
+		# I take the earliest year that will not result in a KeyError.
+		rule2_pNoAGI2020 = 1 - logUniform('aggressive',forecast_from=1956,forecast_to=2020)
+
+		pAGI2036Static = logUniform('aggressive',forecast_from=2020,forecast_to=2036)
+
+		psAGI2036.append(pAGI2036Static)
 
 	final_weights_unnormalized = initial_weights * np.asarray([rule1_pNoAGI2020,rule2_pNoAGI2020])
 	normalization_constant = sum(final_weights_unnormalized)
