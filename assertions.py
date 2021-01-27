@@ -47,14 +47,14 @@ section4_2 = [12,
 			  1.5,
 			  0.77,
 			  0.52]
-warn_if_unequal(sections.section4_2(), section4_2, "4.2")
+warn_if_unequal(sections.section_4_2(), section4_2, "4.2")
 
 
 section5_2_2 = [
 	[1/600, 1/200, 1/150, 1/125, 1/105],
 	[1/1100,1/300,1/200,1/150,1/110]
 ]
-warn_if_unequal(sections.section5_2_2(), section5_2_2, "5.2.2")
+warn_if_unequal(sections.section_5_2_2(), section5_2_2, "5.2.2")
 
 section5_2_3_t1 = [
 [2,1.6,0.93], # I changed 0.9 to 0.93, I believe you accidentally didn't include 2 significant figures
@@ -65,7 +65,7 @@ section5_2_3_t1 = [
 [13,4.9,1.6],
 [14,5.1,1.6]
 ]
-warn_if_unequal(sections.section5_2_3_t1(), section5_2_3_t1, "5.2.3 Table 1")
+warn_if_unequal(sections.section_5_2_3_t1(), section5_2_3_t1, "5.2.3 Table 1")
 
 section5_2_3_t2_left = [
 [39,30,13,4.7],
@@ -73,14 +73,14 @@ section5_2_3_t2_left = [
 [7.6,6.4,3.6,1.4]
 ]
 print(colored("The differences below are all in the first column, ftp=1/50",'red'))
-warn_if_unequal(sections.section5_2_3_t2_left(), section5_2_3_t2_left, "5.2.3 Table 2, Left part")
+warn_if_unequal(sections.section_5_2_3_t2_left(), section5_2_3_t2_left, "5.2.3 Table 2, Left part")
 
 section5_2_3_t2_right = [
 [34,14,4.8],
 [50,25,9.1],
 [8.9,4.2,1.5]
 ]
-warn_if_unequal(sections.section5_2_3_t2_right(), section5_2_3_t2_right, "5.2.3 Table 2, Right part")
+warn_if_unequal(sections.section_5_2_3_t2_right(), section5_2_3_t2_right, "5.2.3 Table 2, Right part")
 
 section5_3_t1 =[ # I am adding significant figures to the last column, e.g. 0.2 becomes 0.23.
 [19,12,11,3.7,0.23],
@@ -89,7 +89,7 @@ section5_3_t1 =[ # I am adding significant figures to the last column, e.g. 0.2 
 [1.5,1.5,1.5,1.2,0.20]
 ]
 print(colored("The differences below are very minor, likely rounding errors",'red'))
-warn_if_unequal(sections.section5_3_t1(), section5_3_t1, "5.3 Table 1")
+warn_if_unequal(sections.section_5_3_t1(), section5_3_t1, "5.3 Table 1")
 
 section5_3_t2 = [
 [6.4,5.3,7.3,20],
@@ -98,7 +98,7 @@ section5_3_t2 = [
 [1.3,1.2,1.3,1.4]
 ]
 print(colored("The differences below are for the cells (1/100,168) and (1/1000,0)",'red'))
-warn_if_unequal(sections.section5_3_t2(),section5_3_t2,"5.3 Table 2")
+warn_if_unequal(sections.section_5_3_t2(), section5_3_t2, "5.3 Table 2")
 
 section6_1_2 = [
 [11,14,16,17,18],
@@ -107,6 +107,6 @@ section6_1_2 = [
 [1.1,2.3,3.3,4.4,5.3]
 ]
 print(colored("There are several differences below, all on the second significant digit (so they are relatively minior)",'red'))
-warn_if_unequal(sections.section6_1_2(),section6_1_2,"6.1.2")
+warn_if_unequal(sections.section_6_1_2(), section6_1_2, "6.1.2")
 
 assert len(caught_warnings_list) == 4
