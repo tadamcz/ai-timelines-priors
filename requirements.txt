@@ -4,3 +4,4 @@ sigfig~=1.1.8
 scipy~=1.5.4
 termcolor~=1.1.0
 pytest~=6.1.2
+pandas~=1.2.0
