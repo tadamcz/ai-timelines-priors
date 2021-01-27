@@ -155,14 +155,13 @@ def section_5_3_t2():
 	return return_output
 
 
-def section_6_1_2():
-	print("Section 6.1.2")
+def section_6_1_2_helper(g_exp):
 	header = ["", "g_act=3%", "g_act=7%", "g_act=11%", "g_act=16%", "g_act=21%"]
 	print_output = [header]
 	return_output = []
 
 	for ftp_cal_equiv in [1 / 50, 1 / 100, 1 / 300, 1 / 1000]:
-		prAGI = [functions.four_param_framework_researcher(g_act=g_act, g_exp=4.3 / 100, ftp_cal_equiv=ftp_cal_equiv) \
+		prAGI = [functions.four_param_framework_researcher(g_act=g_act, g_exp=g_exp, ftp_cal_equiv=ftp_cal_equiv) \
 				 for g_act in [3 / 100, 7 / 100, 11 / 100, 16 / 100, 21 / 100]]
 
 		prAGI = [i * 100 for i in prAGI]
@@ -177,6 +176,13 @@ def section_6_1_2():
 	print(columnar(print_output, no_borders=True))
 	return return_output
 
+def section_6_1_2():
+	print("Section 6.1.2")
+	section_6_1_2_helper(g_exp=4.3 / 100)
+
+def appendix_4_4():
+	print("\n Appendix 4.4: Table of results for conservative g_exp")
+	section_6_1_2_helper(g_exp=8.6 / 100)
 
 ## From here on, I only create the disp output (not the return output), since Tom at OpenPhil has asked me to directly edit the document.
 def section6_2_comp_from_research(biggest_spends_method):
