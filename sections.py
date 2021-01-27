@@ -16,11 +16,11 @@ def section_4_2():
 
 	for ftp in [1 / 50, 1 / 100, 1 / 200, 1 / 300, 1 / 500, 1 / 1000, 1 / 2000, 1 / 3000]:
 		p_AGI = functions.four_param_framework_calendar(ftp=ftp, regime_start=1956, forecast_from=2020, forecast_to=2036, virtual_successes=1)
-		p_AGI_perc = round(p_AGI * 100, 2)
-		p_AGI_string = round(p_AGI * 100, 2, type=str)
+		p_AGI_perc = round_sig(p_AGI * 100, 2)
+		p_AGI_string = round_sig(p_AGI * 100, 2, type=str)
 
 		return_output.append(p_AGI_perc)
-		print_output.append(['1/' + str(int(1 / ftp))] + [str(p_AGI_string) + '%'])
+		print_output.append([to_fraction_strings(ftp)] + [str(p_AGI_string) + '%'])
 
 	print(columnar(print_output, no_borders=True))
 	return return_output
@@ -35,11 +35,11 @@ def section_5_2_2():
 
 	pr_after_50 = [functions.generalized_laplace(trials=50, failures=50, virtual_successes=i, ftp=1 / 100) for i in vs]
 	return_output.append(pr_after_50)
-	print_output.append(['After 50 failures'] + ['1/' + str(int(1 / x)) for x in pr_after_50])
+	print_output.append(['After 50 failures'] + to_fraction_strings(pr_after_50))
 
 	pr_after_100 = [functions.generalized_laplace(trials=100, failures=100, virtual_successes=i, ftp=1 / 100) for i in vs]
 	return_output.append(pr_after_100)
-	print_output.append(['After 100 failures'] + ['1/' + str(int(1 / x)) for x in pr_after_100])
+	print_output.append(['After 100 failures'] + to_fraction_strings(pr_after_100))
 
 	print(columnar(print_output, no_borders=True))
 	return return_output
@@ -56,10 +56,10 @@ def section_5_2_3_t1():
 			functions.four_param_framework_calendar(ftp=1 / 100, virtual_successes=vs),
 			functions.four_param_framework_calendar(ftp=1 / 300, virtual_successes=vs),
 			functions.four_param_framework_calendar(ftp=1 / 1000, virtual_successes=vs)]
-		pragi = [round(x * 100, 2) for x in pragi]
+		pragi = [round_sig(x * 100, 2, type=str) for x in pragi]
 		return_output.append(pragi)
 
-		row = [vs] + [str(x) + '%' for x in pragi]
+		row = [vs] + [x + '%' for x in pragi]
 		print_output.append(row)
 	print(columnar(print_output, no_borders=True))
 	return return_output
@@ -79,13 +79,13 @@ def section5_2_3_t2(virtual_successes, ftps, header):
 	prAGIfirst50 = [i * 100 for i in prAGIfirst50]
 	prAGI2036 = [i * 100 for i in prAGI2036]
 
-	prAGIfirst50_perc = round(prAGIfirst50, 2)
-	prAGIfirst100_perc = round(prAGIfirst100, 2)
-	prAGI2036_perc = round(prAGI2036, 2)
+	prAGIfirst50_perc = round_sig(prAGIfirst50, 2)
+	prAGIfirst100_perc = round_sig(prAGIfirst100, 2)
+	prAGI2036_perc = round_sig(prAGI2036, 2)
 
-	prAGIfirst50_str = round(prAGIfirst50, 2, type=str)
-	prAGIfirst100_str = round(prAGIfirst100, 2, type=str)
-	prAGI2036_str = round(prAGI2036, 2, type=str)
+	prAGIfirst50_str = round_sig(prAGIfirst50, 2, type=str)
+	prAGIfirst100_str = round_sig(prAGIfirst100, 2, type=str)
+	prAGI2036_str = round_sig(prAGI2036, 2, type=str)
 
 	return_output.append(prAGIfirst50_perc)
 	return_output.append(prAGIfirst100_perc)
@@ -123,10 +123,10 @@ def section_5_3_t1():
 		prAGI = [functions.four_param_framework_calendar(ftp, regime_start=r) for r in regime_starts]
 		prAGI = [i * 100 for i in prAGI]
 
-		prAGI_perc = round(prAGI, 2)
-		prAGI_str = round(prAGI, 2, type=str)
+		prAGI_perc = round_sig(prAGI, 2)
+		prAGI_str = round_sig(prAGI, 2, type=str)
 
-		print_output.append(['1/' + str(int(1 / ftp))] + [str(i) + '%' for i in prAGI_str])
+		print_output.append([to_fraction_strings(ftp)] + [str(i) + '%' for i in prAGI_str])
 		return_output.append(prAGI_perc)
 	print(columnar(print_output, no_borders=True))
 	return return_output
@@ -146,10 +146,10 @@ def section_5_3_t2():
 		prAGI = [functions.four_param_framework_calendar(ftp, regime_start=1956 - i) for i in trials_before_1956]
 		prAGI = [i * 100 for i in prAGI]
 
-		prAGI_perc = round(prAGI, 2)
-		prAGI_str = round(prAGI, 2, type=str)
+		prAGI_perc = round_sig(prAGI, 2)
+		prAGI_str = round_sig(prAGI, 2, type=str)
 
-		print_output.append(['1/' + str(int(1 / ftp))] + [str(i) + '%' for i in prAGI_str])
+		print_output.append([to_fraction_strings(ftp)] + [str(i) + '%' for i in prAGI_str])
 		return_output.append(prAGI_perc)
 	print(columnar(print_output, no_borders=True))
 	return return_output
@@ -166,10 +166,10 @@ def section_6_1_2_helper(g_exp):
 
 		prAGI = [i * 100 for i in prAGI]
 
-		prAGI_perc = round(prAGI, 2)
-		prAGI_str = round(prAGI, 2, type=str)
+		prAGI_perc = round_sig(prAGI, 2)
+		prAGI_str = round_sig(prAGI, 2, type=str)
 
-		row_name = 'ftp_cal = 1/' + str(int(1 / ftp_cal_equiv))
+		row_name = 'ftp_cal = ' + to_fraction_strings(ftp_cal_equiv)
 		print_output.append([row_name] + [str(i) + '%' for i in prAGI_str])
 		return_output.append(prAGI_perc)
 
@@ -198,8 +198,8 @@ def section6_2_comp_from_research(biggest_spends_method):
 																	  biggest_spends_method=biggest_spends_method,
 																	  ftp_cal_equiv=ftp_cal_equiv)
 							  for rel_imp_res_comp in columns}
-		dict_comprehension = {k: round(v * 100, 2, type=str) + "%" for k, v in dict_comprehension.items()}
-		row_name = 'ftp_cal = 1/' + str(int(1 / ftp_cal_equiv))
+		dict_comprehension = {k: round_sig(v * 100, 2, type=str) + "%" for k, v in dict_comprehension.items()}
+		row_name = 'ftp_cal = ' + to_fraction_strings(ftp_cal_equiv)
 		row = pd.Series(data=dict_comprehension, name=row_name)
 		df = df.append(row)
 
@@ -219,7 +219,7 @@ def section_6_2_from_biology():
 
 	for method in ['conservative', 'aggressive']:
 		datadict = {'lifetime': functions.lifetime_anchor(method), 'evolutionary': functions.evolutionary_anchor(method)}
-		datadict = {k: round(v * 100, 2, type=str) + "%" for k, v in datadict.items()}
+		datadict = {k: round_sig(v * 100, 2, type=str) + "%" for k, v in datadict.items()}
 		row = pd.Series(data=datadict, name=method)
 		df = df.append(row)
 	print(df)
@@ -230,12 +230,12 @@ def section_6_2_log_uniform():
 
 	c = float(functions.log_uniform('conservative'))
 	a = float(functions.log_uniform('aggressive'))
-	print('P(AGI by 2036) with conservative spend estimate', round(c * 100, 2, type=str) + "%")
-	print('P(AGI by 2036) with aggressive spend estimate', round(a * 100, 2, type=str) + "%")
+	print('P(AGI by 2036) with conservative spend estimate', round_sig(c * 100, 2, type=str) + "%")
+	print('P(AGI by 2036) with aggressive spend estimate', round_sig(a * 100, 2, type=str) + "%")
 
 
 def section_6_2_3(virtual_successes=1, disp=True):
-	if disp: print("Section 6.2.3")
+	if disp: print("\nSection 6.2.3")
 	df = pd.DataFrame(columns=['lifetime', 'evolutionary', 'log-uniform', 'from research', 'eq. wt. avg.'])
 
 	overall = []
@@ -253,21 +253,21 @@ def section_6_2_3(virtual_successes=1, disp=True):
 		datadict['eq. wt. avg.'] = average
 		datadict = {k: float(v) for k, v in datadict.items()}
 
-		datadict = {k: round(v * 100, 2, type=str) + "%" for k, v in datadict.items()}
+		datadict = {k: round_sig(v * 100, 2, type=str) + "%" for k, v in datadict.items()}
 		row = pd.Series(data=datadict, name=method)
 		df = df.append(row)
 
 	if disp: print(df)
 	overall = np.average(overall)
-	if disp: print("\nAll things considered average:", round(float(overall) * 100, 2, type=str) + "%")
+	if disp: print("\nAll things considered average:", round_sig(overall * 100, 2, type=str) + "%")
 	return overall
 
 
 def section6_3_1_helper_research(g_act, ftp_cal_equiv, g_exp, rowname, df):
 	left = functions.four_param_framework_researcher(g_act=g_act, ftp_cal_equiv=ftp_cal_equiv, g_exp=g_exp)
 	right = functions.four_param_framework_researcher(g_act=g_act, ftp_cal_equiv=ftp_cal_equiv, g_exp=g_exp, virtual_successes=0.5)
-	left = round(left * 100, 2, type=str) + "%"
-	right = round(right * 100, 2, type=str) + "%"
+	left = round_sig(left * 100, 2, type=str) + "%"
+	right = round_sig(right * 100, 2, type=str) + "%"
 	return df.append(pd.Series(name=rowname, data={'1 VS': left, '0.5 VS': right}))
 
 
@@ -299,8 +299,8 @@ def section6_3_1_helper_comp(ftp_cal_equiv, rel_imp_res_comp, biggest_spends_met
 													biggest_spends_method=biggest_spends_method,
 													virtual_successes=0.5)
 
-	left = round(left * 100, 2, type=str) + "%"
-	right = round(right * 100, 2, type=str) + "%"
+	left = round_sig(left * 100, 2, type=str) + "%"
+	right = round_sig(right * 100, 2, type=str) + "%"
 	return df.append(pd.Series(name=rowname, data={'1 VS': left, '0.5 VS': right}))
 
 
@@ -333,8 +333,8 @@ def section_6_3_1_virtual_succ():
 	rowname = 'Computation, central'
 	left = 0.5 * (functions.lifetime_anchor('conservative', virtual_successes=1) + functions.lifetime_anchor('aggressive', virtual_successes=1))
 	right = 0.5 * (functions.lifetime_anchor('conservative', virtual_successes=.5) + functions.lifetime_anchor('aggressive', virtual_successes=.5))
-	left = round(float(left) * 100, 2, type=str) + "%"
-	right = round(float(right) * 100, 2, type=str) + "%"
+	left = round_sig(left * 100, 2, type=str) + "%"
+	right = round_sig(right * 100, 2, type=str) + "%"
 	df = df.append(pd.Series(name=rowname, data={'1 VS': left, '0.5 VS': right}))
 
 	rowname = 'Computation, high'
@@ -346,8 +346,8 @@ def section_6_3_1_virtual_succ():
 	rowname = 'Computation, central, bracketed weigh. avg.'
 	left = section_6_2_3(virtual_successes=1, disp=False)
 	right = section_6_2_3(virtual_successes=.5, disp=False)
-	left = round(float(left) * 100, 2, type=str) + "%"
-	right = round(float(right) * 100, 2, type=str) + "%"
+	left = round_sig(left * 100, 2, type=str) + "%"
+	right = round_sig(right * 100, 2, type=str) + "%"
 	df = df.append(pd.Series(name=rowname, data={'1 VS': left, '0.5 VS': right}))
 
 	rowname = 'Computation, high, bracketed weigh. avg.'
@@ -361,8 +361,8 @@ def section_6_3_1_virtual_succ():
 													   biggest_spends_method='aggressive',
 													   virtual_successes=.5) +
 				   functions.log_uniform('aggressive'))
-	left = round(float(left) * 100, 2, type=str) + "%"
-	right = round(float(right) * 100, 2, type=str) + "%"
+	left = round_sig(left * 100, 2, type=str) + "%"
+	right = round_sig(right * 100, 2, type=str) + "%"
 	df = df.append(pd.Series(name=rowname, data={'1 VS': left, '0.5 VS': right}))
 
 	print(df)
@@ -373,7 +373,7 @@ def section_6_3_1_regimestart():
 	central = functions.four_param_framework_researcher(g_act=11 / 100, ftp_cal_equiv=1 / 300, regime_start=2000, g_exp=4.3 / 100)
 	high = functions.four_param_framework_researcher(g_act=16 / 100, ftp_cal_equiv=1 / 100, regime_start=2000, g_exp=4.3 / 100)
 
-	central, high = round(float(central) * 100, 2, type=str) + "%", round(float(high) * 100, 2, type=str) + "%"
+	central, high = round_sig(central * 100, 2, type=str) + "%", round_sig(high * 100, 2, type=str) + "%"
 
 	print("Central:", central, "High:", high)
 
@@ -803,13 +803,12 @@ def to_percentage_strings(input):
 		input = deepcopy(input)
 		for k, v in input.items():
 			if isinstance(v, (list, np.ndarray)):
-				input[k] = [round(float(i) * 100, 2, type=str) + "%" for i in v]
+				input[k] = [round_sig(i * 100, 2, type=str) + "%" for i in v]
 			if isinstance(v, np.float):
-				input[k] = round(float(v) * 100, 2, type=str) + "%"
+				input[k] = round_sig(v * 100, 2, type=str) + "%"
 		return input
 	if isinstance(input, (float, int)):
-		input = float(input)
-		return round(input * 100, 2, type=str) + "%"
+		return round_sig(input * 100, 2, type=str) + "%"
 
 
 def to_fraction_strings(input):
@@ -817,16 +816,20 @@ def to_fraction_strings(input):
 		input = deepcopy(input)
 		for k, v in input.items():
 			if isinstance(v, (list, np.ndarray)):
-				input[k] = ['1/' + str(int((1 / float(i)))) for i in v]
+				input[k] = ['1/' + str(int(round((1 / float(i))))) for i in v]
 			if isinstance(v, np.float):
-				input[k] = '1/' + str(int((1 / float(v))))
+				input[k] = '1/' + str(int(round((1 / float(v)))))
 		return input
 	if isinstance(input, (float, int)):
 		input = float(input)
-		return '1/' + str(int((1 / input)))
+		return '1/' + str(int(round((1 / input))))
+	if isinstance(input,list):
+		return ['1/' + str(int(round(1 / i))) for i in input]
 
 
-def round(x, *args, **kwargs):
+def round_sig(x, *args, **kwargs):
+	if isinstance(x, np.float64):
+		return round_lib(float(x), *args, **kwargs)
 	if isinstance(x, (float, int)):
 		return round_lib(x, *args, **kwargs)
 	if isinstance(x, (list, np.ndarray)):
