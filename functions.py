@@ -194,6 +194,18 @@ biggest_spends_aggressive = {
 	2035: 10**10.7,
 	2036: 10**11,
 }
+biggest_spends_central = {
+	2036: 10**9,
+}
+
+for k in biggest_spends_conservative.keys():
+	# biggest_spends_central: geometric interpolation between conservative and aggressive, anchoring off the value for 2036
+
+	conservative = np.log10(biggest_spends_conservative[k])
+	aggressive = np.log10(biggest_spends_aggressive[k])
+
+	factor = (np.log10(biggest_spends_central[2036])-np.log10(biggest_spends_conservative[2036]))/ (np.log10(biggest_spends_aggressive[2036])-np.log10(biggest_spends_conservative[2036]))
+	biggest_spends_central[k] = 10**(conservative + (aggressive-conservative)*factor)
 
 def fourParamFrameworkComp(rel_imp_res_comp=None,
 						   forecast_from_year=2020,
@@ -236,6 +248,8 @@ def getYearForComputationAmount(c,biggest_spends_method):
 		biggest_spends = biggest_spends_aggressive
 	if biggest_spends_method == 'conservative':
 		biggest_spends = biggest_spends_conservative
+	if biggest_spends_method == 'central':
+		biggest_spends = biggest_spends_central
 
 	computation_to_year = OrderedDict()
 	year_to_computation = OrderedDict()
@@ -256,6 +270,8 @@ def getComputationAmountForYear(y, biggest_spends_method):
 		biggest_spends = biggest_spends_aggressive
 	if biggest_spends_method == 'conservative':
 		biggest_spends = biggest_spends_conservative
+	if biggest_spends_method == 'central':
+		biggest_spends = biggest_spends_central
 
 	year_to_computation = OrderedDict()
 	for year, price in compute_prices.items():
@@ -343,14 +359,19 @@ def hyperPrior(rules: list, initial_weights: list) -> dict:
 	psNoAGI2020 = []
 
 	for rule in rules:
+		if 'virtual_successes' not in rule:
+			rule['virtual_successes'] = 1  # Default value
+
 		if rule['name'] == 'calendar':
 			pNoAGI2020 = 1 - fourParamFrameworkCalendar(ftp=rule['ftp'],
 														  regime_start=rule['regime_start'],
 														  forecast_from=rule['regime_start'],
-														  forecast_to=2020)
+														  forecast_to=2020,
+														virtual_successes=rule['virtual_successes'])
 
 			pAGI2036Static = fourParamFrameworkCalendar(ftp=rule['ftp'],
-														regime_start=rule['regime_start'])
+														regime_start=rule['regime_start'],
+														virtual_successes=rule['virtual_successes'])
 
 		if rule['name'] == 'res-year':
 			pNoAGI2020 = 1 - fourParamFrameworkResearcher(g_exp=rule['g_exp'],
@@ -358,12 +379,14 @@ def hyperPrior(rules: list, initial_weights: list) -> dict:
 																ftp_cal_equiv=rule['ftp_cal_equiv'],
 																regime_start=rule['regime_start'],
 																forecast_from=rule['regime_start'],
-																forecast_to=2020)
+																forecast_to=2020,
+														  virtual_successes=rule['virtual_successes'])
 
 			pAGI2036Static = fourParamFrameworkResearcher(g_exp=rule['g_exp'],
 														  g_act=rule['g_act'],
 														  ftp_cal_equiv=rule['ftp_cal_equiv'],
-														  regime_start=rule['regime_start'])
+														  regime_start=rule['regime_start'],
+														  virtual_successes=rule['virtual_successes'])
 
 		if rule['name'] == 'computation':
 			if not 'biohypothesis' in rule:
@@ -373,29 +396,35 @@ def hyperPrior(rules: list, initial_weights: list) -> dict:
 															  regime_start_year=rule['regime_start'],
 															  forecast_from_year=rule['regime_start'],
 															  forecast_to_year=2020,
-															  biggest_spends_method=rule['biggest_spends_method'])
+															  biggest_spends_method=rule['biggest_spends_method'],
+														virtual_successes=rule['virtual_successes'])
 
 				pAGI2036Static = fourParamFrameworkComp(g_exp=rule['g_exp'],
 														ftp_cal_equiv=rule['ftp_cal_equiv'],
 														rel_imp_res_comp=rule['rel_imp_res_comp'],
 														regime_start_year=rule['regime_start'],
-														biggest_spends_method=rule['biggest_spends_method'])
+														biggest_spends_method=rule['biggest_spends_method'],
+														virtual_successes=rule['virtual_successes'])
 
 			else:
 				if rule['biohypothesis'] == 'lifetime':
 					pNoAGI2020 = 1 - lifetimeAnchor(biggest_spends_method=rule['biggest_spends_method'],
 														  regime_start_year=rule['regime_start'],
 														  forecast_from_year=rule['regime_start'],
-														  forecast_to_year=2020)
+														  forecast_to_year=2020,
+													virtual_successes=rule['virtual_successes'])
 
 					pAGI2036Static = lifetimeAnchor(biggest_spends_method=rule['biggest_spends_method'],
-													regime_start_year=rule['regime_start'])
+													regime_start_year=rule['regime_start'],
+													virtual_successes=rule['virtual_successes'])
 
 
 				if rule['biohypothesis'] == 'evolution':
-					pNoAGI2020 = 1 - evolutionaryAnchor(biggest_spends_method='aggressive', forecast_to_year=2020)
+					pNoAGI2020 = 1 - evolutionaryAnchor(biggest_spends_method='aggressive', forecast_to_year=2020,
+														virtual_successes=rule['virtual_successes'])
 
-					pAGI2036Static = evolutionaryAnchor(biggest_spends_method='aggressive')
+					pAGI2036Static = evolutionaryAnchor(biggest_spends_method='aggressive',
+														virtual_successes=rule['virtual_successes'])
 
 
 		if rule['name'] == 'computation-loguniform':

@@ -630,6 +630,165 @@ def appendix9():
 
 	print(df)
 
+def section_8():
+	print("\nSection 8: All-things considered judgement")
+
+	row_inputs = [
+		{ # Low
+			'rules':
+				[
+					{# Rule 1
+						'name':'calendar',
+						'virtual_successes': 0.5,
+						'regime_start':1956,
+						'ftp':1/1000,
+
+					},
+
+					{# Rule 2
+						'name': 'res-year',
+						'virtual_successes': 0.5,
+						'regime_start': 1956,
+						'ftp_cal_equiv': 1 / 1000,
+						'g_exp':4.3/100,
+						'g_act': 7 / 100,
+					},
+
+					{# Rule 3
+						'name':'impossible',
+					}
+				],
+			'weights': [50,30,20]
+		},
+
+		{  # Central
+			'rules':
+				[
+					{  # Rule 1
+						'name': 'calendar',
+						'regime_start': 1956,
+						'ftp': 1 / 300,
+
+					},
+
+					{  # Rule 2
+						'name': 'res-year',
+						'regime_start': 1956,
+						'ftp_cal_equiv': 1 / 300,
+						'g_exp': 4.3 / 100,
+						'g_act': 11 / 100,
+					},
+
+					{  # Rule 3
+						'name': 'computation',
+						'biggest_spends_method': 'central',
+						'rel_imp_res_comp': 5,
+						'g_exp': 4.3 / 100,
+						'ftp_cal_equiv': 1 / 300,
+						'regime_start': 1956,
+					},
+
+					{  # Rule 4
+						'name': 'computation',
+						'biggest_spends_method': 'central',
+						'biohypothesis': 'lifetime',
+						'regime_start': 1956
+					},
+
+					{  # Rule 5
+						'name': 'computation',
+						'biggest_spends_method': 'central',
+						'biohypothesis': 'evolution'
+					},
+
+					{  # Rule 6
+						'name':'impossible',
+					},
+				],
+			'weights': [
+				.30,  # Rule 1
+				.30,  # Rule 2
+				.05,  # Rule 3
+				.10,  # Rule 4
+				.15,  # Rule 5
+				.10   # Rule 6
+				]
+		},
+
+		{  # High
+			'rules':
+				[
+					{  # Rule 1
+						'name': 'calendar',
+						'regime_start': 1956,
+						'ftp': 1 / 100,
+					},
+
+					{  # Rule 2
+						'name': 'calendar',
+						'regime_start': 2000,
+						'ftp': 1 / 100,
+					},
+
+					{  # Rule 3
+						'name': 'res-year',
+						'regime_start': 1956,
+						'ftp_cal_equiv': 1 / 100,
+						'g_exp': 4.3 / 100,
+						'g_act': 11 / 100,
+					},
+
+					{  # Rule 4
+						'name': 'res-year',
+						'regime_start': 2000,
+						'ftp_cal_equiv': 1 / 100,
+						'g_exp': 4.3 / 100,
+						'g_act': 11 / 100,
+					},
+
+					{  # Rule 5
+						'name': 'computation',
+						'biggest_spends_method': 'aggressive',
+						'rel_imp_res_comp': 5,
+						'regime_start': 1956,
+						'g_exp': 4.3 / 100,
+						'ftp_cal_equiv': 1 / 100,
+					},
+
+					{  # Rule 6
+						'name': 'computation',
+						'biggest_spends_method': 'aggressive',
+						'biohypothesis': 'lifetime',
+						'regime_start': 1956,
+					},
+
+					{  # Rule 7
+						'name': 'computation',
+						'biggest_spends_method': 'aggressive',
+						'biohypothesis': 'evolution',
+					},
+
+					{  # Rule 8
+						'name': 'impossible',
+					},
+				],
+			'weights': [
+				.10*.15,  # Rule 1
+				.10*.85,  # Rule 2
+				.40*.15,  # Rule 3
+				.40*.85,  # Rule 4
+				.10,      # Rule 5
+				.10,      # Rule 6
+				.20,      # Rule 7
+				.10       # Rule 8
+				]
+		}
+	]
+
+	for row in row_inputs:
+		datadict = functions.hyperPrior(row['rules'], initial_weights=row['weights'])
+		print(ToPercentageStrings(datadict['pr2036hyper']))
+
 
 def ToPercentageStrings(input):
 	if isinstance(input, dict):
@@ -641,6 +800,7 @@ def ToPercentageStrings(input):
 				input[k] = round(float(v) * 100, 2, type=str) + "%"
 		return input
 	if isinstance(input, (float, int)):
+		input = float(input)
 		return round(input * 100, 2, type=str) + "%"
 
 def ToFractionStrings(input):
@@ -653,4 +813,5 @@ def ToFractionStrings(input):
 				input[k] = '1/' + str(int((1 / float(v))))
 		return input
 	if isinstance(input, (float, int)):
+		input = float(input)
 		return '1/'+str(int((1 /input)))
