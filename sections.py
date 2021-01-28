@@ -185,8 +185,8 @@ def appendix_4_4():
 	section_6_1_2_helper(g_exp=8.6 / 100)
 
 ## From here on, I only create the disp output (not the return output), since Tom at OpenPhil has asked me to directly edit the document.
-def section6_2_comp_from_research(biggest_spends_method):
-	print("\nSection 6.2. Computation trial definition, with ftp from research, table with biggest_spends_method:", biggest_spends_method)
+def section6_2_comp_from_research_helper(biggest_spends_method):
+	print("\nBiggest_spends_method:", biggest_spends_method)
 	columns = [1, 5, 10]
 	df = pd.DataFrame(columns=columns)
 
@@ -207,13 +207,14 @@ def section6_2_comp_from_research(biggest_spends_method):
 	print(df)
 
 
-def section_6_2_from_research():
-	section6_2_comp_from_research('conservative')
-	section6_2_comp_from_research('aggressive')
+def section_6_2_2_1():
+	print("Section 6.2.2.1. Computation trial definition, with ftp from research")
+	section6_2_comp_from_research_helper('conservative')
+	section6_2_comp_from_research_helper('aggressive')
 
 
-def section_6_2_from_biology():
-	print("\nSection 6.2. Computation trial definition, with ftp from biology")
+def section_6_2_2_2():
+	print("\nSection 6.2.2.2. Computation trial definition, with ftp from biology")
 	columns = ['lifetime', 'evolutionary']
 	df = pd.DataFrame(columns=columns)
 
@@ -494,7 +495,7 @@ def appendix_8():
 	print(df)
 
 
-def section7_3():
+def section_7_3():
 	print("\n7.3 Allow some probability that AGI is impossible")
 	df = pd.DataFrame(columns=['pr2036 calendar-year', 'pr2036 20% impossible'])  # forces this order
 
