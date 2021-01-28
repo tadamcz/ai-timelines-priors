@@ -798,6 +798,12 @@ def section_8():
 		datadict = functions.hyper_prior(row['rules'], initial_weights=row['weights'])
 		print(to_percentage_strings(datadict['pr2036hyper']))
 
+	central = row_inputs[1]
+	for rule in central['rules']:
+		rule['forecast_from'] = 2025
+	datadict = functions.hyper_prior(central['rules'], initial_weights=central['weights'])
+	print("Central estimate conditional on no AGI by 2025:",to_percentage_strings(datadict['pr2036hyper']))
+
 
 def to_percentage_strings(input):
 	if isinstance(input, dict):

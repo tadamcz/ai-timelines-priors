@@ -293,7 +293,7 @@ def get_computation_amount_for_year(y, biggest_spends_method):
 	return year_to_computation[y]
 
 
-def evolutionary_anchor(biggest_spends_method, virtual_successes=1, forecast_to_year=2036):
+def evolutionary_anchor(biggest_spends_method, virtual_successes=1, forecast_from_year=2020, forecast_to_year=2036):
 	c_initial = 1e21
 	c_evolution = 1e41
 
@@ -318,6 +318,7 @@ def evolutionary_anchor(biggest_spends_method, virtual_successes=1, forecast_to_
 		computation_at_forecasted_time=computation_at_forecasted_time,
 		biggest_spends_method=biggest_spends_method,
 		ftp_comp=ftp_comp_solution,
+		forecast_from_year=forecast_from_year,
 		virtual_successes=virtual_successes)
 
 
@@ -377,19 +378,23 @@ def hyper_prior(rules: list, initial_weights: list) -> dict:
 	for rule in rules:
 		if 'virtual_successes' not in rule:
 			rule['virtual_successes'] = 1  # Default value
+		if 'forecast_from' not in rule:
+			rule['forecast_from'] = 2020  # Default value
 
 		if rule['name'] == 'calendar':
 			p_no_AGI_2020 = 1 - four_param_framework_calendar(
 				ftp=rule['ftp'],
 				regime_start=rule['regime_start'],
 				forecast_from=rule['regime_start'],
-				forecast_to=2020,
+				forecast_to=rule['forecast_from'],
 				virtual_successes=rule['virtual_successes'])
 
 			p_AGI_2036_static = four_param_framework_calendar(
 				ftp=rule['ftp'],
 				regime_start=rule['regime_start'],
-				virtual_successes=rule['virtual_successes'])
+				virtual_successes=rule['virtual_successes'],
+				forecast_from=rule['forecast_from'],
+			)
 
 		if rule['name'] == 'res-year':
 			p_no_AGI_2020 = 1 - four_param_framework_researcher(
@@ -398,7 +403,7 @@ def hyper_prior(rules: list, initial_weights: list) -> dict:
 				ftp_cal_equiv=rule['ftp_cal_equiv'],
 				regime_start=rule['regime_start'],
 				forecast_from=rule['regime_start'],
-				forecast_to=2020,
+				forecast_to=rule['forecast_from'],
 				virtual_successes=rule['virtual_successes'])
 
 			p_AGI_2036_static = four_param_framework_researcher(
@@ -406,7 +411,9 @@ def hyper_prior(rules: list, initial_weights: list) -> dict:
 				g_act=rule['g_act'],
 				ftp_cal_equiv=rule['ftp_cal_equiv'],
 				regime_start=rule['regime_start'],
-				virtual_successes=rule['virtual_successes'])
+				virtual_successes=rule['virtual_successes'],
+				forecast_from=rule['forecast_from'],
+			)
 
 		if rule['name'] == 'computation':
 			if 'biohypothesis' not in rule:
@@ -416,7 +423,7 @@ def hyper_prior(rules: list, initial_weights: list) -> dict:
 					rel_imp_res_comp=rule['rel_imp_res_comp'],
 					regime_start_year=rule['regime_start'],
 					forecast_from_year=rule['regime_start'],
-					forecast_to_year=2020,
+					forecast_to_year=rule['forecast_from'],
 					biggest_spends_method=rule['biggest_spends_method'],
 					virtual_successes=rule['virtual_successes'])
 
@@ -426,7 +433,9 @@ def hyper_prior(rules: list, initial_weights: list) -> dict:
 					rel_imp_res_comp=rule['rel_imp_res_comp'],
 					regime_start_year=rule['regime_start'],
 					biggest_spends_method=rule['biggest_spends_method'],
-					virtual_successes=rule['virtual_successes'])
+					virtual_successes=rule['virtual_successes'],
+					forecast_from_year=rule['forecast_from'],
+				)
 
 			else:
 				if rule['biohypothesis'] == 'lifetime':
@@ -434,30 +443,35 @@ def hyper_prior(rules: list, initial_weights: list) -> dict:
 						biggest_spends_method=rule['biggest_spends_method'],
 						regime_start_year=rule['regime_start'],
 						forecast_from_year=rule['regime_start'],
-						forecast_to_year=2020,
+						forecast_to_year=rule['forecast_from'],
 						virtual_successes=rule['virtual_successes'])
 
 					p_AGI_2036_static = lifetime_anchor(
 						biggest_spends_method=rule['biggest_spends_method'],
 						regime_start_year=rule['regime_start'],
-						virtual_successes=rule['virtual_successes'])
+						virtual_successes=rule['virtual_successes'],
+						forecast_from_year=rule['forecast_from']
+					)
 
 				if rule['biohypothesis'] == 'evolution':
 					p_no_AGI_2020 = 1 - evolutionary_anchor(
 						biggest_spends_method='aggressive',
-						forecast_to_year=2020,
-						virtual_successes=rule['virtual_successes'])
+						forecast_to_year=rule['forecast_from'],
+						virtual_successes=rule['virtual_successes'],
+					)
 
 					p_AGI_2036_static = evolutionary_anchor(
 						biggest_spends_method='aggressive',
-						virtual_successes=rule['virtual_successes'])
+						virtual_successes=rule['virtual_successes'],
+						forecast_from_year=rule['forecast_from']
+					)
 
 		if rule['name'] == 'computation-loguniform':
 			# Forecast-from should really be 'the beginning of time', but any year before brain debugging compute is achieved will give the same result.
 			# I take the earliest year that will not result in a KeyError.
-			p_no_AGI_2020 = 1 - log_uniform(rule['biggest_spends_method'], forecast_from=1956, forecast_to=2020)
+			p_no_AGI_2020 = 1 - log_uniform(rule['biggest_spends_method'], forecast_from=1956, forecast_to=rule['forecast_from'])
 
-			p_AGI_2036_static = log_uniform(rule['biggest_spends_method'], forecast_from=2020, forecast_to=2036)
+			p_AGI_2036_static = log_uniform(rule['biggest_spends_method'], forecast_from=rule['forecast_from'], forecast_to=2036)
 
 		if rule['name'] == 'impossible':
 			p_no_AGI_2020 = 1
