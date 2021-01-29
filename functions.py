@@ -455,13 +455,13 @@ def hyper_prior(rules: list, initial_weights: list) -> dict:
 
 				if rule['biohypothesis'] == 'evolution':
 					p_no_AGI_2020 = 1 - evolutionary_anchor(
-						biggest_spends_method='aggressive',
+						biggest_spends_method=rule['biggest_spends_method'],
 						forecast_to_year=rule['forecast_from'],
 						virtual_successes=rule['virtual_successes'],
 					)
 
 					p_AGI_2036_static = evolutionary_anchor(
-						biggest_spends_method='aggressive',
+						biggest_spends_method=rule['biggest_spends_method'],
 						virtual_successes=rule['virtual_successes'],
 						forecast_from_year=rule['forecast_from']
 					)

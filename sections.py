@@ -473,7 +473,8 @@ def appendix_8():
 
 		[rule1,
 		 {'name': 'computation',
-		  'biohypothesis': 'evolution'}
+		  'biohypothesis': 'evolution',
+		  'biggest_spends_method': 'aggressive'}
 		 ]
 	]
 
