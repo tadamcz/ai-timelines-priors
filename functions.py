@@ -68,7 +68,7 @@ def four_param_framework_calendar(ftp, regime_start=1956, forecast_from=2020, fo
 	return forecast_generalized_laplace(failures=failures, forecast_years=forecast_to - forecast_from, virtual_successes=virtual_successes, virtual_failures=virtual_failures)
 
 
-def solveFor_ftp_res(g_exp=4.3 / 100, ftp_cal=1 / 300):
+def solve_for_ftp_res(g_exp=4.3 / 100, ftp_cal=1 / 300):
 	"""
 	To determine ftp_res, solve for ftp_res:
 	p_AGI_res_model(ftp_res,g_exp) = p_AGI_cal_model(ftp_cal)
@@ -95,7 +95,7 @@ def four_param_framework_researcher(g_act, ftp_res=None, ftp_cal_equiv=None, g_e
 		raise ValueError("Supply either (ftp_cal_equiv and g_exp) or supply ftp_res")
 
 	if method == 'indirect':
-		ftp_res = solveFor_ftp_res(g_exp, ftp_cal_equiv)
+		ftp_res = solve_for_ftp_res(g_exp, ftp_cal_equiv)
 
 	n_trials_per_year = g_act * (1 / trial_increment)
 
@@ -129,7 +129,7 @@ def solve_for_ftp_comp(ftp_res, rel_imp_res_comp):
 
 
 def solve_for_ftp_comp_indirect(ftp_cal, rel_imp_res_comp, g_exp):
-	ftp_res = solveFor_ftp_res(g_exp=g_exp, ftp_cal=ftp_cal)
+	ftp_res = solve_for_ftp_res(g_exp=g_exp, ftp_cal=ftp_cal)
 	return solve_for_ftp_comp(ftp_res, rel_imp_res_comp)
 
 
@@ -137,8 +137,8 @@ def number_geometric_increases(start, end, increment=trial_increment):
 	return int(np.log(end / start) / np.log(1 + increment))
 
 
-# Dictionaries compute_prices, biggest_spends_conservative and biggest_spends_aggressive copied directly from client's code without checking
-compute_prices = {
+# Dictionaries computation_prices, biggest_spends_conservative and biggest_spends_aggressive copied directly from client's code without checking
+computation_prices = {
 	1800: 10 ** -6,
 	1956: 10 ** -6,
 	1970: 10 ** -7,
@@ -262,7 +262,7 @@ def get_year_for_computation_amount(c, biggest_spends_method):
 
 	computation_to_year = OrderedDict()
 	year_to_computation = OrderedDict()
-	for year, price in compute_prices.items():
+	for year, price in computation_prices.items():
 		try:
 			computation_to_year[biggest_spends[year] / price] = year
 			year_to_computation[year] = biggest_spends[year] / price
@@ -284,7 +284,7 @@ def get_computation_amount_for_year(y, biggest_spends_method):
 		biggest_spends = biggest_spends_central
 
 	year_to_computation = OrderedDict()
-	for year, price in compute_prices.items():
+	for year, price in computation_prices.items():
 		try:
 			year_to_computation[year] = biggest_spends[year] / price
 		except KeyError:
