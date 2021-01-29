@@ -644,7 +644,7 @@ def section_8():
 	print("\nSection 8: All-things considered judgement")
 
 	row_inputs = [
-		{  # Low
+		{'name':'low',
 			'rules':
 				[
 					{  # Rule 1
@@ -671,7 +671,7 @@ def section_8():
 			'weights': [50, 30, 20]
 		},
 
-		{  # Central
+		{'name':'central',
 			'rules':
 				[
 					{  # Rule 1
@@ -725,7 +725,7 @@ def section_8():
 			]
 		},
 
-		{  # High
+		{'name':'high',
 			'rules':
 				[
 					{  # Rule 1
@@ -797,7 +797,7 @@ def section_8():
 
 	for row in row_inputs:
 		datadict = functions.hyper_prior(row['rules'], initial_weights=row['weights'])
-		print(to_percentage_strings(datadict['pr2036hyper']))
+		print(row['name'],to_percentage_strings(datadict['pr2036hyper']))
 
 	central = row_inputs[1]
 	for rule in central['rules']:
