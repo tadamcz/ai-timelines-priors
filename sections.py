@@ -744,7 +744,7 @@ def section_8():
 						'regime_start': 1956,
 						'ftp_cal_equiv': 1 / 100,
 						'g_exp': 4.3 / 100,
-						'g_act': 11 / 100,
+						'g_act': 16 / 100,
 					},
 
 					{  # Rule 4
@@ -752,7 +752,7 @@ def section_8():
 						'regime_start': 2000,
 						'ftp_cal_equiv': 1 / 100,
 						'g_exp': 4.3 / 100,
-						'g_act': 11 / 100,
+						'g_act': 16 / 100,
 					},
 
 					{  # Rule 5
