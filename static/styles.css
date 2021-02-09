@@ -1,0 +1,21 @@
+.flex {
+    display: flex;
+}
+.input{
+    margin-right: 3em;
+    width: 20em;
+}
+.input > * {
+    margin-bottom: 1em;
+}
+
+input {
+    width: 5em;
+}
+.errors{
+    color: red;
+}
+
+th {
+    text-align: left;
+}

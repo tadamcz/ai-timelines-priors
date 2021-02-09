@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href={{url_for('static', filename="styles.css")}}/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src={{url_for('static', filename="index.js")}}></script>
+
+    <title>Semi-informative priors over AI timelines</title>
+</head>
+<body>
+<h1>Semi-informative priors over AI timelines</h1>
+
+{% from "_macros.html" import render_field, render_field_nolabel, render_checkbox %}
+{% set p2036string = "Probability of AGI by 2036: " %}
+
+<p>See inputs used in report: <a href="javascript:fillLow()">Low</a>, <a href="javascript:fillCentral()">Central</a>, High</p>
+
+<form method="POST">
+{{ render_field(form.virtual_successes) }}
+{{ render_field(form.regime_start_year) }}
+
+<h2>Calendar-year trial definition</h2>
+    <div class="flex update_rule_box">
+    <div class="input">
+        {{ render_field(form.first_trial_probability)}}
+    <button type='submit'>Submit all</button>
+    </div>
+    <div class="output">
+    {% if result %}
+        {% if result.calendar %}
+        {{ p2036string }}{{ result.calendar.p2036 }}
+        {{ result.calendar.plot|safe }}
+        {% endif %}
+    {% endif %}
+    </div>
+</div>
+
+<h2>Researcher-year trial definition</h2>
+
+<div class="flex update_rule_box">
+    <div class="input">
+        {{ render_field(form.g_exp)}}
+
+        {{ render_field(form.g_act) }}
+
+    <button type='submit'>Submit all</button>
+    </div>
+    <div class="output">
+    {% if result %}
+        {% if result.researcher %}
+        {{ p2036string }}{{ result.researcher.p2036 }}
+        {{ result.researcher.plot|safe }}
+        {% endif %}
+    {% endif %}
+    </div>
+</div>
+
+<h2>Computation trial definition: relative importance of research and computation</h2>
+<div class="flex update_rule_box">
+    <div class="input">
+        {{ render_field(form.relative_imp_res_comp)}}
+        {{ render_field(form.comp_spending_assumption) }}
+    <button type='submit'>Submit all</button>
+    </div>
+    <div class="output">
+    {% if result %}
+        {% if result.comp_relative_res %}
+        {{ p2036string }}{{ result.comp_relative_res.p2036 }}
+        {{ result.comp_relative_res.plot|safe }}
+        {% endif %}
+    {% endif %}
+    </div>
+</div>
+
+<h2>Computation trial definition: lifetime anchor</h2>
+<div class="flex update_rule_box">
+    <div class="input">
+    <button type='submit'>Submit all</button>
+    </div>
+    <div class="output">
+    {% if result %}
+        {% if result.lifetime %}
+        {{ p2036string }}{{ result.lifetime.p2036 }}
+        {{ result.lifetime.plot|safe }}
+        {% endif %}
+    {% endif %}
+    </div>
+</div>
+
+<h2>Computation trial definition: evolutionary anchor</h2>
+<div class="flex update_rule_box">
+    <div class="input">
+    <button type='submit'>Submit all</button>
+    </div>
+    <div class="output">
+    {% if result %}
+        {% if result.evolution %}
+        {{ p2036string }}{{ result.evolution.p2036 }}
+        {{ result.evolution.plot|safe }}
+        {% endif %}
+    {% endif %}
+    </div>
+</div>
+
+<h2>Hyper-prior update</h2>
+<div>
+
+
+
+<table>
+    <tr>
+        <th>Initial weights of update rules</th>
+        <th>Weights in 2020 </th>
+    </tr>
+
+    <tr>
+        <td>{{ render_field(form.init_weight_calendar) }}</td>
+        <td>
+            {% if result.p2036hyper %}
+            {{ result.calendar.weight2020 }}
+            {% endif %}
+        </td>
+    </tr>
+
+    <tr>
+        <td>{{ render_field(form.init_weight_researcher) }}</td>
+        <td>
+            {% if result.p2036hyper %}
+            {{ result.researcher.weight2020 }}
+            {% endif %}
+        </td>
+    </tr>
+
+    <tr>
+        <td>{{ render_field(form.init_weight_comp_relative_res) }}</td>
+        <td>
+            {% if result.p2036hyper %}
+            {{ result.comp_relative_res.weight2020 }}
+            {% endif %}
+        </td>
+    </tr>
+
+    <tr>
+        <td>{{ render_field(form.init_weight_lifetime) }}</td>
+        <td>
+            {% if result.p2036hyper %}
+            {{ result.lifetime.weight2020 }}
+            {% endif %}
+        </td>
+    </tr>
+
+    <tr>
+        <td>{{ render_field(form.init_weight_evolution) }}</td>
+        <td>
+            {% if result.p2036hyper %}
+            {{ result.evolution.weight2020 }}
+            {% endif %}
+        </td>
+    </tr>
+
+    <tr>
+        <td>{{ render_field(form.init_weight_agi_impossible) }}</td>
+        <td>
+            {% if result.p2036hyper %}
+            {{ result.agi_impossible.weight2020 }}
+            {% endif %}
+        </td>
+    </tr>
+</table>
+
+<h3>Weighted average probability of AGI by 2036: {{ result.p2036hyper }}</h3>
+
+</div>
+
+<button type='submit'>Submit all</button>
+</form>
+
+</body>
+</html>
