@@ -20,23 +20,23 @@ positive_validator = validators.number_range(min=0, max=None, message='Cannot be
 
 
 class HyperPriorForm(FlaskForm):
-	first_trial_probability = StringField()
-	virtual_successes = FloatField(validators=[positive_validator], label='Virtual successes (used in all update rules)')
-	regime_start_year = IntegerField(validators=[validators.Optional()], label='Regime start year (used in all update rules except the evolutionary anchor)')
+	first_trial_probability = StringField(default='1/300')
+	virtual_successes = FloatField(validators=[positive_validator], label='Virtual successes (used in all update rules)', default=1)
+	regime_start_year = IntegerField(validators=[validators.Optional()], label='Regime start year (used in all update rules except the evolutionary anchor)', default=1956)
 
-	g_exp = FloatField(validators=[validators.Optional()], label='Typical growth for STEM researchers')
-	g_act = FloatField(validators=[validators.Optional()], label='Growth of AI researchers')
+	g_exp = FloatField(validators=[validators.Optional()], label='Typical growth for STEM researchers', default=0.043)
+	g_act = FloatField(validators=[validators.Optional()], label='Growth of AI researchers', default=0.11)
 
-	relative_imp_res_comp = IntegerField(validators=[validators.Optional(), positive_validator], label='One doubling in the number of researchers is equivalent to X doublings in computation')
+	relative_imp_res_comp = IntegerField(validators=[validators.Optional(), positive_validator], label='One doubling in the number of researchers is equivalent to X doublings in computation', default=5)
 
-	comp_spending_assumption = SelectField(choices=('conservative','central','aggressive'), label='Assumption about future spending on computation (used in all computation trial definitions)')
+	comp_spending_assumption = SelectField(choices=('conservative','central','aggressive'), label='Assumption about future spending on computation (used in all computation trial definitions)', default='central')
 
-	init_weight_comp_relative_res = FloatField(validators=[positive_validator], label='Computation trial definition: relative importance of research and computation')
-	init_weight_calendar = FloatField(validators=[validators.Optional(), positive_validator], label='Calendar-year trial definition')
-	init_weight_researcher = FloatField(validators=[validators.Optional(), positive_validator], label='Researcher-year trial definition')
-	init_weight_lifetime = FloatField(validators=[validators.Optional(), positive_validator], label='Computation trial definition: lifetime anchor')
-	init_weight_evolution = FloatField(validators=[validators.Optional(), positive_validator], label='Computation trial definition: evolutionary anchor')
-	init_weight_agi_impossible = FloatField(validators=[validators.Optional(), positive_validator], label='AGI is impossible')
+	init_weight_calendar = FloatField(validators=[validators.Optional(), positive_validator], label='Calendar-year trial definition', default=.3)
+	init_weight_researcher = FloatField(validators=[validators.Optional(), positive_validator], label='Researcher-year trial definition', default=.3)
+	init_weight_comp_relative_res = FloatField(validators=[positive_validator], label='Computation trial definition: relative importance of research and computation', default=.05)
+	init_weight_lifetime = FloatField(validators=[validators.Optional(), positive_validator], label='Computation trial definition: lifetime anchor', default=.1)
+	init_weight_evolution = FloatField(validators=[validators.Optional(), positive_validator], label='Computation trial definition: evolutionary anchor', default=.15)
+	init_weight_agi_impossible = FloatField(validators=[validators.Optional(), positive_validator], label='AGI is impossible', default=.1)
 
 	def calendar_year_filled(self):
 		c1 = self.first_trial_probability.data is not None
@@ -208,7 +208,7 @@ def show():
 
 		if form.calendar_year_filled():
 			kwargs = {
-				'ftp': form.first_trial_probability.data,
+				'ftp': float(form.first_trial_probability.data),
 				'regime_start': int(form.regime_start_year.data),
 				'virtual_successes': form.virtual_successes.data,
 			}
@@ -222,7 +222,7 @@ def show():
 		if form.researcher_filled():
 			kwargs = {
 				'regime_start': form.regime_start_year.data,
-				'ftp_cal_equiv': form.first_trial_probability.data,
+				'ftp_cal_equiv': float(form.first_trial_probability.data),
 				'g_exp': form.g_exp.data,
 				'g_act': form.g_act.data,
 				'virtual_successes': form.virtual_successes.data,
@@ -239,7 +239,7 @@ def show():
 				'biggest_spends_method': form.comp_spending_assumption.data,
 				'rel_imp_res_comp': form.relative_imp_res_comp.data,
 				'g_exp': form.g_exp.data,
-				'ftp_cal_equiv': form.first_trial_probability.data,
+				'ftp_cal_equiv': float(form.first_trial_probability.data),
 				'regime_start_year': form.regime_start_year.data,
 				'virtual_successes': form.virtual_successes.data,
 			}
