@@ -730,33 +730,19 @@ def section_8():
 				[
 					{  # Rule 1
 						'name': 'calendar',
-						'regime_start': 1956,
+						'regime_start': 2000,
 						'ftp': 1 / 100,
 					},
 
 					{  # Rule 2
-						'name': 'calendar',
+						'name': 'res-year',
 						'regime_start': 2000,
-						'ftp': 1 / 100,
+						'ftp_cal_equiv': 1 / 100,
+						'g_exp': 4.3 / 100,
+						'g_act': 16 / 100,
 					},
 
 					{  # Rule 3
-						'name': 'res-year',
-						'regime_start': 1956,
-						'ftp_cal_equiv': 1 / 100,
-						'g_exp': 4.3 / 100,
-						'g_act': 16 / 100,
-					},
-
-					{  # Rule 4
-						'name': 'res-year',
-						'regime_start': 2000,
-						'ftp_cal_equiv': 1 / 100,
-						'g_exp': 4.3 / 100,
-						'g_act': 16 / 100,
-					},
-
-					{  # Rule 5
 						'name': 'computation',
 						'biggest_spends_method': 'aggressive',
 						'rel_imp_res_comp': 5,
@@ -765,32 +751,30 @@ def section_8():
 						'ftp_cal_equiv': 1 / 100,
 					},
 
-					{  # Rule 6
+					{  # Rule 4
 						'name': 'computation',
 						'biggest_spends_method': 'aggressive',
 						'biohypothesis': 'lifetime',
 						'regime_start': 1956,
 					},
 
-					{  # Rule 7
+					{  # Rule 5
 						'name': 'computation',
 						'biggest_spends_method': 'aggressive',
 						'biohypothesis': 'evolution',
 					},
 
-					{  # Rule 8
+					{  # Rule 6
 						'name': 'impossible',
 					},
 				],
 			'weights': [
-				.10 * .15,  # Rule 1
-				.10 * .85,  # Rule 2
-				.40 * .15,  # Rule 3
-				.40 * .85,  # Rule 4
-				.10,  # Rule 5
+				.10,  # Rule 1
+				.40,  # Rule 2
+				.10,  # Rule 3
+				.10,  # Rule 4
+				.20,  # Rule 5
 				.10,  # Rule 6
-				.20,  # Rule 7
-				.10  # Rule 8
 			]
 		}
 	]
