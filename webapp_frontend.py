@@ -144,7 +144,7 @@ class UpdateRuleResult:
 		fig, ax = plt.subplots()
 		fig.set_size_inches(5, 2)
 		x_from, x_to = x_from_to
-		xs = np.arange(x_from, x_to, 15)  # Only every N years, because this has an effect on performance
+		xs = np.hstack((np.arange(x_from, 2036, 3), np.arange(2037, x_to, 15)))  # Only every N years, because this has an effect on performance
 		ys = [_callable(i) for i in xs]
 		if is_date:
 			xs = [datetime(x, 1, 1) for x in xs]
