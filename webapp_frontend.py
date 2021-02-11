@@ -29,7 +29,7 @@ class HyperPriorForm(FlaskForm):
 
 	relative_imp_res_comp = IntegerField(validators=[validators.Optional(), positive_validator], label='One doubling in the number of researchers is equivalent to X doublings in computation', default=5)
 
-	comp_spending_assumption = SelectField(choices=('conservative','central','aggressive'), label='Assumption about future spending on computation (used in all computation trial definitions)', default='central')
+	comp_spending_assumption = FloatField(label='Order of magnitude (log10) of amount spent on biggest AI experiment in 2036 (used in all computation trial definitions)', default=9)
 
 	init_weight_calendar = FloatField(validators=[validators.Optional(), positive_validator], label='Calendar-year trial definition', default=.3)
 	init_weight_researcher = FloatField(validators=[validators.Optional(), positive_validator], label='Researcher-year trial definition', default=.3)
@@ -140,11 +140,11 @@ class UpdateRuleResult:
 		self.input_args = input_args
 		self.init_weight = init_weight
 
-	def create_graph(self, _callable, x_from_to=(2020, 2036), is_date=True):
+	def create_graph(self, _callable, x_from_to=(2020, 2100), is_date=True):
 		fig, ax = plt.subplots()
 		fig.set_size_inches(5, 2)
 		x_from, x_to = x_from_to
-		xs = np.arange(x_from, x_to, 3)  # Only every 3, because this has an effect on performance
+		xs = np.arange(x_from, x_to, 15)  # Only every N years, because this has an effect on performance
 		ys = [_callable(i) for i in xs]
 		if is_date:
 			xs = [datetime(x, 1, 1) for x in xs]
@@ -236,7 +236,7 @@ def show():
 
 		if form.computation_relative_res_filled():
 			kwargs = {
-				'spend2036': form.comp_spending_assumption.data,
+				'spend2036': 10**form.comp_spending_assumption.data,
 				'rel_imp_res_comp': form.relative_imp_res_comp.data,
 				'g_exp': form.g_exp.data,
 				'ftp_cal_equiv': float(form.first_trial_probability.data),
@@ -251,23 +251,23 @@ def show():
 			result.comp_relative_res = comp_relative_res
 
 		def lifetime_callable(year):
-			return functions.lifetime_anchor('aggressive', form.virtual_successes.data, form.regime_start_year.data, forecast_to_year=year)
+			return functions.lifetime_anchor(10**form.comp_spending_assumption.data, form.virtual_successes.data, form.regime_start_year.data, forecast_to_year=year)
 
 		def evolution_callable(year):
 			return functions.evolutionary_anchor(
-				spend2036=form.comp_spending_assumption.data,
+				spend2036=10**form.comp_spending_assumption.data,
 				virtual_successes=form.virtual_successes.data,
 				forecast_to_year=year)
 
 		lifetime_kwargs = {'name': 'computation',
-						   'spend2036': form.comp_spending_assumption.data,
+						   'spend2036': 10**form.comp_spending_assumption.data,
 						   'biohypothesis': 'lifetime',
 						   'regime_start': form.regime_start_year.data,
 						   'virtual_successes': form.virtual_successes.data,
 						   }
 
 		evolution_kwargs = {'name': 'computation',
-							'spend2036': form.comp_spending_assumption.data,
+							'spend2036': 10**form.comp_spending_assumption.data,
 							'biohypothesis': 'evolution',
 							'virtual_successes': form.virtual_successes.data,
 							}

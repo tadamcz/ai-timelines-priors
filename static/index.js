@@ -43,7 +43,7 @@ function fillCentral() {
     g_act_field.val(0.11)
 
     relative_imp_res_comp_field.val(5)
-    comp_spending_assumption_field.val('central')
+    comp_spending_assumption_field.val(9)
 
 
     init_weight_calendar_field.val(.3)
