@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" type="text/css" href={{url_for('static', filename="styles.css")}}/>
+    <link rel="stylesheet" type="text/css" href={{url_for('static', filename="balloon.min.css")}}/>
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src={{url_for('static', filename="index.js")}}></script>
 
@@ -14,11 +17,11 @@
 {% from "_macros.html" import render_field, render_field_nolabel, render_checkbox %}
 {% set p2036string = "Probability of AGI by 2036: " %}
 
-<p>See inputs used in report: <a href="javascript:fillLow()">Low</a>, <a href="javascript:fillCentral()">Central</a>, High</p>
+<p>See inputs used in report: <a href="javascript:fillLow()">Low</a>, <a href="javascript:fillCentral()">Central</a>, <a href="javascript:fillHigh()">High</a></p>
 
 <form method="POST">
-{{ render_field(form.virtual_successes) }}
-{{ render_field(form.regime_start_year) }}
+{{ render_field(form.virtual_successes, info="Used in all update rules") }}
+{{ render_field(form.regime_start_year, info="Used in calendar year and researcher year update rules. The computation rules have fixed start times.") }}
 
 <h2>Calendar-year trial definition</h2>
     <div class="flex update_rule_box">
@@ -60,7 +63,7 @@
 <div class="flex update_rule_box">
     <div class="input">
         {{ render_field(form.relative_imp_res_comp)}}
-        {{ render_field(form.comp_spending_assumption) }}
+        {{ render_field(form.comp_spending_assumption, info="Amount spent on computation means the amount spent on biggest AI experiment to date (see 6.2.1). Used in all computation trial definitions.") }}
     <button type='submit'>Submit all</button>
     </div>
     <div class="output">
@@ -111,11 +114,15 @@
 <table>
     <tr>
         <th>Initial weights of update rules</th>
+        <th>Probability of AGI by 2036</th>
         <th>Weights in 2020 </th>
     </tr>
 
     <tr>
         <td>{{ render_field(form.init_weight_calendar) }}</td>
+        <td>
+            {{ result.calendar.p2036 }}
+        </td>
         <td>
             {% if result.p2036hyper %}
             {{ result.calendar.weight2020 }}
@@ -126,6 +133,9 @@
     <tr>
         <td>{{ render_field(form.init_weight_researcher) }}</td>
         <td>
+            {{ result.researcher.p2036 }}
+        </td>
+        <td>
             {% if result.p2036hyper %}
             {{ result.researcher.weight2020 }}
             {% endif %}
@@ -134,6 +144,9 @@
 
     <tr>
         <td>{{ render_field(form.init_weight_comp_relative_res) }}</td>
+        <td>
+            {{ result.comp_relative_res.p2036 }}
+        </td>
         <td>
             {% if result.p2036hyper %}
             {{ result.comp_relative_res.weight2020 }}
@@ -144,6 +157,9 @@
     <tr>
         <td>{{ render_field(form.init_weight_lifetime) }}</td>
         <td>
+            {{ result.lifetime.p2036 }}
+        </td>
+        <td>
             {% if result.p2036hyper %}
             {{ result.lifetime.weight2020 }}
             {% endif %}
@@ -153,6 +169,9 @@
     <tr>
         <td>{{ render_field(form.init_weight_evolution) }}</td>
         <td>
+            {{ result.evolution.p2036 }}
+        </td>
+        <td>
             {% if result.p2036hyper %}
             {{ result.evolution.weight2020 }}
             {% endif %}
@@ -161,6 +180,9 @@
 
     <tr>
         <td>{{ render_field(form.init_weight_agi_impossible) }}</td>
+        <td>
+            {{ result.agi_impossible.p2036 }}
+        </td>
         <td>
             {% if result.p2036hyper %}
             {{ result.agi_impossible.weight2020 }}

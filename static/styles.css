@@ -19,3 +19,10 @@ input {
 th {
     text-align: left;
 }
+.material-icons {
+    font-size: 1em;
+}
+
+.input_w_info > * {
+    display: inline-block;
+}

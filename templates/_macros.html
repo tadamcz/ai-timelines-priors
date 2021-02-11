@@ -1,6 +1,9 @@
-{% macro render_field(field) %}
+{% macro render_field(field, info=False) %}
   <div>
       {{ field.label }}
+      {% if info %}
+      <span aria-label="{{ info }}" data-balloon-pos="right" data-balloon-length="large" class="material-icons">info</span>
+      {% endif %}
       {{ field(**kwargs)|safe }}
   </div>
     {% if field.type == 'FieldList' or field.type == 'FormField' %}

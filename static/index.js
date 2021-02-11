@@ -55,3 +55,24 @@ function fillCentral() {
 
     $('form').submit()
 }
+
+function fillHigh() {
+    virtual_successes_field.val(1)
+    regime_start_year_field.val(2000)
+    first_trial_probability_field.val('1/100')
+    g_exp_field.val(0.043)
+    g_act_field.val(0.16)
+
+    relative_imp_res_comp_field.val(5)
+    comp_spending_assumption_field.val(11)
+
+
+    init_weight_calendar_field.val(.1)
+    init_weight_researcher_field.val(.4)
+    init_weight_comp_relative_res_field.val(0.1)
+    init_weight_lifetime_field.val(.1)
+    init_weight_evolution_field.val(.2)
+    init_weight_agi_impossible_field.val(.1)
+
+    $('form').submit()
+}

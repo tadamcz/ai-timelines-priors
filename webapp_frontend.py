@@ -21,15 +21,15 @@ positive_validator = validators.number_range(min=0, max=None, message='Cannot be
 
 class HyperPriorForm(FlaskForm):
 	first_trial_probability = StringField(default='1/300')
-	virtual_successes = FloatField(validators=[positive_validator], label='Virtual successes (used in all update rules)', default=1)
-	regime_start_year = IntegerField(validators=[validators.Optional()], label='Regime start year (used in calendar year and researcher year update rules)', default=1956)
+	virtual_successes = FloatField(validators=[positive_validator], label='Virtual successes', default=1)
+	regime_start_year = IntegerField(validators=[validators.Optional()], label='Regime start year', default=1956)
 
 	g_exp = FloatField(validators=[validators.Optional()], label='Typical growth for STEM researchers', default=0.043)
 	g_act = FloatField(validators=[validators.Optional()], label='Growth of AI researchers', default=0.11)
 
 	relative_imp_res_comp = IntegerField(validators=[validators.Optional(), positive_validator], label='One doubling in the number of researchers is equivalent to X doublings in computation', default=5)
 
-	comp_spending_assumption = FloatField(label='Order of magnitude (log10) of amount spent on biggest AI experiment in 2036 (used in all computation trial definitions)', default=9)
+	comp_spending_assumption = FloatField(label='Order of magnitude (log10) of amount spent on biggest AI experiment in 2036', default=9)
 
 	init_weight_calendar = FloatField(validators=[validators.Optional(), positive_validator], label='Calendar-year trial definition', default=.3)
 	init_weight_researcher = FloatField(validators=[validators.Optional(), positive_validator], label='Researcher-year trial definition', default=.3)
