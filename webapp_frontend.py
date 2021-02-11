@@ -22,7 +22,7 @@ positive_validator = validators.number_range(min=0, max=None, message='Cannot be
 class HyperPriorForm(FlaskForm):
 	first_trial_probability = StringField(default='1/300')
 	virtual_successes = FloatField(validators=[positive_validator], label='Virtual successes (used in all update rules)', default=1)
-	regime_start_year = IntegerField(validators=[validators.Optional()], label='Regime start year (used in all update rules except the evolutionary anchor)', default=1956)
+	regime_start_year = IntegerField(validators=[validators.Optional()], label='Regime start year (used in calendar year and researcher year update rules)', default=1956)
 
 	g_exp = FloatField(validators=[validators.Optional()], label='Typical growth for STEM researchers', default=0.043)
 	g_act = FloatField(validators=[validators.Optional()], label='Growth of AI researchers', default=0.11)
@@ -240,7 +240,7 @@ def show():
 				'rel_imp_res_comp': form.relative_imp_res_comp.data,
 				'g_exp': form.g_exp.data,
 				'ftp_cal_equiv': float(form.first_trial_probability.data),
-				'regime_start_year': form.regime_start_year.data,
+				'regime_start_year': 1956,
 				'virtual_successes': form.virtual_successes.data,
 			}
 
@@ -251,7 +251,7 @@ def show():
 			result.comp_relative_res = comp_relative_res
 
 		def lifetime_callable(year):
-			return functions.lifetime_anchor(10**form.comp_spending_assumption.data, form.virtual_successes.data, form.regime_start_year.data, forecast_to_year=year)
+			return functions.lifetime_anchor(10**form.comp_spending_assumption.data, form.virtual_successes.data, 1956, forecast_to_year=year)
 
 		def evolution_callable(year):
 			return functions.evolutionary_anchor(
@@ -262,7 +262,7 @@ def show():
 		lifetime_kwargs = {'name': 'computation',
 						   'spend2036': 10**form.comp_spending_assumption.data,
 						   'biohypothesis': 'lifetime',
-						   'regime_start': form.regime_start_year.data,
+						   'regime_start': 1956,
 						   'virtual_successes': form.virtual_successes.data,
 						   }
 
