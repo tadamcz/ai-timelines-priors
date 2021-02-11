@@ -1,6 +1,7 @@
 from scipy import integrate, optimize
 import numpy as np
 from collections import OrderedDict
+import computation_dictionaries
 
 # Global variables
 probability_solution_leftbound, probability_solution_rightbound = 1e-9, 1 - 1e-9
@@ -136,92 +137,12 @@ def solve_for_ftp_comp_indirect(ftp_cal, rel_imp_res_comp, g_exp):
 def number_geometric_increases(start, end, increment=trial_increment):
 	return int(np.log(end / start) / np.log(1 + increment))
 
-
-# Dictionaries computation_prices, biggest_spends_conservative and biggest_spends_aggressive copied directly from client's code without checking
-computation_prices = {
-	1800: 10 ** -6,
-	1956: 10 ** -6,
-	1970: 10 ** -7,
-	2000: 10 ** -12,
-	2008: 10 ** -16,
-	2020: 10 ** -17,
-	2021: 10 ** -17.2,
-	2022: 10 ** -17.4,
-	2023: 10 ** -17.6,
-	2024: 10 ** -17.8,
-	2025: 10 ** -18,
-	2026: 10 ** -18.1,
-	2027: 10 ** -18.2,
-	2028: 10 ** -18.3,
-	2029: 10 ** -18.4,
-	2030: 10 ** -18.5,
-	2031: 10 ** -18.6,
-	2032: 10 ** -18.7,
-	2033: 10 ** -18.8,
-	2034: 10 ** -18.9,
-	2035: 10 ** -18.95,
-	2036: 10 ** -19,
-}
-biggest_spends_conservative = {
-	1956: 10 ** 1,
-	2020: 10 ** 6.7,
-	2021: 10 ** 6.78,
-	2022: 10 ** 6.86,
-	2023: 10 ** 6.94,
-	2024: 10 ** 7.02,
-	2025: 10 ** 7.1,
-	2026: 10 ** 7.18,
-	2027: 10 ** 7.26,
-	2028: 10 ** 7.35,
-	2029: 10 ** 7.43,
-	2030: 10 ** 7.51,
-	2031: 10 ** 7.59,
-	2032: 10 ** 7.67,
-	2033: 10 ** 7.75,
-	2034: 10 ** 7.83,
-	2035: 10 ** 7.91,
-	2036: 10 ** 8,
-}
-biggest_spends_aggressive = {
-	1956: 10 ** 1,
-	2020: 10 ** 6.7,
-	2021: 10 ** 7.0,
-	2022: 10 ** 7.25,
-	2023: 10 ** 7.5,
-	2024: 10 ** 7.8,
-	2025: 10 ** 8.05,
-	2026: 10 ** 8.3,
-	2027: 10 ** 8.6,
-	2028: 10 ** 8.85,
-	2029: 10 ** 9.1,
-	2030: 10 ** 9.4,
-	2031: 10 ** 9.65,
-	2032: 10 ** 9.9,
-	2033: 10 ** 10.2,
-	2034: 10 ** 10.45,
-	2035: 10 ** 10.7,
-	2036: 10 ** 11,
-}
-biggest_spends_central = {
-	2036: 10 ** 9,
-}
-
-for k in biggest_spends_conservative.keys():
-	# biggest_spends_central: geometric interpolation between conservative and aggressive, anchoring off the value for 2036
-
-	conservative = np.log10(biggest_spends_conservative[k])
-	aggressive = np.log10(biggest_spends_aggressive[k])
-
-	factor = (np.log10(biggest_spends_central[2036]) - np.log10(biggest_spends_conservative[2036])) / (np.log10(biggest_spends_aggressive[2036]) - np.log10(biggest_spends_conservative[2036]))
-	biggest_spends_central[k] = 10 ** (conservative + (aggressive - conservative) * factor)
-
-
 def four_param_framework_comp(
 		rel_imp_res_comp=None,
 		forecast_from_year=2020,
 		forecast_to_year=2036,
 		regime_start_year=1956,
-		biggest_spends_method=None,
+		spend2036=None,
 		computation_at_regime_start=None,
 		computation_at_forecasted_time=None,
 		ftp_cal_equiv=None,
@@ -236,11 +157,11 @@ def four_param_framework_comp(
 	if ftp_comp is None:
 		ftp_comp = solve_for_ftp_comp_indirect(ftp_cal_equiv, rel_imp_res_comp, g_exp=g_exp)
 
-	computation2020 = get_computation_amount_for_year(forecast_from_year, biggest_spends_method)
+	computation2020 = get_computation_amount_for_year(forecast_from_year, spend2036)
 
 	if computation_at_regime_start is None and computation_at_forecasted_time is None:
-		computation_at_regime_start = get_computation_amount_for_year(regime_start_year, biggest_spends_method)
-		computation_at_forecasted_time = get_computation_amount_for_year(forecast_to_year, biggest_spends_method)
+		computation_at_regime_start = get_computation_amount_for_year(regime_start_year, spend2036)
+		computation_at_forecasted_time = get_computation_amount_for_year(forecast_to_year, spend2036)
 
 	n_failures_regime_start_to_now = number_geometric_increases(computation_at_regime_start, computation2020)
 	n_trials_forecast = number_geometric_increases(computation2020, computation_at_forecasted_time)
@@ -252,17 +173,15 @@ def four_param_framework_comp(
 		ftp=ftp_comp)
 
 
-def get_year_for_computation_amount(c, biggest_spends_method):
-	if biggest_spends_method == 'aggressive':
-		biggest_spends = biggest_spends_aggressive
-	if biggest_spends_method == 'conservative':
-		biggest_spends = biggest_spends_conservative
-	if biggest_spends_method == 'central':
-		biggest_spends = biggest_spends_central
+def get_year_for_computation_amount(c, spend2036):
+	if spend2036 in ['conservative','central','aggressive']:
+		biggest_spends = computation_dictionaries.generate_named_spending_dict(spend2036)
+	else:
+		biggest_spends = computation_dictionaries.generate_spending_dict(spend2036)
 
 	computation_to_year = OrderedDict()
 	year_to_computation = OrderedDict()
-	for year, price in computation_prices.items():
+	for year, price in computation_dictionaries.computation_prices.items():
 		try:
 			computation_to_year[biggest_spends[year] / price] = year
 			year_to_computation[year] = biggest_spends[year] / price
@@ -275,16 +194,14 @@ def get_year_for_computation_amount(c, biggest_spends_method):
 			return year
 
 
-def get_computation_amount_for_year(y, biggest_spends_method):
-	if biggest_spends_method == 'aggressive':
-		biggest_spends = biggest_spends_aggressive
-	if biggest_spends_method == 'conservative':
-		biggest_spends = biggest_spends_conservative
-	if biggest_spends_method == 'central':
-		biggest_spends = biggest_spends_central
+def get_computation_amount_for_year(y, spend2036):
+	if spend2036 in ['conservative','central','aggressive']:
+		biggest_spends = computation_dictionaries.generate_named_spending_dict(spend2036)
+	else:
+		biggest_spends = computation_dictionaries.generate_spending_dict(spend2036)
 
 	year_to_computation = OrderedDict()
-	for year, price in computation_prices.items():
+	for year, price in computation_dictionaries.computation_prices.items():
 		try:
 			year_to_computation[year] = biggest_spends[year] / price
 		except KeyError:
@@ -293,7 +210,7 @@ def get_computation_amount_for_year(y, biggest_spends_method):
 	return year_to_computation[y]
 
 
-def evolutionary_anchor(biggest_spends_method, virtual_successes=1, forecast_from_year=2020, forecast_to_year=2036):
+def evolutionary_anchor(spend2036, virtual_successes=1, forecast_from_year=2020, forecast_to_year=2036):
 	c_initial = 1e21
 	c_evolution = 1e41
 
@@ -311,19 +228,19 @@ def evolutionary_anchor(biggest_spends_method, virtual_successes=1, forecast_fro
 
 	c_brain_debug = 1e21
 
-	computation_at_forecasted_time = get_computation_amount_for_year(forecast_to_year, biggest_spends_method)
+	computation_at_forecasted_time = get_computation_amount_for_year(forecast_to_year, spend2036)
 
 	return four_param_framework_comp(
 		computation_at_regime_start=c_brain_debug,
 		computation_at_forecasted_time=computation_at_forecasted_time,
-		biggest_spends_method=biggest_spends_method,
+		spend2036=spend2036,
 		ftp_comp=ftp_comp_solution,
 		forecast_from_year=forecast_from_year,
 		virtual_successes=virtual_successes)
 
 
-def lifetime_anchor(biggest_spends_method, virtual_successes=1, regime_start_year=1956, forecast_from_year=2020, forecast_to_year=2036):
-	c_initial = get_computation_amount_for_year(regime_start_year, biggest_spends_method)
+def lifetime_anchor(spend2036, virtual_successes=1, regime_start_year=1956, forecast_from_year=2020, forecast_to_year=2036):
+	c_initial = get_computation_amount_for_year(regime_start_year, spend2036)
 	c_lifetime = 1e24
 
 	n_trials_reg_start_to_lifetime = number_geometric_increases(c_initial, c_lifetime)
@@ -342,20 +259,20 @@ def lifetime_anchor(biggest_spends_method, virtual_successes=1, regime_start_yea
 		forecast_to_year=forecast_to_year,
 		forecast_from_year=forecast_from_year,
 		regime_start_year=regime_start_year,
-		biggest_spends_method=biggest_spends_method,
+		spend2036=spend2036,
 		ftp_comp=ftp_comp_solution,
 		virtual_successes=virtual_successes)
 
 
-def log_uniform(biggest_spends_method, forecast_from=2020, forecast_to=2036):
+def log_uniform(spend2036, forecast_from=2020, forecast_to=2036):
 	OOMs_evo_c = 41
 	OOMs_brain_debug = 21
 
 	# Unconditional probability mass between brain debug and evolution
 	p_agi_debug_to_evo = .8
 
-	OOMs_start = np.log10(get_computation_amount_for_year(forecast_from, biggest_spends_method))
-	OOMs_end = np.log10(get_computation_amount_for_year(forecast_to, biggest_spends_method))
+	OOMs_start = np.log10(get_computation_amount_for_year(forecast_from, spend2036))
+	OOMs_end = np.log10(get_computation_amount_for_year(forecast_to, spend2036))
 
 	# Number of orders of magnitude in the intersection of (brain debug,evolution) and (start,end)
 	# It is the number of orders of magnitude between start and evolution that have non-zero probability mass.
@@ -424,7 +341,7 @@ def hyper_prior(rules: list, initial_weights: list) -> dict:
 					regime_start_year=rule['regime_start'],
 					forecast_from_year=rule['regime_start'],
 					forecast_to_year=rule['forecast_from'],
-					biggest_spends_method=rule['biggest_spends_method'],
+					spend2036=rule['spend2036'],
 					virtual_successes=rule['virtual_successes'])
 
 				p_AGI_2036_static = four_param_framework_comp(
@@ -432,7 +349,7 @@ def hyper_prior(rules: list, initial_weights: list) -> dict:
 					ftp_cal_equiv=rule['ftp_cal_equiv'],
 					rel_imp_res_comp=rule['rel_imp_res_comp'],
 					regime_start_year=rule['regime_start'],
-					biggest_spends_method=rule['biggest_spends_method'],
+					spend2036=rule['spend2036'],
 					virtual_successes=rule['virtual_successes'],
 					forecast_from_year=rule['forecast_from'],
 				)
@@ -440,14 +357,14 @@ def hyper_prior(rules: list, initial_weights: list) -> dict:
 			else:
 				if rule['biohypothesis'] == 'lifetime':
 					p_no_AGI_2020 = 1 - lifetime_anchor(
-						biggest_spends_method=rule['biggest_spends_method'],
+						spend2036=rule['spend2036'],
 						regime_start_year=rule['regime_start'],
 						forecast_from_year=rule['regime_start'],
 						forecast_to_year=rule['forecast_from'],
 						virtual_successes=rule['virtual_successes'])
 
 					p_AGI_2036_static = lifetime_anchor(
-						biggest_spends_method=rule['biggest_spends_method'],
+						spend2036=rule['spend2036'],
 						regime_start_year=rule['regime_start'],
 						virtual_successes=rule['virtual_successes'],
 						forecast_from_year=rule['forecast_from']
@@ -455,13 +372,13 @@ def hyper_prior(rules: list, initial_weights: list) -> dict:
 
 				if rule['biohypothesis'] == 'evolution':
 					p_no_AGI_2020 = 1 - evolutionary_anchor(
-						biggest_spends_method=rule['biggest_spends_method'],
+						spend2036=rule['spend2036'],
 						forecast_to_year=rule['forecast_from'],
 						virtual_successes=rule['virtual_successes'],
 					)
 
 					p_AGI_2036_static = evolutionary_anchor(
-						biggest_spends_method=rule['biggest_spends_method'],
+						spend2036=rule['spend2036'],
 						virtual_successes=rule['virtual_successes'],
 						forecast_from_year=rule['forecast_from']
 					)
@@ -469,9 +386,9 @@ def hyper_prior(rules: list, initial_weights: list) -> dict:
 		if rule['name'] == 'computation-loguniform':
 			# Forecast-from should really be 'the beginning of time', but any year before brain debugging compute is achieved will give the same result.
 			# I take the earliest year that will not result in a KeyError.
-			p_no_AGI_2020 = 1 - log_uniform(rule['biggest_spends_method'], forecast_from=1956, forecast_to=rule['forecast_from'])
+			p_no_AGI_2020 = 1 - log_uniform(rule['spend2036'], forecast_from=1956, forecast_to=rule['forecast_from'])
 
-			p_AGI_2036_static = log_uniform(rule['biggest_spends_method'], forecast_from=rule['forecast_from'], forecast_to=2036)
+			p_AGI_2036_static = log_uniform(rule['spend2036'], forecast_from=rule['forecast_from'], forecast_to=2036)
 
 		if rule['name'] == 'impossible':
 			p_no_AGI_2020 = 1

@@ -195,7 +195,7 @@ def section6_2_comp_from_research_helper(biggest_spends_method):
 								  functions.four_param_framework_comp(rel_imp_res_comp=rel_imp_res_comp,
 																	  regime_start_year=1956,
 																	  forecast_to_year=2036,
-																	  biggest_spends_method=biggest_spends_method,
+																	  spend2036=biggest_spends_method,
 																	  ftp_cal_equiv=ftp_cal_equiv)
 							  for rel_imp_res_comp in columns}
 		dict_comprehension = {k: round_sig(v * 100, 2, type=str) + "%" for k, v in dict_comprehension.items()}
@@ -246,7 +246,7 @@ def section_6_2_3(virtual_successes=1, disp=True):
 					'log-uniform': functions.log_uniform(method),
 					'from research': functions.four_param_framework_comp(rel_imp_res_comp=5,
 																		 ftp_cal_equiv=1 / 300,
-																		 biggest_spends_method=method,
+																		 spend2036=method,
 																		 virtual_successes=virtual_successes)
 					}
 		average = float(np.average([value for value in datadict.values()]))
@@ -276,28 +276,28 @@ def section6_3_1_helper_comp(ftp_cal_equiv, rel_imp_res_comp, biggest_spends_met
 	if biggest_spends_method == '50/50':
 		left = 1 / 2 * (functions.four_param_framework_comp(ftp_cal_equiv=ftp_cal_equiv,
 															rel_imp_res_comp=rel_imp_res_comp,
-															biggest_spends_method='aggressive') +
+															spend2036='aggressive') +
 						functions.four_param_framework_comp(ftp_cal_equiv=ftp_cal_equiv,
 															rel_imp_res_comp=rel_imp_res_comp,
-															biggest_spends_method='conservative'))
+															spend2036='conservative'))
 
 		right = 1 / 2 * (functions.four_param_framework_comp(ftp_cal_equiv=ftp_cal_equiv,
 															 rel_imp_res_comp=rel_imp_res_comp,
-															 biggest_spends_method='aggressive',
+															 spend2036='aggressive',
 															 virtual_successes=0.5) +
 						 functions.four_param_framework_comp(ftp_cal_equiv=ftp_cal_equiv,
 															 rel_imp_res_comp=rel_imp_res_comp,
-															 biggest_spends_method='conservative',
+															 spend2036='conservative',
 															 virtual_successes=0.5))
 
 	else:
 		left = functions.four_param_framework_comp(ftp_cal_equiv=ftp_cal_equiv,
 												   rel_imp_res_comp=rel_imp_res_comp,
-												   biggest_spends_method=biggest_spends_method)
+												   spend2036=biggest_spends_method)
 
 		right = functions.four_param_framework_comp(ftp_cal_equiv=ftp_cal_equiv,
 													rel_imp_res_comp=rel_imp_res_comp,
-													biggest_spends_method=biggest_spends_method,
+													spend2036=biggest_spends_method,
 													virtual_successes=0.5)
 
 	left = round_sig(left * 100, 2, type=str) + "%"
@@ -354,12 +354,12 @@ def section_6_3_1_virtual_succ():
 	rowname = 'Computation, high, bracketed weigh. avg.'
 	left = 0.5 * (functions.four_param_framework_comp(rel_imp_res_comp=1,
 													  ftp_cal_equiv=1 / 300,
-													  biggest_spends_method='aggressive',
+													  spend2036='aggressive',
 													  virtual_successes=1) +
 				  functions.log_uniform('aggressive'))
 	right = 0.5 * (functions.four_param_framework_comp(rel_imp_res_comp=1,
 													   ftp_cal_equiv=1 / 300,
-													   biggest_spends_method='aggressive',
+													   spend2036='aggressive',
 													   virtual_successes=.5) +
 				   functions.log_uniform('aggressive'))
 	left = round_sig(left * 100, 2, type=str) + "%"
@@ -452,7 +452,7 @@ def appendix_8():
 		  'g_exp': 4.3 / 100,
 		  'rel_imp_res_comp': 5,
 		  'regime_start': 1956,
-		  'biggest_spends_method': 'aggressive'},
+		  'spend2036': 'aggressive'},
 		 ],
 
 		[rule1,
@@ -461,20 +461,20 @@ def appendix_8():
 		  'g_exp': 4.3 / 100,
 		  'rel_imp_res_comp': 1,
 		  'regime_start': 1956,
-		  'biggest_spends_method': 'aggressive'}
+		  'spend2036': 'aggressive'}
 		 ],
 
 		[rule1,
 		 {'name': 'computation',
 		  'biohypothesis': 'lifetime',
 		  'regime_start': 1956,
-		  'biggest_spends_method': 'aggressive'},
+		  'spend2036': 'aggressive'},
 		 ],
 
 		[rule1,
 		 {'name': 'computation',
 		  'biohypothesis': 'evolution',
-		  'biggest_spends_method': 'aggressive'}
+		  'spend2036': 'aggressive'}
 		 ]
 	]
 
@@ -582,7 +582,7 @@ def appendix_9():
 
 		[
 			{'name': 'computation',
-			 'biggest_spends_method': 'aggressive',
+			 'spend2036': 'aggressive',
 			 'ftp_cal_equiv': 1 / 300,
 			 'g_exp': 4.3 / 100,
 			 'rel_imp_res_comp': 5,
@@ -592,7 +592,7 @@ def appendix_9():
 
 		[
 			{'name': 'computation',
-			 'biggest_spends_method': 'aggressive',
+			 'spend2036': 'aggressive',
 			 'ftp_cal_equiv': 1 / 300,
 			 'g_exp': 4.3 / 100,
 			 'rel_imp_res_comp': 1,
@@ -602,7 +602,7 @@ def appendix_9():
 
 		[
 			{'name': 'computation',
-			 'biggest_spends_method': 'aggressive',
+			 'spend2036': 'aggressive',
 			 'biohypothesis': 'lifetime',
 			 'regime_start': 1956},
 
@@ -610,14 +610,14 @@ def appendix_9():
 
 		[
 			{'name': 'computation',
-			 'biggest_spends_method': 'aggressive',
+			 'spend2036': 'aggressive',
 			 'biohypothesis': 'evolution'},
 
 			rule2],
 
 		[
 			{'name': 'computation-loguniform',
-			 'biggest_spends_method': 'aggressive'},
+			 'spend2036': 'aggressive'},
 
 			rule2],
 	]
@@ -691,7 +691,7 @@ def section_8():
 
 					{  # Rule 3
 						'name': 'computation',
-						'biggest_spends_method': 'central',
+						'spend2036': 'central',
 						'rel_imp_res_comp': 5,
 						'g_exp': 4.3 / 100,
 						'ftp_cal_equiv': 1 / 300,
@@ -700,14 +700,14 @@ def section_8():
 
 					{  # Rule 4
 						'name': 'computation',
-						'biggest_spends_method': 'central',
+						'spend2036': 'central',
 						'biohypothesis': 'lifetime',
 						'regime_start': 1956
 					},
 
 					{  # Rule 5
 						'name': 'computation',
-						'biggest_spends_method': 'central',
+						'spend2036': 'central',
 						'biohypothesis': 'evolution'
 					},
 
@@ -744,7 +744,7 @@ def section_8():
 
 					{  # Rule 3
 						'name': 'computation',
-						'biggest_spends_method': 'aggressive',
+						'spend2036': 'aggressive',
 						'rel_imp_res_comp': 5,
 						'regime_start': 1956,
 						'g_exp': 4.3 / 100,
@@ -753,14 +753,14 @@ def section_8():
 
 					{  # Rule 4
 						'name': 'computation',
-						'biggest_spends_method': 'aggressive',
+						'spend2036': 'aggressive',
 						'biohypothesis': 'lifetime',
 						'regime_start': 1956,
 					},
 
 					{  # Rule 5
 						'name': 'computation',
-						'biggest_spends_method': 'aggressive',
+						'spend2036': 'aggressive',
 						'biohypothesis': 'evolution',
 					},
 

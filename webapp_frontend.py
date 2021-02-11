@@ -236,7 +236,7 @@ def show():
 
 		if form.computation_relative_res_filled():
 			kwargs = {
-				'biggest_spends_method': form.comp_spending_assumption.data,
+				'spend2036': form.comp_spending_assumption.data,
 				'rel_imp_res_comp': form.relative_imp_res_comp.data,
 				'g_exp': form.g_exp.data,
 				'ftp_cal_equiv': float(form.first_trial_probability.data),
@@ -255,19 +255,19 @@ def show():
 
 		def evolution_callable(year):
 			return functions.evolutionary_anchor(
-				biggest_spends_method=form.comp_spending_assumption.data,
+				spend2036=form.comp_spending_assumption.data,
 				virtual_successes=form.virtual_successes.data,
 				forecast_to_year=year)
 
 		lifetime_kwargs = {'name': 'computation',
-						   'biggest_spends_method': form.comp_spending_assumption.data,
+						   'spend2036': form.comp_spending_assumption.data,
 						   'biohypothesis': 'lifetime',
 						   'regime_start': form.regime_start_year.data,
 						   'virtual_successes': form.virtual_successes.data,
 						   }
 
 		evolution_kwargs = {'name': 'computation',
-							'biggest_spends_method': form.comp_spending_assumption.data,
+							'spend2036': form.comp_spending_assumption.data,
 							'biohypothesis': 'evolution',
 							'virtual_successes': form.virtual_successes.data,
 							}
