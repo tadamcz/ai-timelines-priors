@@ -2,12 +2,13 @@ from scipy import integrate, optimize
 import numpy as np
 from collections import OrderedDict
 import computation_dictionaries
+from functools import lru_cache
 
 # Global variables
 probability_solution_leftbound, probability_solution_rightbound = 1e-9, 1 - 1e-9
 trial_increment = 1 / 100
 
-
+@lru_cache(maxsize=int(1e6))
 def generalized_laplace(trials, failures, virtual_successes, virtual_failures=None, ftp=None):
 	if ftp == 0:
 		return 0
@@ -21,7 +22,7 @@ def generalized_laplace(trials, failures, virtual_successes, virtual_failures=No
 	next_trial_p = (virtual_successes + successes) / (trials + virtual_successes + virtual_failures)
 	return next_trial_p
 
-
+@lru_cache(maxsize=int(1e4))
 def forecast_generalized_laplace(failures, forecast_years, virtual_successes, virtual_failures=None, ftp=None):
 	kwargs = {}
 	if virtual_failures is not None:
