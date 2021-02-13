@@ -36,8 +36,12 @@
 {% endmacro %}
 
 
-{% macro render_field_nolabel(field) %}
-  <div>
+{% macro render_field_nolabel(field, inline=False) %}
+  {% if inline %}
+    {% set style = "display: inline" %}
+  {% endif %}
+
+  <div style="{{ style }}">
       {{ field(**kwargs)|safe }}
   </div>
   {% if field.type == 'FieldList' or field.type == 'FormField' %}
@@ -58,4 +62,25 @@
     {% endfor %}
     </ul>
   {% endif %}
+{% endmacro %}
+
+{% macro table_data(result_object, result_rule_object) %}
+<td>
+    {{ result_rule_object.weight_init_normalized }}
+</td>
+
+<td>
+    {% if result_object.p2036hyper %}
+    {{ result_rule_object.weight2020 }}
+    {% endif %}
+</td>
+<td>
+    {% if result_rule_object %}
+    {{ result_rule_object.p2036 }}
+    {% endif %}
+</td>
+{% endmacro %}
+
+{% macro info(text, size="large") %}
+  <span aria-label="{{ text }}" data-balloon-pos="right" data-balloon-length="{{ size }}" class="material-icons">info</span>
 {% endmacro %}

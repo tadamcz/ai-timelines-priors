@@ -24,12 +24,12 @@ class HyperPriorForm(FlaskForm):
 	virtual_successes = FloatField(validators=[positive_validator], label='Virtual successes', default=1)
 	regime_start_year = IntegerField(validators=[validators.Optional()], label='Regime start year', default=1956)
 
-	g_exp = FloatField(validators=[validators.Optional()], label='Typical growth for STEM researchers', default=0.043)
-	g_act = FloatField(validators=[validators.Optional()], label='Growth of AI researchers', default=0.11)
+	g_exp = FloatField(validators=[validators.Optional()], label='Typical annual growth for STEM researchers (%)', default=4.3)
+	g_act = FloatField(validators=[validators.Optional()], label='Annual growth of AI researchers (%)', default=11)
 
-	relative_imp_res_comp = IntegerField(validators=[validators.Optional(), positive_validator], label='One doubling in the number of researchers is equivalent to X doublings in computation', default=5)
+	relative_imp_res_comp = IntegerField(validators=[validators.Optional(), positive_validator], label='A 1% increase in the number of researchers is equivalent to an X% increase in computation', default=5)
 
-	comp_spending_assumption = FloatField(label='Order of magnitude (log10) of amount spent on biggest AI experiment in 2036', default=9)
+	comp_spending_assumption = FloatField(label='Maximum computation spend by 2036 ($ millions)', default=1000)
 
 	init_weight_calendar = FloatField(validators=[validators.Optional(), positive_validator], label='Calendar-year trial definition', default=.3)
 	init_weight_researcher = FloatField(validators=[validators.Optional(), positive_validator], label='Researcher-year trial definition', default=.3)
@@ -193,11 +193,13 @@ class HyperPriorResult:
 			weights.append(rule.init_weight)
 
 		hyper_results = functions.hyper_prior(rules_dicts, weights)
+		init_weights_normalized = np.asarray(weights)/sum(weights)
 
 		for i in range(len(rules_attributes)):
-			rules_attributes[i].weight2020 = to_percentage_strings(hyper_results['wts2020'][i])
+			rules_attributes[i].weight2020 = to_percentage_strings(hyper_results['wts_forecast_from'][i])
+			rules_attributes[i].weight_init_normalized = to_percentage_strings(init_weights_normalized[i])
 
-		self.p2036hyper = to_percentage_strings(hyper_results['pr2036hyper'])
+		self.p2036hyper = to_percentage_strings(hyper_results['p_forecast_to_hyper'])
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -223,8 +225,8 @@ def show():
 			kwargs = {
 				'regime_start': form.regime_start_year.data,
 				'ftp_cal_equiv': float(form.first_trial_probability.data),
-				'g_exp': form.g_exp.data,
-				'g_act': form.g_act.data,
+				'g_exp': form.g_exp.data/100,
+				'g_act': form.g_act.data/100,
 				'virtual_successes': form.virtual_successes.data,
 			}
 
@@ -236,9 +238,9 @@ def show():
 
 		if form.computation_relative_res_filled():
 			kwargs = {
-				'spend2036': 10**form.comp_spending_assumption.data,
+				'spend2036': 1e6*form.comp_spending_assumption.data,
 				'rel_imp_res_comp': form.relative_imp_res_comp.data,
-				'g_exp': form.g_exp.data,
+				'g_exp': form.g_exp.data/100,
 				'ftp_cal_equiv': float(form.first_trial_probability.data),
 				'regime_start_year': 1956,
 				'virtual_successes': form.virtual_successes.data,
@@ -251,23 +253,23 @@ def show():
 			result.comp_relative_res = comp_relative_res
 
 		def lifetime_callable(year):
-			return functions.lifetime_anchor(10**form.comp_spending_assumption.data, form.virtual_successes.data, 1956, forecast_to_year=year)
+			return functions.lifetime_anchor(1e6*form.comp_spending_assumption.data, form.virtual_successes.data, 1956, forecast_to_year=year)
 
 		def evolution_callable(year):
 			return functions.evolutionary_anchor(
-				spend2036=10**form.comp_spending_assumption.data,
+				spend2036=1e6*form.comp_spending_assumption.data,
 				virtual_successes=form.virtual_successes.data,
 				forecast_to_year=year)
 
 		lifetime_kwargs = {'name': 'computation',
-						   'spend2036': 10**form.comp_spending_assumption.data,
+						   'spend2036': 1e6*form.comp_spending_assumption.data,
 						   'biohypothesis': 'lifetime',
 						   'regime_start': 1956,
 						   'virtual_successes': form.virtual_successes.data,
 						   }
 
 		evolution_kwargs = {'name': 'computation',
-							'spend2036': 10**form.comp_spending_assumption.data,
+							'spend2036': 1e6*form.comp_spending_assumption.data,
 							'biohypothesis': 'evolution',
 							'virtual_successes': form.virtual_successes.data,
 							}
@@ -275,6 +277,7 @@ def show():
 		result.evolution = UpdateRuleResult(evolution_callable, evolution_kwargs, form.init_weight_evolution.data)
 
 		agi_impossible = UpdateRuleResult(None, {'name': 'impossible'}, form.init_weight_agi_impossible.data)
+		agi_impossible.p2036 = to_percentage_strings(0)
 		result.agi_impossible = agi_impossible
 		if form.initial_weights_filled():
 			result.update_hyper_prior()

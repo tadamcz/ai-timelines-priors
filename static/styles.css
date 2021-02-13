@@ -3,7 +3,7 @@
 }
 .input{
     margin-right: 3em;
-    width: 20em;
+    width: 27em;
 }
 .input > * {
     margin-bottom: 1em;
@@ -20,9 +20,18 @@ th {
     text-align: left;
 }
 .material-icons {
-    font-size: 1em;
+    font-size: 0.9em;
 }
 
 .input_w_info > * {
     display: inline-block;
+}
+
+td, th {
+    padding-right: 2em;
+}
+
+.material-icons{
+  font-size: 1em;
+  vertical-align: text-bottom;
 }

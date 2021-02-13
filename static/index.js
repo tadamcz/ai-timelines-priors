@@ -22,8 +22,8 @@ function fillLow() {
     virtual_successes_field.val(0.5)
     regime_start_year_field.val(1956)
     first_trial_probability_field.val(0.001)
-    g_exp_field.val(0.043)
-    g_act_field.val(0.07)
+    g_exp_field.val(4.3)
+    g_act_field.val(7)
 
     init_weight_calendar_field.val(.5)
     init_weight_researcher_field.val(.3)
@@ -39,11 +39,11 @@ function fillCentral() {
     virtual_successes_field.val(1)
     regime_start_year_field.val(1956)
     first_trial_probability_field.val('1/300')
-    g_exp_field.val(0.043)
-    g_act_field.val(0.11)
+    g_exp_field.val(4.3)
+    g_act_field.val(11)
 
     relative_imp_res_comp_field.val(5)
-    comp_spending_assumption_field.val(9)
+    comp_spending_assumption_field.val(1000)
 
 
     init_weight_calendar_field.val(.3)
@@ -60,11 +60,11 @@ function fillHigh() {
     virtual_successes_field.val(1)
     regime_start_year_field.val(2000)
     first_trial_probability_field.val('1/100')
-    g_exp_field.val(0.043)
-    g_act_field.val(0.16)
+    g_exp_field.val(4.3)
+    g_act_field.val(16)
 
     relative_imp_res_comp_field.val(5)
-    comp_spending_assumption_field.val(11)
+    comp_spending_assumption_field.val(100000)
 
 
     init_weight_calendar_field.val(.1)

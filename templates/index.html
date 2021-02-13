@@ -14,19 +14,24 @@
 <body>
 <h1>Semi-informative priors over AI timelines</h1>
 
-{% from "_macros.html" import render_field, render_field_nolabel, render_checkbox %}
+{% from "_macros.html" import render_field, render_field_nolabel, render_checkbox, table_data, info %}
 {% set p2036string = "Probability of AGI by 2036: " %}
 
-<p>See inputs used in report: <a href="javascript:fillLow()">Low</a>, <a href="javascript:fillCentral()">Central</a>, <a href="javascript:fillHigh()">High</a></p>
+This web site lets you provide your own inputs for some of the calculations
+in the report "Semi-informative priors over AI timelines".
+
+<p>See inputs used in report {{ info("See section 8 of report, or equivalently section 'All things considered pr(AGI by 2036)' of blog post.") }}
+    : <a href="javascript:fillLow()">Low</a>, <a href="javascript:fillCentral()">Central</a>, <a href="javascript:fillHigh()">High</a></p>
+
 
 <form method="POST">
-{{ render_field(form.virtual_successes, info="Used in all update rules") }}
-{{ render_field(form.regime_start_year, info="Used in calendar year and researcher year update rules. The computation rules have fixed start times.") }}
+{{ render_field(form.virtual_successes, info="This input is not discussed in the blog, see section 4 of report. Used in all update rules") }}
 
 <h2>Calendar-year trial definition</h2>
     <div class="flex update_rule_box">
     <div class="input">
         {{ render_field(form.first_trial_probability)}}
+        {{ render_field(form.regime_start_year, info="Used in calendar year and researcher year update rules. The computation rules have fixed start times.") }}
     <button type='submit'>Submit all</button>
     </div>
     <div class="output">
@@ -43,9 +48,8 @@
 
 <div class="flex update_rule_box">
     <div class="input">
-        {{ render_field(form.g_exp)}}
-
-        {{ render_field(form.g_act) }}
+        {{ render_field(form.g_exp, info='One calendar-year trial with the first trial probability defined above is equivalent to this increase in the number of AI researchers. See section 6.1 of the report.')}}
+        {{ render_field(form.g_act, info="This model assumes that these growth rates will continue indefinitely. Large growth rates (e.g. 11%) are probably unrealistic out to 2100.") }}
 
     <button type='submit'>Submit all</button>
     </div>
@@ -62,8 +66,10 @@
 <h2>Computation trial definition: relative importance of research and computation</h2>
 <div class="flex update_rule_box">
     <div class="input">
-        {{ render_field(form.relative_imp_res_comp)}}
-        {{ render_field(form.comp_spending_assumption, info="Amount spent on computation means the amount spent on biggest AI experiment to date (see 6.2.1). Used in all computation trial definitions.") }}
+        <div>A 1% increase in the number of researchers is equivalent to a {{ render_field_nolabel(form.relative_imp_res_comp, inline=True)}}% increase in computation
+        {{ info("Or equivalently: one doubling in the number of researchers is equivalent to X doublings in computation.") }}
+        </div>
+        {{ render_field(form.comp_spending_assumption, info="Amount spent on computation means the amount spent on biggest AI experiment to date (see 6.2.1). Used in all computation trial definitions. We assume this amount does not increase after 2036. You may enter large numbers using scientific notation e.g. '1e5'.") }}
     <button type='submit'>Submit all</button>
     </div>
     <div class="output">
@@ -113,81 +119,40 @@
 
 <table>
     <tr>
-        <th>Initial weights of update rules</th>
-        <th>Probability of AGI by 2036</th>
+        <th>Initial weights of update rules {{ info("These weights need not sum to 1, they can be any non-negative numbers") }}</th>
+        <th>Initial weights {{ info("Normalized","small") }} </th>
         <th>Weights in 2020 </th>
+        <th>Probability of AGI by 2036</th>
     </tr>
 
     <tr>
         <td>{{ render_field(form.init_weight_calendar) }}</td>
-        <td>
-            {{ result.calendar.p2036 }}
-        </td>
-        <td>
-            {% if result.p2036hyper %}
-            {{ result.calendar.weight2020 }}
-            {% endif %}
-        </td>
+        {{ table_data(result, result.calendar) }}
     </tr>
 
     <tr>
         <td>{{ render_field(form.init_weight_researcher) }}</td>
-        <td>
-            {{ result.researcher.p2036 }}
-        </td>
-        <td>
-            {% if result.p2036hyper %}
-            {{ result.researcher.weight2020 }}
-            {% endif %}
-        </td>
+        {{ table_data(result, result.researcher) }}
     </tr>
 
     <tr>
         <td>{{ render_field(form.init_weight_comp_relative_res) }}</td>
-        <td>
-            {{ result.comp_relative_res.p2036 }}
-        </td>
-        <td>
-            {% if result.p2036hyper %}
-            {{ result.comp_relative_res.weight2020 }}
-            {% endif %}
-        </td>
+       {{ table_data(result, result.comp_relative_res) }}
     </tr>
 
     <tr>
         <td>{{ render_field(form.init_weight_lifetime) }}</td>
-        <td>
-            {{ result.lifetime.p2036 }}
-        </td>
-        <td>
-            {% if result.p2036hyper %}
-            {{ result.lifetime.weight2020 }}
-            {% endif %}
-        </td>
+        {{ table_data(result, result.lifetime) }}
     </tr>
 
     <tr>
         <td>{{ render_field(form.init_weight_evolution) }}</td>
-        <td>
-            {{ result.evolution.p2036 }}
-        </td>
-        <td>
-            {% if result.p2036hyper %}
-            {{ result.evolution.weight2020 }}
-            {% endif %}
-        </td>
+        {{ table_data(result, result.evolution) }}
     </tr>
 
     <tr>
         <td>{{ render_field(form.init_weight_agi_impossible) }}</td>
-        <td>
-            {{ result.agi_impossible.p2036 }}
-        </td>
-        <td>
-            {% if result.p2036hyper %}
-            {{ result.agi_impossible.weight2020 }}
-            {% endif %}
-        </td>
+        {{ table_data(result, result.agi_impossible) }}
     </tr>
 </table>
 
