@@ -136,11 +136,11 @@ class UpdateRuleResult:
 	def __init__(self, _callable, input_args, init_weight):
 		if _callable:
 			self.p2036 = to_percentage_strings(_callable(2036))
-			self.create_graph(_callable)
+			self.create_plot(_callable)
 		self.input_args = input_args
 		self.init_weight = init_weight
 
-	def create_graph(self, _callable, x_from_to=(2020, 2100), is_date=True):
+	def create_plot(self, _callable, x_from_to=(2020, 2100), is_date=True):
 		fig, ax = plt.subplots()
 		fig.set_size_inches(5, 2)
 		x_from, x_to = x_from_to
@@ -192,14 +192,39 @@ class HyperPriorResult:
 			rules_dicts.append(rule.input_args)
 			weights.append(rule.init_weight)
 
-		hyper_results = functions.hyper_prior(rules_dicts, weights)
 		init_weights_normalized = np.asarray(weights)/sum(weights)
 
+		hyper_results = {}
+		p_failure_by_target = 1
+		interval = 16
+		# We create the data here instead of passing a callable because we want to ensure that 2036 is one of the years
+		# that is calculated. We could probably do it more cleanly too.
+		for year in np.arange(2020 + interval, 2101, interval):
+			hyper_results_year = functions.hyper_prior(rules=rules_dicts, initial_weights=weights, forecast_from=year - interval, forecast_to=year)
+			p_failure = 1 - hyper_results_year['p_forecast_to_hyper']
+			p_failure_by_target = p_failure_by_target * p_failure
+			p_success_by_target = 1 - p_failure_by_target
+			hyper_results[year] = {'p_forecast_to_hyper':p_success_by_target, 'wts_forecast_from':hyper_results_year['wts_forecast_from']}
+
+
 		for i in range(len(rules_attributes)):
-			rules_attributes[i].weight2020 = to_percentage_strings(hyper_results['wts_forecast_from'][i])
+			rules_attributes[i].weight2020 = to_percentage_strings(hyper_results[2020+interval]['wts_forecast_from'][i])
 			rules_attributes[i].weight_init_normalized = to_percentage_strings(init_weights_normalized[i])
 
-		self.p2036hyper = to_percentage_strings(hyper_results['p_forecast_to_hyper'])
+		self.pAGI_hyper = hyper_results
+		self.pAGI_2036_hyper = to_percentage_strings(hyper_results[2036]['p_forecast_to_hyper'])
+
+	def create_plot(self):
+		fig, ax = plt.subplots()
+		fig.set_size_inches(5, 2)
+		xs = self.pAGI_hyper.keys()
+		xs = [datetime(x, 1, 1) for x in xs]
+		ys = [v['p_forecast_to_hyper'] for v in self.pAGI_hyper.values()]
+		ax.plot(xs, ys)
+		ax.set_ylabel("Pr(AGI)")
+		ax.set_xlabel("Year")
+		self.plot_hyper = mpld3.fig_to_html(fig)
+		plt.close(fig)
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -281,6 +306,7 @@ def show():
 		result.agi_impossible = agi_impossible
 		if form.initial_weights_filled():
 			result.update_hyper_prior()
+			result.create_plot()
 		return render_template('index.html', form=form, result=result)
 	else:
 		return render_template('index.html', form=form, result=None)

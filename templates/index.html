@@ -156,7 +156,13 @@ in the report "Semi-informative priors over AI timelines".
     </tr>
 </table>
 
-<h3>Weighted average probability of AGI by 2036: {{ result.p2036hyper }}</h3>
+<div class="flex">
+    <div class="input"></div>
+    <div class="output" style="margin-top: 1em">
+        Weighted average probability of AGI by 2036: {{ result.pAGI_2036_hyper }}
+        {{ result.plot_hyper|safe }}
+    </div>
+</div>
 
 </div>
 
