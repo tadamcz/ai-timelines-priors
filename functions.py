@@ -289,122 +289,125 @@ def log_uniform(spend2036, forecast_from=2020, forecast_to=2036):
 	return p_per_OOM_after_start * OOMs_in_brain_to_evo_and_start_to_end
 
 
-def hyper_prior(rules: list, initial_weights: list) -> dict:
-	ps_AGI_2036 = []
-	ps_no_AGI_2020 = []
+def hyper_prior(rules: list, initial_weights: list, forecast_from=2020, forecast_to=2036) -> dict:
+	ps_AGI_forecast_to = []
+	ps_no_AGI_forecast_from = []
 
 	for rule in rules:
 		if 'virtual_successes' not in rule:
 			rule['virtual_successes'] = 1  # Default value
-		if 'forecast_from' not in rule:
-			rule['forecast_from'] = 2020  # Default value
 
 		if rule['name'] == 'calendar':
-			p_no_AGI_2020 = 1 - four_param_framework_calendar(
+			p_no_AGI_forecast_from = 1 - four_param_framework_calendar(
 				ftp=rule['ftp'],
 				regime_start=rule['regime_start'],
 				forecast_from=rule['regime_start'],
-				forecast_to=rule['forecast_from'],
+				forecast_to=forecast_from,
 				virtual_successes=rule['virtual_successes'])
 
-			p_AGI_2036_static = four_param_framework_calendar(
+			p_AGI_forecast_to_static = four_param_framework_calendar(
 				ftp=rule['ftp'],
 				regime_start=rule['regime_start'],
 				virtual_successes=rule['virtual_successes'],
-				forecast_from=rule['forecast_from'],
+				forecast_from=forecast_from,
+				forecast_to=forecast_to
 			)
 
 		if rule['name'] == 'res-year':
-			p_no_AGI_2020 = 1 - four_param_framework_researcher(
+			p_no_AGI_forecast_from = 1 - four_param_framework_researcher(
 				g_exp=rule['g_exp'],
 				g_act=rule['g_act'],
 				ftp_cal_equiv=rule['ftp_cal_equiv'],
 				regime_start=rule['regime_start'],
 				forecast_from=rule['regime_start'],
-				forecast_to=rule['forecast_from'],
+				forecast_to=forecast_from,
 				virtual_successes=rule['virtual_successes'])
 
-			p_AGI_2036_static = four_param_framework_researcher(
+			p_AGI_forecast_to_static = four_param_framework_researcher(
 				g_exp=rule['g_exp'],
 				g_act=rule['g_act'],
 				ftp_cal_equiv=rule['ftp_cal_equiv'],
 				regime_start=rule['regime_start'],
 				virtual_successes=rule['virtual_successes'],
-				forecast_from=rule['forecast_from'],
+				forecast_from=forecast_from,
+				forecast_to=forecast_to
 			)
 
 		if rule['name'] == 'computation':
 			if 'biohypothesis' not in rule:
-				p_no_AGI_2020 = 1 - four_param_framework_comp(
+				p_no_AGI_forecast_from = 1 - four_param_framework_comp(
 					g_exp=rule['g_exp'],
 					ftp_cal_equiv=rule['ftp_cal_equiv'],
 					rel_imp_res_comp=rule['rel_imp_res_comp'],
 					regime_start_year=rule['regime_start'],
 					forecast_from_year=rule['regime_start'],
-					forecast_to_year=rule['forecast_from'],
+					forecast_to_year=forecast_from,
 					spend2036=rule['spend2036'],
 					virtual_successes=rule['virtual_successes'])
 
-				p_AGI_2036_static = four_param_framework_comp(
+				p_AGI_forecast_to_static = four_param_framework_comp(
 					g_exp=rule['g_exp'],
 					ftp_cal_equiv=rule['ftp_cal_equiv'],
 					rel_imp_res_comp=rule['rel_imp_res_comp'],
 					regime_start_year=rule['regime_start'],
 					spend2036=rule['spend2036'],
 					virtual_successes=rule['virtual_successes'],
-					forecast_from_year=rule['forecast_from'],
+					forecast_from_year=forecast_from,
+					forecast_to_year=forecast_to
 				)
 
 			else:
 				if rule['biohypothesis'] == 'lifetime':
-					p_no_AGI_2020 = 1 - lifetime_anchor(
+					p_no_AGI_forecast_from = 1 - lifetime_anchor(
 						spend2036=rule['spend2036'],
 						regime_start_year=rule['regime_start'],
 						forecast_from_year=rule['regime_start'],
-						forecast_to_year=rule['forecast_from'],
+						forecast_to_year=forecast_from,
 						virtual_successes=rule['virtual_successes'])
 
-					p_AGI_2036_static = lifetime_anchor(
+					p_AGI_forecast_to_static = lifetime_anchor(
 						spend2036=rule['spend2036'],
 						regime_start_year=rule['regime_start'],
 						virtual_successes=rule['virtual_successes'],
-						forecast_from_year=rule['forecast_from']
+						forecast_from_year=forecast_from,
+						forecast_to_year=forecast_to,
 					)
 
 				if rule['biohypothesis'] == 'evolution':
-					p_no_AGI_2020 = 1 - evolutionary_anchor(
+					p_no_AGI_forecast_from = 1 - evolutionary_anchor(
 						spend2036=rule['spend2036'],
-						forecast_to_year=rule['forecast_from'],
+						forecast_to_year=forecast_from,
 						virtual_successes=rule['virtual_successes'],
 					)
 
-					p_AGI_2036_static = evolutionary_anchor(
+					p_AGI_forecast_to_static = evolutionary_anchor(
 						spend2036=rule['spend2036'],
 						virtual_successes=rule['virtual_successes'],
-						forecast_from_year=rule['forecast_from']
+						forecast_from_year=forecast_from,
+						forecast_to_year=forecast_to,
 					)
 
 		if rule['name'] == 'computation-loguniform':
 			# Forecast-from should really be 'the beginning of time', but any year before brain debugging compute is achieved will give the same result.
 			# I take the earliest year that will not result in a KeyError.
-			p_no_AGI_2020 = 1 - log_uniform(rule['spend2036'], forecast_from=1956, forecast_to=rule['forecast_from'])
+			p_no_AGI_forecast_from = 1 - log_uniform(rule['spend2036'], forecast_from=1956, forecast_to=forecast_from)
 
-			p_AGI_2036_static = log_uniform(rule['spend2036'], forecast_from=rule['forecast_from'], forecast_to=2036)
+			p_AGI_forecast_to_static = log_uniform(rule['spend2036'], forecast_from=forecast_from, forecast_to=forecast_to)
 
 		if rule['name'] == 'impossible':
-			p_no_AGI_2020 = 1
-			p_AGI_2036_static = 0
+			p_no_AGI_forecast_from = 1
+			p_AGI_forecast_to_static = 0
 
-		ps_no_AGI_2020.append(p_no_AGI_2020)
-		ps_AGI_2036.append(p_AGI_2036_static)
+		ps_no_AGI_forecast_from.append(p_no_AGI_forecast_from)
+		ps_AGI_forecast_to.append(p_AGI_forecast_to_static)
 
-	final_weights_unnormalized = np.asarray(initial_weights) * np.asarray(ps_no_AGI_2020)
+	final_weights_unnormalized = np.asarray(initial_weights) * np.asarray(ps_no_AGI_forecast_from)
 
 	# Not necessary for computation, but useful additional information for display or debugging
 	normalization_constant = sum(final_weights_unnormalized)
 	final_weights = final_weights_unnormalized / normalization_constant
 
 	return {
-		'pr2036hyper': np.average(ps_AGI_2036, weights=final_weights),
-		'pr2036static': np.average(ps_AGI_2036, weights=initial_weights),
-		'wts2020': final_weights}
+		'p_forecast_to_hyper': np.average(ps_AGI_forecast_to, weights=final_weights),
+		'p_forecast_to_static': np.average(ps_AGI_forecast_to, weights=initial_weights),
+		'wts_forecast_from': final_weights}

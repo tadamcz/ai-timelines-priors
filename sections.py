@@ -382,7 +382,7 @@ def section_6_3_1_regimestart():
 def section_7_2_1():
 	print("\nSection 7.2.1 Effect of hyper prior updates: first-trial probability")
 
-	df = pd.DataFrame(columns=['pr2036static', 'pr2036hyper'])  # forces the columns to appear in this order
+	df = pd.DataFrame(columns=['p_forecast_to_static', 'p_forecast_to_hyper'])  # forces the columns to appear in this order
 
 	row_inputs = [
 		[{'ftp': 1 / 100}, {'ftp': 1 / 1000}],
@@ -413,7 +413,7 @@ def section_7_2_1():
 def appendix_8():
 	print("\nAppendix 8: using a hyper-prior on different trial definitions")
 
-	df = pd.DataFrame(columns=['pr2036static', 'pr2036hyper'])  # forces the columns to appear in this order
+	df = pd.DataFrame(columns=['p_forecast_to_static', 'p_forecast_to_hyper'])  # forces the columns to appear in this order
 
 	# First rule is the same in all rows
 	rule1 = {'name': 'calendar',
@@ -486,8 +486,8 @@ def appendix_8():
 		datadict = functions.hyper_prior(input_list, initial_weights)
 
 		# We only display the second weight
-		datadict['wt2020'] = datadict['wts2020'][1]
-		del datadict['wts2020']
+		datadict['wt2020'] = datadict['wts_forecast_from'][1]
+		del datadict['wts_forecast_from']
 
 		datadict = to_percentage_strings(datadict)
 
@@ -526,9 +526,9 @@ def section_7_3():
 		rowname = to_fraction_strings(row[0]['ftp'])
 
 		datadict = functions.hyper_prior(row, initial_weights=[.8, .2])
-		datadict['pr2036 20% impossible'] = datadict.pop('pr2036hyper')
-		datadict['wt2020'] = datadict.pop('wts2020')[1]
-		del datadict['pr2036static']
+		datadict['pr2036 20% impossible'] = datadict.pop('p_forecast_to_hyper')
+		datadict['wt2020'] = datadict.pop('wts_forecast_from')[1]
+		del datadict['p_forecast_to_static']
 
 		datadict['pr2036 calendar-year'] = functions.four_param_framework_calendar(row[0]['ftp'])
 
@@ -626,12 +626,12 @@ def appendix_9():
 		rowname = str(row)
 
 		datadict = functions.hyper_prior(row, initial_weights=[0.8, 0.2])
-		del datadict['pr2036static']
+		del datadict['p_forecast_to_static']
 
-		datadict['pr2036 20% impossible'] = datadict.pop('pr2036hyper')
-		datadict['wt2020'] = datadict.pop('wts2020')[1]
+		datadict['pr2036 20% impossible'] = datadict.pop('p_forecast_to_hyper')
+		datadict['wt2020'] = datadict.pop('wts_forecast_from')[1]
 
-		datadict['pr2036 No Hyper'] = functions.hyper_prior(row, initial_weights=[1, 0])['pr2036hyper']
+		datadict['pr2036 No Hyper'] = functions.hyper_prior(row, initial_weights=[1, 0])['p_forecast_to_hyper']
 
 		datadict = to_percentage_strings(datadict)
 
@@ -781,13 +781,11 @@ def section_8():
 
 	for row in row_inputs:
 		datadict = functions.hyper_prior(row['rules'], initial_weights=row['weights'])
-		print(row['name'],to_percentage_strings(datadict['pr2036hyper']))
+		print(row['name'],to_percentage_strings(datadict['p_forecast_to_hyper']))
 
 	central = row_inputs[1]
-	for rule in central['rules']:
-		rule['forecast_from'] = 2025
-	datadict = functions.hyper_prior(central['rules'], initial_weights=central['weights'])
-	print("Central estimate conditional on no AGI by 2025:",to_percentage_strings(datadict['pr2036hyper']))
+	datadict = functions.hyper_prior(central['rules'], initial_weights=central['weights'], forecast_from=2025)
+	print("Central estimate conditional on no AGI by 2025:",to_percentage_strings(datadict['p_forecast_to_hyper']))
 
 
 def to_percentage_strings(input):
