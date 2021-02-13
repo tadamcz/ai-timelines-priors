@@ -11,6 +11,7 @@ from sections import to_percentage_strings, to_fraction_strings, round_sig
 import matplotlib.pyplot as plt
 import numpy as np
 import mpld3
+import matplotlib.ticker as mtick
 
 app = Flask(__name__)
 app.config['WTF_CSRF_ENABLED'] = False  # not needed, there are no user accounts
@@ -130,7 +131,17 @@ class HyperPriorForm(FlaskForm):
 
 		self.validate()
 
-
+def plot_helper(xs,ys):
+	fig, ax = plt.subplots()
+	fig.set_size_inches(5, 2)
+	ax.plot(xs, ys)
+	ax.set_ylabel("Pr(AGI)")
+	ax.set_xlabel("Year")
+	ax.yaxis.set_major_formatter(mtick.PercentFormatter(xmax=1))
+	mpld3.plugins.clear(fig)  # We only need a very simple plot
+	plot_html = mpld3.fig_to_html(fig)
+	plt.close(fig)  # Otherwise the matplotlib object stays in memory forever
+	return plot_html
 
 class UpdateRuleResult:
 	def __init__(self, _callable, input_args, init_weight):
@@ -141,19 +152,12 @@ class UpdateRuleResult:
 		self.init_weight = init_weight
 
 	def create_plot(self, _callable, x_from_to=(2020, 2100), is_date=True):
-		fig, ax = plt.subplots()
-		fig.set_size_inches(5, 2)
 		x_from, x_to = x_from_to
 		xs = np.hstack((np.arange(x_from, 2036, 3), np.arange(2037, x_to, 15)))  # Only every N years, because this has an effect on performance
 		ys = [_callable(i) for i in xs]
 		if is_date:
 			xs = [datetime(x, 1, 1) for x in xs]
-		ax.plot(xs, ys)
-		ax.set_ylabel("Pr(AGI)")
-		ax.set_xlabel("Year")
-		mpld3.plugins.clear(fig) # We only need a very simple plot
-		self.plot = mpld3.fig_to_html(fig)
-		plt.close(fig)  # Otherwise the matplotlib object stays in memory forever
+		self.plot = plot_helper(xs,ys)
 
 
 class HyperPriorResult:
@@ -216,17 +220,10 @@ class HyperPriorResult:
 		self.pAGI_2036_hyper = to_percentage_strings(hyper_results[2036]['p_forecast_to_hyper'])
 
 	def create_plot(self):
-		fig, ax = plt.subplots()
-		fig.set_size_inches(5, 2)
 		xs = self.pAGI_hyper.keys()
 		xs = [datetime(x, 1, 1) for x in xs]
 		ys = [v['p_forecast_to_hyper'] for v in self.pAGI_hyper.values()]
-		ax.plot(xs, ys)
-		ax.set_ylabel("Pr(AGI)")
-		ax.set_xlabel("Year")
-		mpld3.plugins.clear(fig) # We only need a very simple plot
-		self.plot_hyper = mpld3.fig_to_html(fig)
-		plt.close(fig)
+		self.plot_hyper = plot_helper(xs,ys)
 
 
 @app.route('/', methods=['GET', 'POST'])
