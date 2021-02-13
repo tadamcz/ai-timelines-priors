@@ -151,6 +151,7 @@ class UpdateRuleResult:
 		ax.plot(xs, ys)
 		ax.set_ylabel("Pr(AGI)")
 		ax.set_xlabel("Year")
+		mpld3.plugins.clear(fig) # We only need a very simple plot
 		self.plot = mpld3.fig_to_html(fig)
 		plt.close(fig)  # Otherwise the matplotlib object stays in memory forever
 
@@ -223,6 +224,7 @@ class HyperPriorResult:
 		ax.plot(xs, ys)
 		ax.set_ylabel("Pr(AGI)")
 		ax.set_xlabel("Year")
+		mpld3.plugins.clear(fig) # We only need a very simple plot
 		self.plot_hyper = mpld3.fig_to_html(fig)
 		plt.close(fig)
 
