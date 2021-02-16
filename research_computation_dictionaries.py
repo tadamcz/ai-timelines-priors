@@ -1,4 +1,5 @@
 import numpy as np
+from functools import lru_cache
 
 computation_prices = {
 	1800: 10 ** -6,
@@ -31,6 +32,7 @@ for year in range(2037, 2150):
 	computation_prices[year] = computation_prices[2036] / 2 ** (distance_to_2036 / 2.5)
 
 
+@lru_cache()
 def generate_spending_dict(spend2036, spend2020=10 ** 6.7):
 	"""
 	Extrapolate spending based on values for 2020 and 2036, in an inverse quadratic model.
@@ -61,6 +63,7 @@ def generate_spending_dict(spend2036, spend2020=10 ** 6.7):
 	return spending_dict_out
 
 
+@lru_cache()
 def generate_named_spending_dict(name):
 	if name == 'central':
 		# geometric interpolation between conservative and aggressive, anchoring off the value for 2036
