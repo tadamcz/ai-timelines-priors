@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import mpld3
 import matplotlib.ticker as mtick
+from collections import OrderedDict
 
 app = Flask(__name__)
 app.config['WTF_CSRF_ENABLED'] = False  # not needed, there are no user accounts
@@ -267,7 +268,7 @@ class HyperPriorResult:
 def show():
 	form = HyperPriorForm()
 	if form.validate():
-		dict_x_y_pairs_for_multiline_plot = {}
+		dict_x_y_pairs_for_multiline_plot = OrderedDict()  # Use for compatibility with Python version 3.7 running on Elastic Beanstalk
 
 		result = HyperPriorResult(update_hyper_from=form.rule_out_agi_by.data)
 		kwargs_all_rules = {
