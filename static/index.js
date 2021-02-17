@@ -16,6 +16,26 @@ init_weight_comp_relative_res_field = $('#init_weight_comp_relative_res')
 init_weight_lifetime_field = $('#init_weight_lifetime')
 init_weight_evolution_field = $('#init_weight_evolution')
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// Hack to move y-axes that were being cut off. Customizing axis placement appears to be impossible or poorly documented in mpld3
+async function moveYAxes(attempts){
+    labels = $('.mpld3-text')
+    console.log(attempts,labels.length)
+    if (labels.length > 0) {
+        labels.attr('transform', (i, value) => `${value || ""} translate(0 10)`)
+        return // after one attempt on loaded axes
+    }
+    else if (attempts < 20) {
+        await sleep(200)
+        attempts++
+        moveYAxes(attempts)
+    }
+}
+moveYAxes(0)
+
 })
 
 function fillLow() {
