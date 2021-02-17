@@ -26,7 +26,7 @@ class HyperPriorForm(FlaskForm):
 	regime_start_year = IntegerField(validators=[validators.Optional()], label='Regime start year', default=1956)
 
 	g_exp = FloatField(validators=[validators.Optional()], label='Typical annual growth for STEM researchers (%)', default=4.3)
-	g_act = FloatField(validators=[validators.Optional()], label='Annual growth of AI researchers (%)', default=11)
+	g_act = FloatField(validators=[validators.Optional()], label='Annual growth of AI researchers until 2036 (%)', default=11)
 
 	relative_imp_res_comp = IntegerField(validators=[validators.Optional(), positive_validator], label='A 1% increase in the number of researchers is equivalent to an X% increase in computation', default=5)
 

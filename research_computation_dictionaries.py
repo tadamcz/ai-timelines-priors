@@ -84,3 +84,27 @@ def generate_named_spending_dict(name):
 
 	elif name == 'conservative':
 		return generate_spending_dict(10 ** 8)
+
+@lru_cache()
+def generate_cumulative_researcher_years_dict(growth_to_2036, growth_after_2036, regime_start):
+	"""
+	Assume there were initially 10 researchers at the regime start-time.
+	Assume there were initially 10/g_act cumulative researcher-years at the regime start-time.
+	Calculate how the number of cumulative researcher-years grows over time. (Note: it doesn't grow at the same rate as the number
+	of researchers. You have to calculate a running total of the cumulative researcher-years over time.)
+	"""
+
+	researchers = {regime_start: 10}
+
+	cumulative_research_years = {regime_start: 10 / growth_to_2036}
+
+	for year in range(regime_start + 1, 2037):
+		researchers[year] = researchers[year - 1] * (1 + growth_to_2036)
+
+	for year in range(2037, 2101):
+		researchers[year] = researchers[year - 1] * (1 + growth_after_2036)
+
+	for year in range(regime_start + 1, 2101):
+		cumulative_research_years[year] = cumulative_research_years[year - 1] + researchers[year]
+
+	return cumulative_research_years

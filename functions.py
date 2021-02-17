@@ -1,7 +1,7 @@
 from scipy import integrate, optimize
 import numpy as np
 from collections import OrderedDict
-import computation_dictionaries
+import research_computation_dictionaries
 from functools import lru_cache
 
 # Global variables
@@ -87,11 +87,16 @@ def solve_for_ftp_res(g_exp=4.3 / 100, ftp_cal=1 / 300):
 	return ftp_res_solution
 
 
-def four_param_framework_researcher(g_act, ftp_res=None, ftp_cal_equiv=None, g_exp=None, regime_start=1956, forecast_from=2020, forecast_to=2036, virtual_successes=1):
+def four_param_framework_researcher(g_act, ftp_res=None, ftp_cal_equiv=None, g_exp=None, regime_start=1956, forecast_from=2020, forecast_to=2036, virtual_successes=1, g_act_after_2036=None):
 	if ftp_cal_equiv is not None and g_exp is not None:
 		method = 'indirect'
 	if ftp_res is not None:
 		method = 'direct'
+	if g_act_after_2036 is None:
+		if g_exp is not None:
+			g_act_after_2036 = g_exp
+		else:
+			g_act_after_2036 = 0  # Set some other default value if g_exp not provided. This should have no effect on the final result.
 
 	if ftp_res is not None and (ftp_cal_equiv is not None or g_exp is not None):
 		raise ValueError("Supply either (ftp_cal_equiv and g_exp) or supply ftp_res")
@@ -99,10 +104,9 @@ def four_param_framework_researcher(g_act, ftp_res=None, ftp_cal_equiv=None, g_e
 	if method == 'indirect':
 		ftp_res = solve_for_ftp_res(g_exp, ftp_cal_equiv)
 
-	n_trials_per_year = g_act * (1 / trial_increment)
-
-	failures = int((forecast_from - regime_start) * n_trials_per_year)
-	n_trials_forecast = int((forecast_to - forecast_from) * n_trials_per_year)
+	researcher_years = research_computation_dictionaries.generate_cumulative_researcher_years_dict(growth_to_2036=g_act, growth_after_2036=g_act_after_2036, regime_start=regime_start)
+	failures = number_geometric_increases(researcher_years[regime_start], researcher_years[forecast_from])
+	n_trials_forecast = number_geometric_increases(researcher_years[forecast_from], researcher_years[forecast_to])
 
 	return forecast_generalized_laplace(
 		failures=failures,
@@ -176,13 +180,13 @@ def four_param_framework_comp(
 
 def get_year_for_computation_amount(c, spend2036):
 	if spend2036 in ['conservative','central','aggressive']:
-		biggest_spends = computation_dictionaries.generate_named_spending_dict(spend2036)
+		biggest_spends = research_computation_dictionaries.generate_named_spending_dict(spend2036)
 	else:
-		biggest_spends = computation_dictionaries.generate_spending_dict(spend2036)
+		biggest_spends = research_computation_dictionaries.generate_spending_dict(spend2036)
 
 	computation_to_year = OrderedDict()
 	year_to_computation = OrderedDict()
-	for year, price in computation_dictionaries.computation_prices.items():
+	for year, price in research_computation_dictionaries.computation_prices.items():
 		try:
 			computation_to_year[biggest_spends[year] / price] = year
 			year_to_computation[year] = biggest_spends[year] / price
@@ -197,12 +201,12 @@ def get_year_for_computation_amount(c, spend2036):
 
 def get_computation_amount_for_year(y, spend2036):
 	if spend2036 in ['conservative','central','aggressive']:
-		biggest_spends = computation_dictionaries.generate_named_spending_dict(spend2036)
+		biggest_spends = research_computation_dictionaries.generate_named_spending_dict(spend2036)
 	else:
-		biggest_spends = computation_dictionaries.generate_spending_dict(spend2036)
+		biggest_spends = research_computation_dictionaries.generate_spending_dict(spend2036)
 
 	year_to_computation = OrderedDict()
-	for year, price in computation_dictionaries.computation_prices.items():
+	for year, price in research_computation_dictionaries.computation_prices.items():
 		try:
 			year_to_computation[year] = biggest_spends[year] / price
 		except KeyError:
