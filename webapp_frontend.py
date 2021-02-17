@@ -31,7 +31,7 @@ class HyperPriorForm(FlaskForm):
 
 	relative_imp_res_comp = IntegerField(validators=[validators.Optional(), positive_validator], label='A 1% increase in the number of researchers is equivalent to an X% increase in computation', default=5)
 
-	comp_spending_assumption = FloatField(label='Maximum computation spend by 2036 ($ millions)', default=1000)
+	comp_spending_assumption = FloatField(label='Maximum computation spend by 2036 ($ billions)', default=1)
 
 	init_weight_calendar = FloatField(validators=[validators.Optional(), positive_validator], label='Calendar-year trial definition', default=.3)
 	init_weight_researcher = FloatField(validators=[validators.Optional(), positive_validator], label='Researcher-year trial definition', default=.3)
@@ -305,7 +305,7 @@ def show():
 
 		if form.computation_relative_res_filled():
 			kwargs = {**kwargs_all_rules, **{
-				'spend2036': 1e6*form.comp_spending_assumption.data,
+				'spend2036': 1e9*form.comp_spending_assumption.data,
 				'rel_imp_res_comp': form.relative_imp_res_comp.data,
 				'g_exp': form.g_exp.data/100,
 				'ftp_cal_equiv': float(form.first_trial_probability.data),
@@ -321,11 +321,11 @@ def show():
 
 
 		lifetime_kwargs = {**kwargs_all_rules, **{
-			'spend2036': 1e6*form.comp_spending_assumption.data,
+			'spend2036': 1e9*form.comp_spending_assumption.data,
 			'regime_start': 1956}}
 
 		evolution_kwargs = {**kwargs_all_rules, **{
-			'spend2036': 1e6*form.comp_spending_assumption.data}}
+			'spend2036': 1e9*form.comp_spending_assumption.data}}
 
 		def lifetime_callable(year):
 			return functions.lifetime_anchor(forecast_to=year, **lifetime_kwargs)

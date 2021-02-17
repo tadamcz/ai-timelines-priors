@@ -66,7 +66,7 @@ function fillCentral() {
     g_act_field.val(11)
 
     relative_imp_res_comp_field.val(5)
-    comp_spending_assumption_field.val(1000)
+    comp_spending_assumption_field.val(1)
 
 
     init_weight_calendar_field.val(.3)
@@ -88,7 +88,7 @@ function fillHigh() {
     g_act_field.val(16)
 
     relative_imp_res_comp_field.val(5)
-    comp_spending_assumption_field.val(100000)
+    comp_spending_assumption_field.val(100)
 
 
     init_weight_calendar_field.val(.1)
