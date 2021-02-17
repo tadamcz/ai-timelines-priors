@@ -23,7 +23,7 @@ function sleep(ms) {
 
 // Hack to move y-axes that were being cut off. Customizing axis placement appears to be impossible or poorly documented in mpld3
 async function moveYAxes(attempts){
-    labels = $('.mpld3-text')
+    labels = $('.mpld3-text[transform]') // add [transform] so we only catch rotated labels
     console.log(attempts,labels.length)
     if (labels.length > 0) {
         labels.attr('transform', (i, value) => `${value || ""} translate(0 10)`)

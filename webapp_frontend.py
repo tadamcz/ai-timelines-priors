@@ -144,6 +144,21 @@ def plot_helper(xs,ys):
 	plt.close(fig)  # Otherwise the matplotlib object stays in memory forever
 	return plot_html
 
+def plot_helper_multiline(dict_named_x_y_pairs):
+	fig, ax = plt.subplots()
+	fig.set_size_inches(5, 2)
+	for name,pair in dict_named_x_y_pairs.items():
+		xs, ys = pair
+		ax.plot(xs, ys, label=name)
+	ax.legend()
+	ax.set_ylabel("Pr(AGI)")
+	ax.set_xlabel("Year")
+	ax.yaxis.set_major_formatter(mtick.PercentFormatter(xmax=1))
+	mpld3.plugins.clear(fig)  # We only need a very simple plot
+	plot_html = mpld3.fig_to_html(fig)
+	plt.close(fig)  # Otherwise the matplotlib object stays in memory forever
+	return plot_html
+
 class UpdateRuleResult:
 	def __init__(self, _callable, input_args, init_weight):
 		if _callable:
@@ -159,6 +174,8 @@ class UpdateRuleResult:
 		if is_date:
 			xs = [datetime(x, 1, 1) for x in xs]
 		self.plot = plot_helper(xs,ys)
+		self.xs_plot = xs
+		self.ys_plot = ys
 
 
 class HyperPriorResult:
@@ -250,6 +267,8 @@ class HyperPriorResult:
 def show():
 	form = HyperPriorForm()
 	if form.validate():
+		dict_x_y_pairs_for_multiline_plot = {}
+
 		result = HyperPriorResult(update_hyper_from=form.rule_out_agi_by.data)
 		kwargs_all_rules = {
 			'forecast_from': form.rule_out_agi_by.data,
@@ -267,6 +286,7 @@ def show():
 
 			calendar_result = UpdateRuleResult(calendar_callable, kwargs, form.init_weight_calendar.data)
 			result.calendar = calendar_result
+			dict_x_y_pairs_for_multiline_plot['Calendar-year'] = (calendar_result.xs_plot,calendar_result.ys_plot)
 
 		if form.researcher_filled():
 			kwargs = {**kwargs_all_rules, **{
@@ -281,6 +301,7 @@ def show():
 
 			researcher_result = UpdateRuleResult(researcher_callable, kwargs, form.init_weight_researcher.data)
 			result.researcher = researcher_result
+			dict_x_y_pairs_for_multiline_plot['Researcher-year'] = (researcher_result.xs_plot,researcher_result.ys_plot)
 
 		if form.computation_relative_res_filled():
 			kwargs = {**kwargs_all_rules, **{
@@ -296,6 +317,7 @@ def show():
 
 			comp_relative_res = UpdateRuleResult(computation_callable, kwargs, form.init_weight_comp_relative_res.data)
 			result.comp_relative_res = comp_relative_res
+			dict_x_y_pairs_for_multiline_plot['Computation vs research'] = (comp_relative_res.xs_plot,comp_relative_res.ys_plot)
 
 
 		lifetime_kwargs = {**kwargs_all_rules, **{
@@ -311,8 +333,16 @@ def show():
 		def evolution_callable(year):
 			return functions.evolutionary_anchor(forecast_to=year,**evolution_kwargs)
 
-		result.lifetime = UpdateRuleResult(lifetime_callable, lifetime_kwargs, form.init_weight_lifetime.data)
-		result.evolution = UpdateRuleResult(evolution_callable, evolution_kwargs, form.init_weight_evolution.data)
+		lifetime_result = UpdateRuleResult(lifetime_callable, lifetime_kwargs, form.init_weight_lifetime.data)
+		evolution_result = UpdateRuleResult(evolution_callable, evolution_kwargs, form.init_weight_evolution.data)
+
+		result.lifetime = lifetime_result
+		result.evolution = evolution_result
+
+		dict_x_y_pairs_for_multiline_plot['Lifetime'] = (lifetime_result.xs_plot, lifetime_result.ys_plot)
+		dict_x_y_pairs_for_multiline_plot['Evolution'] = (evolution_result.xs_plot, evolution_result.ys_plot)
+
+		result.plot_multiline = plot_helper_multiline(dict_x_y_pairs_for_multiline_plot)
 
 		agi_impossible = UpdateRuleResult(None, {'name': 'impossible'}, form.init_weight_agi_impossible.data)
 		agi_impossible.p2036 = to_percentage_strings(0)
