@@ -25,14 +25,14 @@ in the report "Semi-informative priors over AI timelines".
 
 
 <form method="POST">
-<p>{{ render_field(form.virtual_successes, info="This input is not discussed in the blog, see section 4 of report. Used in all update rules") }}</p>
+<p>{{ render_field(form.virtual_successes, info="This input is not discussed in the blog post, see section 4 of report.") }}</p>
 <p>{{ render_field(form.rule_out_agi_by) }}</p>
 
-<h2>Calendar-year trial definition</h2>
+<h2>Calendar year trial definition</h2>
     <div class="flex update_rule_box">
     <div class="input">
         {{ render_field(form.first_trial_probability)}}
-        {{ render_field(form.regime_start_year, info="Used in calendar year and researcher year update rules. The computation rules have fixed start times.") }}
+        {{ render_field(form.regime_start_year, info="Used in calendar year and researcher-year update rules. The computation rules have fixed start times.") }}
     <button type='submit'>Submit all</button>
     </div>
     <div class="output">
@@ -49,7 +49,7 @@ in the report "Semi-informative priors over AI timelines".
 
 <div class="flex update_rule_box">
     <div class="input">
-        {{ render_field(form.g_exp, info='One calendar-year trial with the first trial probability defined above is equivalent to this increase in the number of AI researchers. See section 6.1 of the report.')}}
+        {{ render_field(form.g_exp, info='One calendar year trial with the first trial probability defined above is equivalent to this increase in the number of AI researchers. See section 6.1 of the report.')}}
         {{ render_field(form.g_act, info="After 2036, growth rates return to the typical annual growth for STEM researchers.") }}
 
     <button type='submit'>Submit all</button>
@@ -70,7 +70,7 @@ in the report "Semi-informative priors over AI timelines".
         <div>A 1% increase in the number of researchers is equivalent to a {{ render_field_nolabel(form.relative_imp_res_comp, inline=True)}}% increase in computation
         {{ info("Or equivalently: one doubling in the number of researchers is equivalent to X doublings in computation.") }}
         </div>
-        {{ render_field(form.comp_spending_assumption, info="Amount spent on computation means the amount spent on biggest AI experiment to date (see 6.2.1). Used in all computation trial definitions. We assume this amount does not increase after 2036. You may enter large numbers using scientific notation e.g. '1e5'.") }}
+        {{ render_field(form.comp_spending_assumption, info="The amount spent on the biggest AI experiment to date in 2036 (see section 6.2.1 of report). Used in all computation trial definitions. We assume this amount does not increase after 2036. You may enter large numbers using scientific notation e.g. '1e5'.") }}
     <button type='submit'>Submit all</button>
     </div>
     <div class="output">
