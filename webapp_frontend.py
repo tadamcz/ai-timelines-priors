@@ -147,7 +147,7 @@ def plot_helper(xs,ys):
 
 def plot_helper_multiline(dict_named_x_y_pairs):
 	fig, ax = plt.subplots()
-	fig.set_size_inches(5, 2)
+	fig.set_size_inches(5, 3.5)
 	for name,pair in reversed(dict_named_x_y_pairs.items()):
 		xs, ys = pair
 		ax.plot(xs, ys, label=name)
