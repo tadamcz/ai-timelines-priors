@@ -193,8 +193,8 @@ def section6_2_comp_from_research_helper(biggest_spends_method):
 	for ftp_cal_equiv in [1 / 50, 1 / 100, 1 / 300, 1 / 1000, 1 / 3000]:
 		dict_comprehension = {rel_imp_res_comp:
 								  functions.four_param_framework_comp(rel_imp_res_comp=rel_imp_res_comp,
-																	  regime_start_year=1956,
-																	  forecast_to_year=2036,
+																	  regime_start=1956,
+																	  forecast_to=2036,
 																	  spend2036=biggest_spends_method,
 																	  ftp_cal_equiv=ftp_cal_equiv)
 							  for rel_imp_res_comp in columns}

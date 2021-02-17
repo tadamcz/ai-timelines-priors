@@ -25,7 +25,8 @@ in the report "Semi-informative priors over AI timelines".
 
 
 <form method="POST">
-{{ render_field(form.virtual_successes, info="This input is not discussed in the blog, see section 4 of report. Used in all update rules") }}
+<p>{{ render_field(form.virtual_successes, info="This input is not discussed in the blog, see section 4 of report. Used in all update rules") }}</p>
+<p>{{ render_field(form.rule_out_agi_by) }}</p>
 
 <h2>Calendar-year trial definition</h2>
     <div class="flex update_rule_box">
@@ -121,7 +122,7 @@ in the report "Semi-informative priors over AI timelines".
     <tr>
         <th>Initial weights of update rules {{ info("These weights need not sum to 1, they can be any non-negative numbers") }}</th>
         <th>Initial weights {{ info("Normalized","small") }} </th>
-        <th>Weights in 2020 </th>
+        <th>Weights in {{ result.update_hyper_from }} </th>
         <th>Probability of AGI by 2036</th>
     </tr>
 

@@ -144,9 +144,9 @@ def number_geometric_increases(start, end, increment=trial_increment):
 
 def four_param_framework_comp(
 		rel_imp_res_comp=None,
-		forecast_from_year=2020,
-		forecast_to_year=2036,
-		regime_start_year=1956,
+		forecast_from=2020,
+		forecast_to=2036,
+		regime_start=1956,
 		spend2036=None,
 		computation_at_regime_start=None,
 		computation_at_forecasted_time=None,
@@ -162,11 +162,11 @@ def four_param_framework_comp(
 	if ftp_comp is None:
 		ftp_comp = solve_for_ftp_comp_indirect(ftp_cal_equiv, rel_imp_res_comp, g_exp=g_exp)
 
-	computation2020 = get_computation_amount_for_year(forecast_from_year, spend2036)
+	computation2020 = get_computation_amount_for_year(forecast_from, spend2036)
 
 	if computation_at_regime_start is None and computation_at_forecasted_time is None:
-		computation_at_regime_start = get_computation_amount_for_year(regime_start_year, spend2036)
-		computation_at_forecasted_time = get_computation_amount_for_year(forecast_to_year, spend2036)
+		computation_at_regime_start = get_computation_amount_for_year(regime_start, spend2036)
+		computation_at_forecasted_time = get_computation_amount_for_year(forecast_to, spend2036)
 
 	n_failures_regime_start_to_now = number_geometric_increases(computation_at_regime_start, computation2020)
 	n_trials_forecast = number_geometric_increases(computation2020, computation_at_forecasted_time)
@@ -215,7 +215,7 @@ def get_computation_amount_for_year(y, spend2036):
 	return year_to_computation[y]
 
 
-def evolutionary_anchor(spend2036, virtual_successes=1, forecast_from_year=2020, forecast_to_year=2036):
+def evolutionary_anchor(spend2036, virtual_successes=1, forecast_from=2020, forecast_to=2036):
 	c_initial = 1e21
 	c_evolution = 1e41
 
@@ -233,19 +233,19 @@ def evolutionary_anchor(spend2036, virtual_successes=1, forecast_from_year=2020,
 
 	c_brain_debug = 1e21
 
-	computation_at_forecasted_time = get_computation_amount_for_year(forecast_to_year, spend2036)
+	computation_at_forecasted_time = get_computation_amount_for_year(forecast_to, spend2036)
 
 	return four_param_framework_comp(
 		computation_at_regime_start=c_brain_debug,
 		computation_at_forecasted_time=computation_at_forecasted_time,
 		spend2036=spend2036,
 		ftp_comp=ftp_comp_solution,
-		forecast_from_year=forecast_from_year,
+		forecast_from=forecast_from,
 		virtual_successes=virtual_successes)
 
 
-def lifetime_anchor(spend2036, virtual_successes=1, regime_start_year=1956, forecast_from_year=2020, forecast_to_year=2036):
-	c_initial = get_computation_amount_for_year(regime_start_year, spend2036)
+def lifetime_anchor(spend2036, virtual_successes=1, regime_start=1956, forecast_from=2020, forecast_to=2036):
+	c_initial = get_computation_amount_for_year(regime_start, spend2036)
 	c_lifetime = 1e24
 
 	n_trials_reg_start_to_lifetime = number_geometric_increases(c_initial, c_lifetime)
@@ -261,9 +261,9 @@ def lifetime_anchor(spend2036, virtual_successes=1, regime_start_year=1956, fore
 	ftp_comp_solution = optimize.brentq(f_to_solve, probability_solution_leftbound, probability_solution_rightbound)
 
 	return four_param_framework_comp(
-		forecast_to_year=forecast_to_year,
-		forecast_from_year=forecast_from_year,
-		regime_start_year=regime_start_year,
+		forecast_to=forecast_to,
+		forecast_from=forecast_from,
+		regime_start=regime_start,
 		spend2036=spend2036,
 		ftp_comp=ftp_comp_solution,
 		virtual_successes=virtual_successes)
@@ -343,9 +343,9 @@ def hyper_prior(rules: list, initial_weights: list, forecast_from=2020, forecast
 					g_exp=rule['g_exp'],
 					ftp_cal_equiv=rule['ftp_cal_equiv'],
 					rel_imp_res_comp=rule['rel_imp_res_comp'],
-					regime_start_year=rule['regime_start'],
-					forecast_from_year=rule['regime_start'],
-					forecast_to_year=forecast_from,
+					regime_start=rule['regime_start'],
+					forecast_from=rule['regime_start'],
+					forecast_to=forecast_from,
 					spend2036=rule['spend2036'],
 					virtual_successes=rule['virtual_successes'])
 
@@ -353,42 +353,42 @@ def hyper_prior(rules: list, initial_weights: list, forecast_from=2020, forecast
 					g_exp=rule['g_exp'],
 					ftp_cal_equiv=rule['ftp_cal_equiv'],
 					rel_imp_res_comp=rule['rel_imp_res_comp'],
-					regime_start_year=rule['regime_start'],
+					regime_start=rule['regime_start'],
 					spend2036=rule['spend2036'],
 					virtual_successes=rule['virtual_successes'],
-					forecast_from_year=forecast_from,
-					forecast_to_year=forecast_to
+					forecast_from=forecast_from,
+					forecast_to=forecast_to
 				)
 
 			else:
 				if rule['biohypothesis'] == 'lifetime':
 					p_no_AGI_forecast_from = 1 - lifetime_anchor(
 						spend2036=rule['spend2036'],
-						regime_start_year=rule['regime_start'],
-						forecast_from_year=rule['regime_start'],
-						forecast_to_year=forecast_from,
+						regime_start=rule['regime_start'],
+						forecast_from=rule['regime_start'],
+						forecast_to=forecast_from,
 						virtual_successes=rule['virtual_successes'])
 
 					p_AGI_forecast_to_static = lifetime_anchor(
 						spend2036=rule['spend2036'],
-						regime_start_year=rule['regime_start'],
+						regime_start=rule['regime_start'],
 						virtual_successes=rule['virtual_successes'],
-						forecast_from_year=forecast_from,
-						forecast_to_year=forecast_to,
+						forecast_from=forecast_from,
+						forecast_to=forecast_to,
 					)
 
 				if rule['biohypothesis'] == 'evolution':
 					p_no_AGI_forecast_from = 1 - evolutionary_anchor(
 						spend2036=rule['spend2036'],
-						forecast_to_year=forecast_from,
+						forecast_to=forecast_from,
 						virtual_successes=rule['virtual_successes'],
 					)
 
 					p_AGI_forecast_to_static = evolutionary_anchor(
 						spend2036=rule['spend2036'],
 						virtual_successes=rule['virtual_successes'],
-						forecast_from_year=forecast_from,
-						forecast_to_year=forecast_to,
+						forecast_from=forecast_from,
+						forecast_to=forecast_to,
 					)
 
 		if rule['name'] == 'computation-loguniform':

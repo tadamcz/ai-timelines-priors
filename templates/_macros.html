@@ -66,7 +66,9 @@
 
 {% macro table_data(result_object, result_rule_object) %}
 <td>
+    {% if result_rule_object %}
     {{ result_rule_object.weight_init_normalized }}
+    {% endif %}
 </td>
 
 <td>

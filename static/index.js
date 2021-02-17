@@ -1,6 +1,7 @@
 $(document).ready(function() {
 
 // Create jQuery objects once, use multiple times later
+rule_out_agi_by_field = $('#rule_out_agi_by')
 virtual_successes_field = $('#virtual_successes')
 regime_start_year_field = $('#regime_start_year')
 first_trial_probability_field = $('#first_trial_probability')
@@ -39,6 +40,7 @@ moveYAxes(0)
 })
 
 function fillLow() {
+    rule_out_agi_by_field.val(2020)
     virtual_successes_field.val(0.5)
     regime_start_year_field.val(1956)
     first_trial_probability_field.val(0.001)
@@ -56,6 +58,7 @@ function fillLow() {
 }
 
 function fillCentral() {
+    rule_out_agi_by_field.val(2020)
     virtual_successes_field.val(1)
     regime_start_year_field.val(1956)
     first_trial_probability_field.val('1/300')
@@ -77,6 +80,7 @@ function fillCentral() {
 }
 
 function fillHigh() {
+    rule_out_agi_by_field.val(2020)
     virtual_successes_field.val(1)
     regime_start_year_field.val(2000)
     first_trial_probability_field.val('1/100')
