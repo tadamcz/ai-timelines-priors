@@ -8,23 +8,16 @@ computation_prices = {
 	2000: 10 ** -12,
 	2008: 10 ** -16,
 	2020: 10 ** -17,
-	2021: 10 ** -17.2,
-	2022: 10 ** -17.4,
-	2023: 10 ** -17.6,
-	2024: 10 ** -17.8,
-	2025: 10 ** -18,
-	2026: 10 ** -18.1,
-	2027: 10 ** -18.2,
-	2028: 10 ** -18.3,
-	2029: 10 ** -18.4,
-	2030: 10 ** -18.5,
-	2031: 10 ** -18.6,
-	2032: 10 ** -18.7,
-	2033: 10 ** -18.8,
-	2034: 10 ** -18.9,
-	2035: 10 ** -18.95,
 	2036: 10 ** -19,
 }
+
+# Interpolate computation prices between 2020 and 2036. Results are spaced evenly in log-space.
+log_units_total = np.log(computation_prices[2036]) - np.log(computation_prices[2020])
+log_units_per_year = log_units_total / 16
+for year in range(2021, 2036):
+	distance_to_2020 = year - 2020
+	log_price = np.log(computation_prices[2020]) + distance_to_2020 * log_units_per_year
+	computation_prices[year] = np.exp(log_price)
 
 # Extrapolate computation prices based on a halving time of 2.5 years after 2036
 for year in range(2037, 2150):
