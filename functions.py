@@ -293,7 +293,17 @@ def log_uniform(spend2036, forecast_from=2020, forecast_to=2036):
 	return p_per_OOM_after_start * OOMs_in_brain_to_evo_and_start_to_end
 
 
-def hyper_prior(rules: list, initial_weights: list, forecast_from=2020, forecast_to=2036) -> dict:
+def hyper_prior_single_update(rules, initial_weights, forecast_to=2036, forecast_from=None) -> dict:
+	if not forecast_from:
+		# By default we do a single update on a single year of observed AGI failures, this gives the most accurate answer and is technically correct
+		forecast_from = forecast_to - 1
+	else:
+		# We can override the default to conduct just a single update even when multiple years of AGI failure have been observed.
+		# This will cause forecasts to be weighted at the weights in `forecast_from`.
+		# These weights are outdated when `forecast_from` is not equal to `forecast_to - 1`.
+		# However, the impact on the results is usually minor.
+		forecast_from = forecast_from
+
 	ps_AGI_forecast_to = []
 	ps_no_AGI_forecast_from = []
 
@@ -409,9 +419,57 @@ def hyper_prior(rules: list, initial_weights: list, forecast_from=2020, forecast
 
 	# Not necessary for computation, but useful additional information for display or debugging
 	normalization_constant = sum(final_weights_unnormalized)
-	final_weights = final_weights_unnormalized / normalization_constant
+	weights_forecast_from = final_weights_unnormalized / normalization_constant
 
 	return {
-		'p_forecast_to_hyper': np.average(ps_AGI_forecast_to, weights=final_weights),
+		'p_forecast_to_hyper': np.average(ps_AGI_forecast_to, weights=weights_forecast_from),
 		'p_forecast_to_static': np.average(ps_AGI_forecast_to, weights=initial_weights),
-		'wts_forecast_from': final_weights}
+		'wts_forecast_from': weights_forecast_from}
+
+def hyper_prior(rules: list, initial_weights: list, forecast_from=2020, forecast_to=2036, return_sequence=False, pivot_to_coarse=None) -> dict:
+	"""
+	:param return_sequence: By default, we only return the results for forecast_to. If True, return the entire sequence of p_forecast_to_hyper, from forecast_from to forecast_to.
+	:param pivot_to_coarse: If different from None, update more infrequently after year `pivot_to_coarse`. Useful if predicting out to 2100 and highest precision is not required.
+	"""
+	hyper_results = {}
+	p_failure_by_target_hyper = 1
+
+	if pivot_to_coarse is None:
+		forecast_years = range(forecast_from+1, forecast_to+1)
+	else:
+		forecast_years = np.concatenate((np.arange(forecast_from+1, pivot_to_coarse, 1), np.arange(pivot_to_coarse, forecast_to+1, 15), (forecast_to,)))
+
+
+	for index,forecast_to_inner in enumerate(forecast_years):
+		if index == 0:
+			forecast_from_inner = forecast_years[0] - 1
+		else:
+			forecast_from_inner = forecast_years[index-1]
+		hyper_results_year = hyper_prior_single_update(rules=rules, initial_weights=initial_weights, forecast_from=forecast_from_inner, forecast_to=forecast_to_inner)
+
+		p_failure_hyper = 1 - hyper_results_year['p_forecast_to_hyper']
+		p_failure_by_target_hyper = p_failure_by_target_hyper * p_failure_hyper
+		p_success_by_target_hyper = 1 - p_failure_by_target_hyper
+
+		hyper_results[forecast_to_inner] = {
+			'p_forecast_to_hyper': p_success_by_target_hyper,
+			# 'p_forecast_to_static': p_success_by_target_static,
+			'forecast_from': forecast_from_inner,
+			'wts_forecast_from': hyper_results_year['wts_forecast_from']
+		}
+
+	# The static calculation can be done all in one go:
+	static = hyper_prior_single_update(rules=rules, initial_weights=initial_weights, forecast_to=forecast_to, forecast_from=forecast_from)
+	hyper_results[forecast_to]['p_forecast_to_static'] = static['p_forecast_to_static']
+
+	if return_sequence:
+		return hyper_results
+	else:
+		if forecast_from == forecast_years[0] - 1:  # to avoid a ValueError
+			after_forecast_from = forecast_years[0]
+		else:
+			after_forecast_from = forecast_years[forecast_years.index(forecast_from) + 1]
+		return {
+			'p_forecast_to_hyper': hyper_results[forecast_to]['p_forecast_to_hyper'],
+			'p_forecast_to_static': hyper_results[forecast_to]['p_forecast_to_static'],
+			'wts_forecast_from': hyper_results[after_forecast_from]['wts_forecast_from']}

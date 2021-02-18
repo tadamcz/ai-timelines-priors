@@ -224,31 +224,18 @@ class HyperPriorResult:
 
 		init_weights_normalized = np.asarray(weights)/sum(weights)
 
+		# We create the data here instead of passing a callable because we want to ensure that 2036 is one of the years
+		# that is calculated. We could probably do it more cleanly too.
 		hyper_results = {}
 		for year in range(2020,self.update_hyper_from + 1):
 			hyper_results[year] = {'p_forecast_to_hyper': 0}
-		hyper_results[self.update_hyper_from + 1] = functions.hyper_prior(rules=rules_dicts, initial_weights=weights, forecast_from=self.update_hyper_from, forecast_to=self.update_hyper_from+1)
-		hyper_results[self.update_hyper_from + 1]['forecast_from'] = self.update_hyper_from
-		p_failure_by_target = 1
-		# We create the data here instead of passing a callable because we want to ensure that 2036 is one of the years
-		# that is calculated. We could probably do it more cleanly too.
+
 		if self.update_hyper_from < 2036:
-			pivot_to_sparse_year = 2037  # Year by which forecast_years switches to every 15 years instead of every year (to save computation)
+			pivot_to_coarse = 2037  # Year by which forecast_years switches to every N years instead of every year (to save computation)
 		else:
-			pivot_to_sparse_year = self.update_hyper_from
-		forecast_years = np.concatenate((np.arange(self.update_hyper_from + 1, pivot_to_sparse_year, 1), np.arange(pivot_to_sparse_year, 2100, 15)))
-		for index,year in enumerate(forecast_years):
-			if index == 0:
-				forecast_from = year-1
-			else:
-				forecast_from = forecast_years[index-1]
+			pivot_to_coarse = self.update_hyper_from
 
-			hyper_results_year = functions.hyper_prior(rules=rules_dicts, initial_weights=weights, forecast_from=forecast_from, forecast_to=year)
-			p_failure = 1 - hyper_results_year['p_forecast_to_hyper']
-			p_failure_by_target = p_failure_by_target * p_failure
-			p_success_by_target = 1 - p_failure_by_target
-			hyper_results[year] = {'p_forecast_to_hyper':p_success_by_target, 'wts_forecast_from':hyper_results_year['wts_forecast_from'], 'forecast_from':forecast_from}
-
+		hyper_results.update(functions.hyper_prior(rules_dicts,weights, forecast_from=self.update_hyper_from, forecast_to=2100, pivot_to_coarse=pivot_to_coarse, return_sequence=True))
 
 		for i in range(len(rules_attributes)):
 			rules_attributes[i].weight2020 = to_percentage_strings(hyper_results[self.update_hyper_from + 1]['wts_forecast_from'][i])

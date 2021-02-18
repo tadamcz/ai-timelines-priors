@@ -528,7 +528,6 @@ def section_7_3():
 		datadict = functions.hyper_prior(row, initial_weights=[.8, .2])
 		datadict['pr2036 20% impossible'] = datadict.pop('p_forecast_to_hyper')
 		datadict['wt2020'] = datadict.pop('wts_forecast_from')[1]
-		del datadict['p_forecast_to_static']
 
 		datadict['pr2036 calendar-year'] = functions.four_param_framework_calendar(row[0]['ftp'])
 
@@ -626,7 +625,6 @@ def appendix_9():
 		rowname = str(row)
 
 		datadict = functions.hyper_prior(row, initial_weights=[0.8, 0.2])
-		del datadict['p_forecast_to_static']
 
 		datadict['pr2036 20% impossible'] = datadict.pop('p_forecast_to_hyper')
 		datadict['wt2020'] = datadict.pop('wts_forecast_from')[1]
