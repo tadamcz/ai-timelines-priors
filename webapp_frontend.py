@@ -224,18 +224,17 @@ class HyperPriorResult:
 
 		init_weights_normalized = np.asarray(weights)/sum(weights)
 
-		# We create the data here instead of passing a callable because we want to ensure that 2036 is one of the years
-		# that is calculated. We could probably do it more cleanly too.
+		# We create the data here instead of passing a callable because it's far more efficient to generate the whole sequence in one call to functions.hyper_prior
 		hyper_results = {}
 		for year in range(2020,self.update_hyper_from + 1):
 			hyper_results[year] = {'p_forecast_to_hyper': 0}
 
 		if self.update_hyper_from < 2036:
-			pivot_to_coarse = 2037  # Year by which forecast_years switches to every N years instead of every year (to save computation)
+			forecast_years = np.concatenate((np.arange(self.update_hyper_from+1, 2035, 3), (2036,), np.arange(2037,2099, 15), (2100,)))
 		else:
-			pivot_to_coarse = self.update_hyper_from
+			forecast_years = np.concatenate((np.arange(2037,2099, 15), (2100,)))
 
-		hyper_results.update(functions.hyper_prior(rules_dicts,weights, forecast_from=self.update_hyper_from, forecast_to=2100, pivot_to_coarse=pivot_to_coarse, return_sequence=True))
+		hyper_results.update(functions.hyper_prior(rules_dicts,weights, forecast_from=self.update_hyper_from, forecast_to=2100, forecast_years_explicit=forecast_years, return_sequence=True))
 
 		for i in range(len(rules_attributes)):
 			rules_attributes[i].weight2020 = to_percentage_strings(hyper_results[self.update_hyper_from + 1]['wts_forecast_from'][i])

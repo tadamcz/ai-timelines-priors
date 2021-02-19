@@ -426,18 +426,36 @@ def hyper_prior_single_update(rules, initial_weights, forecast_to=2036, forecast
 		'p_forecast_to_static': np.average(ps_AGI_forecast_to, weights=initial_weights),
 		'wts_forecast_from': weights_forecast_from}
 
-def hyper_prior(rules: list, initial_weights: list, forecast_from=2020, forecast_to=2036, return_sequence=False, pivot_to_coarse=None) -> dict:
+def hyper_prior(
+		rules: list,
+		initial_weights: list,
+		forecast_from=2020,
+		forecast_to=2036,
+		return_sequence=False,
+		fine_interval=1,
+		pivot_to_coarse=None,
+		forecast_years_explicit=None,
+) -> dict:
 	"""
 	:param return_sequence: By default, we only return the results for forecast_to. If True, return the entire sequence of p_forecast_to_hyper, from forecast_from to forecast_to.
+	:param fine_interval: How often to update before `pivot_to_coarse`. Useful to set to >1 if performance is critical.
 	:param pivot_to_coarse: If different from None, update more infrequently after year `pivot_to_coarse`. Useful if predicting out to 2100 and highest precision is not required.
+	:param forecast_years_explicit: Provide the array explicitly. Overrides `fine_interval` and `pivot_to_coarse`.
 	"""
 	hyper_results = {}
-	p_failure_by_target_hyper = 1
+	p_failure_by_target = 1
 
-	if pivot_to_coarse is None:
-		forecast_years = range(forecast_from+1, forecast_to+1)
+	if forecast_years_explicit is not None:
+		forecast_years_explicit = set(forecast_years_explicit)
+		forecast_years_explicit.add(forecast_from+1)
+		forecast_years_explicit.add(forecast_to)
+		forecast_years_explicit = sorted(list(forecast_years_explicit))
+		forecast_years = forecast_years_explicit
 	else:
-		forecast_years = np.concatenate((np.arange(forecast_from+1, pivot_to_coarse, 1), np.arange(pivot_to_coarse, forecast_to+1, 15), (forecast_to,)))
+		if pivot_to_coarse is None:
+			forecast_years = range(forecast_from+1, forecast_to+1)
+		else:
+			forecast_years = np.concatenate((np.arange(forecast_from+1, pivot_to_coarse, fine_interval), np.arange(pivot_to_coarse, forecast_to+1, 15), (forecast_to,)))
 
 
 	for index,forecast_to_inner in enumerate(forecast_years):
@@ -447,13 +465,12 @@ def hyper_prior(rules: list, initial_weights: list, forecast_from=2020, forecast
 			forecast_from_inner = forecast_years[index-1]
 		hyper_results_year = hyper_prior_single_update(rules=rules, initial_weights=initial_weights, forecast_from=forecast_from_inner, forecast_to=forecast_to_inner)
 
-		p_failure_hyper = 1 - hyper_results_year['p_forecast_to_hyper']
-		p_failure_by_target_hyper = p_failure_by_target_hyper * p_failure_hyper
-		p_success_by_target_hyper = 1 - p_failure_by_target_hyper
+		p_failure = 1 - hyper_results_year['p_forecast_to_hyper']
+		p_failure_by_target = p_failure_by_target * p_failure
+		p_success_by_target_hyper = 1 - p_failure_by_target
 
 		hyper_results[forecast_to_inner] = {
 			'p_forecast_to_hyper': p_success_by_target_hyper,
-			# 'p_forecast_to_static': p_success_by_target_static,
 			'forecast_from': forecast_from_inner,
 			'wts_forecast_from': hyper_results_year['wts_forecast_from']
 		}
