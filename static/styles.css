@@ -35,3 +35,8 @@ td, th {
   font-size: 1em;
   vertical-align: text-bottom;
 }
+
+#feedback_div {
+    max-width:50em;
+    margin-bottom: 2em;
+}

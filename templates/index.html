@@ -23,8 +23,7 @@ in the report "Semi-informative priors over AI timelines".
 <p>See inputs used in report {{ info("See section 8 of report, or equivalently section 'All things considered pr(AGI by 2036)' of blog post.") }}
     : <a href="javascript:fillLow()">Low</a>, <a href="javascript:fillCentral()">Central</a>, <a href="javascript:fillHigh()">High</a></p>
 
-
-<form method="POST">
+<form method="POST" id="main_form">
 <p>{{ render_field(form.virtual_successes, info="This input is not discussed in the blog post, see section 4 of report.") }}</p>
 <p>{{ render_field(form.rule_out_agi_by) }}</p>
 
@@ -171,5 +170,7 @@ in the report "Semi-informative priors over AI timelines".
 </form>
 
 <p><a href="https://github.com/tadamcz/ai-timelines-priors">Source code</a>.</p>
+
+{% include "_feedback-form.html" %}
 </body>
 </html>

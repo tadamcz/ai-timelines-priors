@@ -40,7 +40,7 @@ function fillLow() {
     init_weight_lifetime_field.val(0)
     init_weight_evolution_field.val(0)
 
-    $('form').submit()
+    $('#main_form').submit()
 }
 
 function fillCentral() {
@@ -62,7 +62,7 @@ function fillCentral() {
     init_weight_evolution_field.val(.15)
     init_weight_agi_impossible_field.val(.1)
 
-    $('form').submit()
+    $('#main_form').submit()
 }
 
 function fillHigh() {
@@ -84,5 +84,5 @@ function fillHigh() {
     init_weight_evolution_field.val(.2)
     init_weight_agi_impossible_field.val(.1)
 
-    $('form').submit()
+    $('#main_form').submit()
 }
