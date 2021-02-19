@@ -432,30 +432,25 @@ def hyper_prior(
 		forecast_from=2020,
 		forecast_to=2036,
 		return_sequence=False,
-		fine_interval=1,
 		pivot_to_coarse=None,
 		forecast_years_explicit=None,
 ) -> dict:
 	"""
 	:param return_sequence: By default, we only return the results for forecast_to. If True, return the entire sequence of p_forecast_to_hyper, from forecast_from to forecast_to.
-	:param fine_interval: How often to update before `pivot_to_coarse`. Useful to set to >1 if performance is critical.
 	:param pivot_to_coarse: If different from None, update more infrequently after year `pivot_to_coarse`. Useful if predicting out to 2100 and highest precision is not required.
-	:param forecast_years_explicit: Provide the array explicitly. Overrides `fine_interval` and `pivot_to_coarse`.
+	:param forecast_years_explicit: Provide the array explicitly. Overrides `forecast_from`, `forecast_to`, `pivot_to_coarse`.
 	"""
 	hyper_results = {}
 	p_failure_by_target = 1
 
 	if forecast_years_explicit is not None:
-		forecast_years_explicit = set(forecast_years_explicit)
-		forecast_years_explicit.add(forecast_from+1)
-		forecast_years_explicit.add(forecast_to)
-		forecast_years_explicit = sorted(list(forecast_years_explicit))
+		forecast_from, forecast_to = forecast_years_explicit[0], forecast_years_explicit[-1]
 		forecast_years = forecast_years_explicit
 	else:
 		if pivot_to_coarse is None:
 			forecast_years = range(forecast_from+1, forecast_to+1)
 		else:
-			forecast_years = np.concatenate((np.arange(forecast_from+1, pivot_to_coarse, fine_interval), np.arange(pivot_to_coarse, forecast_to+1, 15), (forecast_to,)))
+			forecast_years = np.concatenate((np.arange(forecast_from+1, pivot_to_coarse, 1), np.arange(pivot_to_coarse, forecast_to+1, 15), (forecast_to,)))
 
 
 	for index,forecast_to_inner in enumerate(forecast_years):
