@@ -17,29 +17,32 @@ from collections import OrderedDict
 app = Flask(__name__)
 app.config['WTF_CSRF_ENABLED'] = False  # not needed, there are no user accounts
 
-probability_validator = validators.number_range(0, 1, message='Probability must be between 0 and 1')
-positive_validator = validators.number_range(min=0, max=None, message='Cannot be a negative number')
+is_probability = validators.number_range(0, 1, message='Probability must be between 0 and 1')
+is_non_negative = validators.number_range(min=0, max=None, message='Cannot be negative')
+is_non_zero = validators.NoneOf((0,), message='Cannot be 0')
+is_not_one = validators.NoneOf((1,), message='Cannot be 1')
+reasonable_growth = validators.number_range(max=1e5, message='Such big numbers will confuse this poor computer, please try something smaller')
 
 
 class HyperPriorForm(FlaskForm):
-	rule_out_agi_by = IntegerField(label='We can rule out AGI by', default=2020, validators=[validators.number_range(min=2020, max=2099)])
+	rule_out_agi_by = IntegerField(validators=[validators.DataRequired(), validators.number_range(min=2020, max=2099)], label='We can rule out AGI by', default=2020)
 	first_trial_probability = StringField(default='1/300')
-	virtual_successes = FloatField(validators=[positive_validator], label='Virtual successes', default=1)
+	virtual_successes = FloatField(validators=[validators.DataRequired(), is_non_negative, is_non_zero], label='Virtual successes', default=1)
 	regime_start_year = IntegerField(validators=[validators.Optional()], label='Regime start year', default=1956)
 
-	g_exp = FloatField(validators=[validators.Optional()], label='Typical annual growth for STEM researchers (%)', default=4.3)
-	g_act = FloatField(validators=[validators.Optional()], label='Annual growth of AI researchers until 2036 (%)', default=11)
+	g_exp = FloatField(validators=[validators.Optional(), is_non_negative, is_non_zero, reasonable_growth], label='Typical annual growth for STEM researchers (%)', default=4.3)
+	g_act = FloatField(validators=[validators.Optional(), is_non_negative, is_non_zero, reasonable_growth], label='Annual growth of AI researchers until 2036 (%)', default=11)
 
-	relative_imp_res_comp = IntegerField(validators=[validators.Optional(), positive_validator], label='A 1% increase in the number of researchers is equivalent to an X% increase in computation', default=5)
+	relative_imp_res_comp = IntegerField(validators=[validators.Optional(), is_non_negative, is_non_zero, reasonable_growth], label='A 1% increase in the number of researchers is equivalent to an X% increase in computation', default=5)
 
-	comp_spending_assumption = FloatField(label='Maximum computation spend by 2036 ($ billions)', default=1)
+	comp_spending_assumption = FloatField(validators=[validators.Optional(), validators.number_range(min=0.00502, message='Must be greater than 2020 spend of 0.00502 billion')], label='Maximum computation spend by 2036 ($ billions)', default=1)
 
-	init_weight_calendar = FloatField(validators=[validators.Optional(), positive_validator], label='Calendar-year trial definition', default=.3)
-	init_weight_researcher = FloatField(validators=[validators.Optional(), positive_validator], label='Researcher-year trial definition', default=.3)
-	init_weight_comp_relative_res = FloatField(validators=[positive_validator], label='Computation trial definition: relative importance of research and computation', default=.05)
-	init_weight_lifetime = FloatField(validators=[validators.Optional(), positive_validator], label='Computation trial definition: lifetime anchor', default=.1)
-	init_weight_evolution = FloatField(validators=[validators.Optional(), positive_validator], label='Computation trial definition: evolutionary anchor', default=.15)
-	init_weight_agi_impossible = FloatField(validators=[validators.Optional(), positive_validator], label='AGI is impossible', default=.1)
+	init_weight_calendar = FloatField(validators=[validators.Optional(), is_non_negative], label='Calendar-year trial definition', default=.3)
+	init_weight_researcher = FloatField(validators=[validators.Optional(), is_non_negative], label='Researcher-year trial definition', default=.3)
+	init_weight_comp_relative_res = FloatField(validators=[is_non_negative], label='Computation trial definition: relative importance of research and computation', default=.05)
+	init_weight_lifetime = FloatField(validators=[validators.Optional(), is_non_negative], label='Computation trial definition: lifetime anchor', default=.1)
+	init_weight_evolution = FloatField(validators=[validators.Optional(), is_non_negative], label='Computation trial definition: evolutionary anchor', default=.15)
+	init_weight_agi_impossible = FloatField(validators=[validators.Optional(), is_non_negative], label='AGI is impossible', default=.1)
 
 	def calendar_year_filled(self):
 		c1 = self.first_trial_probability.data is not None
@@ -94,12 +97,27 @@ class HyperPriorForm(FlaskForm):
 		if not super(HyperPriorForm, self).validate():
 			validity = False
 
+		self.check_initial_weights()
+
+		if not self.rule_out_agi_by.errors and not self.regime_start_year.errors:
+			if self.regime_start_year.data > self.rule_out_agi_by.data:
+				validity = False
+				self.regime_start_year.errors.append("Cannot be later than %s, the year by which we can rule out AGI" % self.rule_out_agi_by.data)
+
 		if self.first_trial_probability.data is not None:
 			try:
 				self.first_trial_probability.data = fractions.Fraction(self.first_trial_probability.data)
-			except (SyntaxError, ValueError):
+			except (SyntaxError, ValueError, ZeroDivisionError):
 				self.first_trial_probability.errors.append("Could not interpret as a decimal or fraction")
 				validity = False
+			else:
+				if not 0 <= self.first_trial_probability.data <= 1:
+					validity = False
+					self.first_trial_probability.errors.append("Probability must be between 0 and 1")
+				if self.first_trial_probability.data == 0 or self.first_trial_probability.data == 1:
+					validity = False
+					self.first_trial_probability.errors.append("Cannot be 0 or 1")
+
 
 		return validity
 
@@ -108,9 +126,6 @@ class HyperPriorForm(FlaskForm):
 
 
 	def check_initial_weights(self):
-		"""
-		Doesn't work right now, not used
-		"""
 		init_weight_fields = [
 			self.init_weight_calendar,
 			self.init_weight_researcher,
@@ -130,8 +145,6 @@ class HyperPriorForm(FlaskForm):
 			for field in init_weight_fields:
 				field.data = 1
 				field.raw_data = ['1.']
-
-		self.validate()
 
 def plot_helper(xs,ys):
 	fig, ax = plt.subplots()
