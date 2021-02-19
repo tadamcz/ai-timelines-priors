@@ -777,9 +777,15 @@ def section_8():
 		}
 	]
 
+	print('P(AGI by 2036)')
 	for row in row_inputs:
-		datadict = functions.hyper_prior(row['rules'], initial_weights=row['weights'])
+		datadict = functions.hyper_prior(row['rules'], initial_weights=row['weights'], forecast_to=2036)
 		print(row['name'],to_percentage_strings(datadict['p_forecast_to_hyper']))
+
+	print('P(AGI by 2100)')
+	for row in row_inputs:
+		datadict = functions.hyper_prior(row['rules'], initial_weights=row['weights'], forecast_to=2100)
+		print(row['name'], to_percentage_strings(datadict['p_forecast_to_hyper']))
 
 	central = row_inputs[1]
 	datadict = functions.hyper_prior(central['rules'], initial_weights=central['weights'], forecast_from=2025)
