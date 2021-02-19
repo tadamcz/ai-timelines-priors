@@ -161,16 +161,17 @@ def plot_helper_multiline(dict_named_x_y_pairs):
 	return plot_html
 
 class UpdateRuleResult:
-	def __init__(self, _callable, input_args, init_weight):
-		if _callable:
-			self.p2036 = to_percentage_strings(_callable(2036))
-			self.create_plot(_callable)
+	def __init__(self, _callable, input_args, init_weight, rule_out_agi_by):
 		self.input_args = input_args
 		self.init_weight = init_weight
+		self.rule_out_agi_by = rule_out_agi_by
+		if _callable:
+			self.p2036 = to_percentage_strings(_callable(2036))
+			self.create_plot(_callable, x_from_to=(self.rule_out_agi_by,2100))
+
 
 	def create_plot(self, _callable, x_from_to=(2020, 2100), is_date=True):
-		x_from, x_to = x_from_to
-		xs = np.hstack((np.arange(x_from, 2036, 3), np.arange(2037, x_to, 15)))  # Only every N years, because this has an effect on performance
+		xs = generate_years_to_forecast(start_end=x_from_to, force_include={2020, self.rule_out_agi_by})
 		ys = [_callable(i) for i in xs]
 		if is_date:
 			xs = [datetime(x, 1, 1) for x in xs]
@@ -228,13 +229,8 @@ class HyperPriorResult:
 		hyper_results = {}
 		for year in range(2020,self.update_hyper_from + 1):
 			hyper_results[year] = {'p_forecast_to_hyper': 0}
-
-		if self.update_hyper_from < 2036:
-			forecast_years = np.concatenate((np.arange(self.update_hyper_from+1, 2035, 3), (2036,), np.arange(2037,2099, 15), (2100,)))
-		else:
-			forecast_years = np.concatenate((np.arange(2037,2099, 15), (2100,)))
-
-		hyper_results.update(functions.hyper_prior(rules_dicts,weights, forecast_from=self.update_hyper_from, forecast_to=2100, forecast_years_explicit=forecast_years, return_sequence=True))
+		forecast_years = generate_years_to_forecast((self.update_hyper_from,2100), fine_interval=3, coarse_interval=15)
+		hyper_results.update(functions.hyper_prior(rules_dicts,weights, forecast_years_explicit=forecast_years, return_sequence=True))
 
 		for i in range(len(rules_attributes)):
 			rules_attributes[i].weight2020 = to_percentage_strings(hyper_results[self.update_hyper_from + 1]['wts_forecast_from'][i])
@@ -271,7 +267,7 @@ def show():
 			def calendar_callable(year):
 				return functions.four_param_framework_calendar(forecast_to=year, **kwargs)
 
-			calendar_result = UpdateRuleResult(calendar_callable, kwargs, form.init_weight_calendar.data)
+			calendar_result = UpdateRuleResult(calendar_callable, kwargs, form.init_weight_calendar.data, form.rule_out_agi_by.data)
 			result.calendar = calendar_result
 			dict_x_y_pairs_for_multiline_plot['Calendar-year'] = (calendar_result.xs_plot,calendar_result.ys_plot)
 
@@ -286,7 +282,7 @@ def show():
 			def researcher_callable(year):
 				return functions.four_param_framework_researcher(forecast_to=year, **kwargs)
 
-			researcher_result = UpdateRuleResult(researcher_callable, kwargs, form.init_weight_researcher.data)
+			researcher_result = UpdateRuleResult(researcher_callable, kwargs, form.init_weight_researcher.data, form.rule_out_agi_by.data)
 			result.researcher = researcher_result
 			dict_x_y_pairs_for_multiline_plot['Researcher-year'] = (researcher_result.xs_plot,researcher_result.ys_plot)
 
@@ -302,7 +298,7 @@ def show():
 			def computation_callable(year):
 				return functions.four_param_framework_comp(forecast_to=year, **kwargs)
 
-			comp_relative_res = UpdateRuleResult(computation_callable, kwargs, form.init_weight_comp_relative_res.data)
+			comp_relative_res = UpdateRuleResult(computation_callable, kwargs, form.init_weight_comp_relative_res.data, form.rule_out_agi_by.data)
 			result.comp_relative_res = comp_relative_res
 			dict_x_y_pairs_for_multiline_plot['Computation vs research'] = (comp_relative_res.xs_plot,comp_relative_res.ys_plot)
 
@@ -320,8 +316,8 @@ def show():
 		def evolution_callable(year):
 			return functions.evolutionary_anchor(forecast_to=year,**evolution_kwargs)
 
-		lifetime_result = UpdateRuleResult(lifetime_callable, lifetime_kwargs, form.init_weight_lifetime.data)
-		evolution_result = UpdateRuleResult(evolution_callable, evolution_kwargs, form.init_weight_evolution.data)
+		lifetime_result = UpdateRuleResult(lifetime_callable, lifetime_kwargs, form.init_weight_lifetime.data, form.rule_out_agi_by.data)
+		evolution_result = UpdateRuleResult(evolution_callable, evolution_kwargs, form.init_weight_evolution.data, form.rule_out_agi_by.data)
 
 		result.lifetime = lifetime_result
 		result.evolution = evolution_result
@@ -331,7 +327,7 @@ def show():
 
 		result.plot_multiline = plot_helper_multiline(dict_x_y_pairs_for_multiline_plot)
 
-		agi_impossible = UpdateRuleResult(None, {'name': 'impossible'}, form.init_weight_agi_impossible.data)
+		agi_impossible = UpdateRuleResult(None, {'name': 'impossible'}, form.init_weight_agi_impossible.data, form.rule_out_agi_by.data)
 		agi_impossible.p2036 = to_percentage_strings(0)
 		result.agi_impossible = agi_impossible
 		if form.initial_weights_filled():
@@ -341,6 +337,25 @@ def show():
 	else:
 		return render_template('index.html', form=form, result=None)
 
+def generate_years_to_forecast(start_end, fine_interval=3, coarse_interval=15, force_include=()):
+	start, end = start_end
+	forecast_years = set(force_include)
+
+	if start<2036:
+		forecast_years.add(2036)
+		for i in np.arange(start+1, 2037, fine_interval):
+			forecast_years.add(i)
+		for i in np.arange(2037, end-1, coarse_interval):
+			forecast_years.add(i)
+	else:
+		for i in np.arange(start+1, end-1, coarse_interval):
+			forecast_years.add(i)
+
+	forecast_years.add(end)
+
+	forecast_years = sorted(list(forecast_years))
+
+	return forecast_years
 
 if __name__ == "__main__":
 	app.run()
