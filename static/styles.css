@@ -13,6 +13,11 @@
 input {
     width: 5em;
 }
+
+.update_rule_box {
+    min-height: 222px; /* avoids layout jumping around if plots not visible */
+}
+
 .errors{
     color: red;
 }
