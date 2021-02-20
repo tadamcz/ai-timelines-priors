@@ -32,6 +32,12 @@ td, th {
     padding-right: 2em;
 }
 
+@media only screen and (max-width: 600px) {
+    td, th {
+        border: solid 1px gray;
+    }
+}
+
 .material-icons{
   font-size: 1em;
   vertical-align: text-bottom;
