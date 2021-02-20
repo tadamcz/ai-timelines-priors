@@ -258,10 +258,32 @@ class HyperPriorResult:
 		ys = [v['p_forecast_to_hyper'] for v in self.pAGI_hyper.values()]
 		self.plot_hyper = plot_helper(xs,ys)
 
+class HashableDict(dict):
+	def hash_value(self, value):
+		if isinstance(value, dict):
+			return self.hash_dict_helper(value)
+		elif isinstance(value, set):
+			return frozenset(value)
+		elif isinstance(value, list):
+			return tuple(value)
+		else:
+			# Assume any other values are hashable types
+			return value.__hash__()
+
+	def hash_dict_helper(self, dictionary):
+		return hash((frozenset(dictionary), tuple(self.hash_value(v) for v in dictionary.values())))
+
+	def __hash__(self):
+		return self.hash_dict_helper(self)
+
+cache = {}
 
 @app.route('/', methods=['GET', 'POST'])
 def show():
 	form = HyperPriorForm()
+	form_data_hashable = HashableDict(form.data)
+	if form_data_hashable in cache:
+		return cache[form_data_hashable]
 	if form.validate():
 		dict_x_y_pairs_for_multiline_plot = OrderedDict()  # Use for compatibility with Python version 3.7 running on Elastic Beanstalk
 
@@ -346,9 +368,11 @@ def show():
 		if form.initial_weights_filled():
 			result.update_hyper_prior()
 			result.create_plot()
-		return render_template('index.html', form=form, result=result)
+		response_page = render_template('index.html', form=form, result=result)
 	else:
-		return render_template('index.html', form=form, result=None)
+		response_page = render_template('index.html', form=form, result=None)
+	cache[form_data_hashable] = response_page
+	return response_page
 
 def generate_years_to_forecast(start_end, fine_interval=3, coarse_interval=15, force_include=()):
 	start, end = start_end
