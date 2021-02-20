@@ -41,3 +41,18 @@ td, th {
     max-width:50em;
     margin-bottom: 2em;
 }
+
+#loading_indicator{
+    display: flex;
+    justify-content: center;
+    position: fixed;
+    top: 1em;
+    width: 100%;
+    z-index: 999;
+}
+
+#loading_indicator > div{
+    border-radius: 5px;
+    background-color: lightgray;
+    padding: 5px;
+}

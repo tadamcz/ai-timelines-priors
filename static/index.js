@@ -1,28 +1,94 @@
+function defineJQueryObjects(){
+    // These objects are inside the form that we rewrite using Ajax, so they
+    // need to be recreated each time. This is a helper function for that.
+    rule_out_agi_by_field = $('#rule_out_agi_by')
+    virtual_successes_field = $('#virtual_successes')
+    regime_start_year_field = $('#regime_start_year')
+    first_trial_probability_field = $('#first_trial_probability')
+    g_exp_field = $('#g_exp')
+    g_act_field = $('#g_act')
+    init_weight_calendar_field = $('#init_weight_calendar')
+    init_weight_researcher_field = $('#init_weight_researcher')
+    init_weight_agi_impossible_field = $('#init_weight_agi_impossible')
+    relative_imp_res_comp_field = $('#relative_imp_res_comp')
+    comp_spending_assumption_field = $('#comp_spending_assumption')
+
+    init_weight_comp_relative_res_field = $('#init_weight_comp_relative_res')
+    init_weight_lifetime_field = $('#init_weight_lifetime')
+    init_weight_evolution_field = $('#init_weight_evolution')
+}
+
 $(document).ready(function() {
+    defineJQueryObjects()
 
-// Create jQuery objects once, use multiple times later
-rule_out_agi_by_field = $('#rule_out_agi_by')
-virtual_successes_field = $('#virtual_successes')
-regime_start_year_field = $('#regime_start_year')
-first_trial_probability_field = $('#first_trial_probability')
-g_exp_field = $('#g_exp')
-g_act_field = $('#g_act')
-init_weight_calendar_field = $('#init_weight_calendar')
-init_weight_researcher_field = $('#init_weight_researcher')
-init_weight_agi_impossible_field = $('#init_weight_agi_impossible')
-relative_imp_res_comp_field = $('#relative_imp_res_comp')
-comp_spending_assumption_field = $('#comp_spending_assumption')
+    // Loading indicator
+    var loading_indicator = $('#loading_indicator').hide();
+    $(document)
+      .ajaxStart(function () {
+        loading_indicator.show();
+      })
+      .ajaxStop(function () {
+        loading_indicator.hide();
+      });
 
-init_weight_comp_relative_res_field = $('#init_weight_comp_relative_res')
-init_weight_lifetime_field = $('#init_weight_lifetime')
-init_weight_evolution_field = $('#init_weight_evolution')
+
+$(document).on('submit', '.main_form', function(event){
+    makeAJAXCall(event)
+});
 
 })
 
+function makeAJAXCall(event){
+    // Submit the form via AJAX to avoid reloading the page
+    if (event) {
+        event.preventDefault();
+    }
+    console.log("Hey!")
+
+    var form = $("#main_form");
+    var url = form.attr('action');
+
+    // remember scroll position
+    var scroll = $(window).scrollTop();
+
+    $.ajax({
+           type: "POST",
+           url: url,
+           data: form.serialize(), // serializes the form's elements.
+           success: function(response)
+           {
+               // parses the big long string into an array of DOM nodes
+               nodes = $.parseHTML(response, keepScripts=true)
+
+               // re-writes the form
+               $("#main_form").replaceWith($(nodes).filter('#main_form'))
+
+               // scroll to any errors
+               errors = $('.errors')
+               if (errors.length) {
+                   $('html, body').animate({
+                       'scrollTop': errors.offset().top - $(document).height()*0.1
+                   });
+               }
+
+           },
+         });
+
+}
+
 // Hack to move y-axes that were being cut off. Customizing axis placement appears to be impossible or poorly documented in mpld3
-$( window ).on( "load", function (){
+function moveAxes(){
     labels = $('.mpld3-text[transform]') // add [transform] so we only catch rotated labels
     labels.attr('transform', (i, value) => `${value || ""} translate(0 10)`)
+}
+
+$( window ).on( "load", function (){
+    moveAxes()
+})
+
+$( document ).ajaxComplete(function(){
+    defineJQueryObjects()
+    moveAxes()
 })
 
 function fillLow() {
