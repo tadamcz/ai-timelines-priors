@@ -3,6 +3,7 @@ from wtforms import FloatField, IntegerField, SelectField, StringField
 from wtforms import validators
 from datetime import datetime
 import fractions
+import pylru
 
 from flask_wtf import FlaskForm
 
@@ -276,7 +277,10 @@ class HashableDict(dict):
 	def __hash__(self):
 		return self.hash_dict_helper(self)
 
-cache = {}
+# We use an LRU dictionary instead of the @lru_cache decorator
+# because we would need to pass in the object `form`, which is not hashable
+cache = pylru.lrucache(size=int(1e6))
+
 
 @app.route('/', methods=['GET', 'POST'])
 def show():
