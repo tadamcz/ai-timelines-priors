@@ -54,10 +54,12 @@ td, th {
 }
 
 #loading_indicator{
+    font-size: 1.25em;
     position: fixed;
     z-index: 999;
     border-radius: 5px;
-    background-color: lightgray;
+    background-color: cornflowerblue;
+    color: white;
     padding: 5px;
     top: 25px;
     left: 25px;
