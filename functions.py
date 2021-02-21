@@ -11,6 +11,8 @@ from functools import lru_cache
 # Global variables
 probability_solution_leftbound, probability_solution_rightbound = 1e-9, 1 - 1e-9
 
+cache_max_size = int(1e6)
+
 # To very slightly improve precision at a cost to performance, set this to a smaller number.
 # Setting it to for example 1/10,000 changes some of the results by 1 on the second significant digit.
 trial_increment = 1 / 100
@@ -18,7 +20,7 @@ trial_increment = 1 / 100
 def number_geometric_increases(start, end, increment=trial_increment):
 	return int(np.log(end / start) / np.log(1 + increment))
 
-@lru_cache(maxsize=int(1e6))
+@lru_cache(maxsize=cache_max_size)
 def generalized_laplace(trials, failures, virtual_successes, virtual_failures=None, ftp=None):
 	"""
 	Generalization of Laplace's rule:
@@ -39,7 +41,7 @@ def generalized_laplace(trials, failures, virtual_successes, virtual_failures=No
 	next_trial_p = (virtual_successes + successes) / (trials + virtual_successes + virtual_failures)
 	return next_trial_p
 
-@lru_cache(maxsize=int(1e4))
+@lru_cache(maxsize=cache_max_size)
 def forecast_generalized_laplace(failures, forecast_years, virtual_successes, virtual_failures=None, ftp=None):
 	"""
 	Use the generalized Laplace's rule to make forecasts about the probability of at least one success within the next
@@ -104,7 +106,7 @@ def four_param_framework_calendar(ftp, regime_start=1956, forecast_from=2020, fo
 	failures = forecast_from - regime_start
 	return forecast_generalized_laplace(failures=failures, forecast_years=forecast_to - forecast_from, virtual_successes=virtual_successes, virtual_failures=virtual_failures)
 
-
+@lru_cache(maxsize=cache_max_size)
 def solve_for_ftp_res(g_exp=4.3 / 100, ftp_cal=1 / 300):
 	"""
 	Numerical equation solver used in some formulations of the researcher-year trial definition and the computation trail definition.
@@ -119,7 +121,7 @@ def solve_for_ftp_res(g_exp=4.3 / 100, ftp_cal=1 / 300):
 
 	return ftp_res_solution
 
-
+@lru_cache(maxsize=cache_max_size)
 def four_param_framework_researcher(g_act, ftp_res=None, ftp_cal_equiv=None, g_exp=None, regime_start=1956, forecast_from=2020, forecast_to=2036, virtual_successes=1, g_act_after_2036=None):
 	"""
 	Used in the researcher-year trial definition
@@ -153,7 +155,7 @@ def four_param_framework_researcher(g_act, ftp_res=None, ftp_cal_equiv=None, g_e
 		virtual_successes=virtual_successes,
 		ftp=ftp_res)
 
-
+@lru_cache(maxsize=cache_max_size)
 def solve_for_ftp_comp(ftp_res, rel_imp_res_comp):
 	"""
 	Numerical equation solver used in some formulations of the computation trail definition.
@@ -175,7 +177,7 @@ def solve_for_ftp_comp(ftp_res, rel_imp_res_comp):
 
 	return ftp_comp_solution
 
-
+@lru_cache(maxsize=cache_max_size)
 def solve_for_ftp_comp_indirect(ftp_cal, rel_imp_res_comp, g_exp):
 	ftp_res = solve_for_ftp_res(g_exp=g_exp, ftp_cal=ftp_cal)
 	return solve_for_ftp_comp(ftp_res, rel_imp_res_comp)
@@ -259,7 +261,7 @@ def get_computation_amount_for_year(y, spend2036):
 
 	return year_to_computation[y]
 
-@lru_cache()
+@lru_cache(maxsize=cache_max_size)
 def evolutionary_anchor(spend2036, virtual_successes=1, forecast_from=2020, forecast_to=2036):
 	"""
 	The "evolutionary anchor" biological hypothesis can be used within the computation trial definition.
@@ -294,7 +296,7 @@ def evolutionary_anchor(spend2036, virtual_successes=1, forecast_from=2020, fore
 		forecast_from=forecast_from,
 		virtual_successes=virtual_successes)
 
-@lru_cache()
+@lru_cache(maxsize=cache_max_size)
 def lifetime_anchor(spend2036, virtual_successes=1, regime_start=1956, forecast_from=2020, forecast_to=2036):
 	"""
 	The "lifetime anchor" biological hypothesis can be used within the computation trial definition.
