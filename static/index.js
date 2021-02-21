@@ -31,6 +31,18 @@ $(document).ready(function() {
         loading_indicator.hide();
       });
 
+    if (window.visualViewport) {
+        function onWindowScroll() {
+            loading_indicator.css('top',window.visualViewport.offsetTop + 25 + "px")
+            loading_indicator.css('left',window.visualViewport.offsetLeft + 25 + "px")
+        }
+        onWindowScroll();
+        window.visualViewport.addEventListener("resize", onWindowScroll);
+        window.visualViewport.addEventListener("scroll", onWindowScroll);
+        // https://developers.google.com/web/updates/2017/09/visual-viewport-api#gotchas
+        window.addEventListener('scroll', onWindowScroll);
+    }
+
 
 $(document).on('submit', '.main_form', function(event){
     makeAJAXCall(event)
