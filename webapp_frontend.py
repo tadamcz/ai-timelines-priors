@@ -279,7 +279,8 @@ class HashableDict(dict):
 
 # We use an LRU dictionary instead of the @lru_cache decorator
 # because we would need to pass in the object `form`, which is not hashable
-cache = pylru.lrucache(size=int(1e6))
+# Each response is about 82kbytes, I set the maxsize to take up about 500mbytes.
+cache = pylru.lrucache(size=int(6000))
 
 
 @app.route('/', methods=['GET', 'POST'])
