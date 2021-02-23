@@ -25,8 +25,6 @@
     : <a href="javascript:fillLow()">Low</a>, <a href="javascript:fillCentral()">Central</a>, <a href="javascript:fillHigh()">High</a></p>
 
 <form method="POST" id="main_form" class="main_form">
-<p>{{ render_field(form.virtual_successes, info="This input is not discussed in the blog post, see section 4 of report.") }}</p>
-<p>{{ render_field(form.rule_out_agi_by) }}</p>
 
 <h2>Calendar year trial definition</h2>
     <div class="flex update_rule_box">
@@ -168,6 +166,11 @@
 </div>
 
 </div>
+
+<h2>Additional inputs that affect all trial definitions</h2>
+<p>{{ render_field(form.virtual_successes, info="This input is not discussed in the blog post, see section 4 of report.") }}</p>
+<p>{{ render_field(form.rule_out_agi_by) }}</p>
+<button type='submit'>Submit all</button>
 </form>
 
 <p>Note: some results may differ very slightly from those in the report, due to approximations we use on this website for the sake of speed.</p>
