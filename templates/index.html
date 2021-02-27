@@ -1,14 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    {# Meta tags   #}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width initial-scale=1">
+
+    {# CSS libraries  #}
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link rel="stylesheet" type="text/css" href={{url_for('static', filename="styles.css")}}/>
     <link rel="stylesheet" type="text/css" href={{url_for('static', filename="balloon.min.css")}}/>
 
+    {# JQuery #}
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    {# Own JS   #}
     <script src={{url_for('static', filename="index.js")}}></script>
+
+    {# Own CSS  #}
+    <link rel="stylesheet" type="text/css" href={{url_for('static', filename="styles.css")}}/>
 
     <title>Semi-informative priors over AI timelines</title>
 </head>
