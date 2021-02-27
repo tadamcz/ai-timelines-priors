@@ -1,8 +1,12 @@
-{% macro render_field(field, info=False) %}
+{% macro info(text, size="large") %}
+  <span aria-label="{{ text }}" data-balloon-pos="right" data-balloon-length="{{ size }}" class="material-icons">info</span>
+{% endmacro %}
+
+{% macro render_field(field, info_text=False) %}
   <div>
       {{ field.label }}
-      {% if info %}
-      <span aria-label="{{ info }}" data-balloon-pos="right" data-balloon-length="large" class="material-icons">info</span>
+      {% if info_text %}
+          {{ info(info_text) }}
       {% endif %}
       {{ field(**kwargs)|safe }}
   </div>
@@ -81,8 +85,4 @@
     {{ result_rule_object.p2036 }}
     {% endif %}
 </td>
-{% endmacro %}
-
-{% macro info(text, size="large") %}
-  <span aria-label="{{ text }}" data-balloon-pos="right" data-balloon-length="{{ size }}" class="material-icons">info</span>
 {% endmacro %}

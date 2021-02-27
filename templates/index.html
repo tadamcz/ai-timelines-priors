@@ -30,7 +30,7 @@
     <div class="flex update_rule_box">
     <div class="input">
         {{ render_field(form.first_trial_probability)}}
-        {{ render_field(form.regime_start_year, info="Used in calendar year and researcher-year update rules. The computation rules have fixed start times.") }}
+        {{ render_field(form.regime_start_year, info_text="Used in calendar year and researcher-year update rules. The computation rules have fixed start times.") }}
     <button type='submit'>Submit all</button>
     </div>
     <div class="output">
@@ -44,11 +44,10 @@
 </div>
 
 <h2>Researcher-year trial definition</h2>
-
 <div class="flex update_rule_box">
     <div class="input">
-        {{ render_field(form.g_exp, info='One calendar year trial with the first trial probability defined above is equivalent to this increase in the number of AI researchers. See section 6.1 of the report.')}}
-        {{ render_field(form.g_act, info="After 2036, growth rates return to the typical annual growth for STEM researchers.") }}
+        {{ render_field(form.g_exp, info_text='One calendar year trial with the first trial probability defined above is equivalent to this increase in the number of AI researchers. See section 6.1 of the report.')}}
+        {{ render_field(form.g_act, info_text="After 2036, growth rates return to the typical annual growth for STEM researchers.") }}
 
     <button type='submit'>Submit all</button>
     </div>
@@ -68,7 +67,7 @@
         <div>A 1% increase in the number of researchers is equivalent to a {{ render_field_nolabel(form.relative_imp_res_comp, inline=True)}}% increase in computation
         {{ info("Or equivalently: one doubling in the number of researchers is equivalent to X doublings in computation.") }}
         </div>
-        {{ render_field(form.comp_spending_assumption, info="The largest amount spent on the computation to develop a single AI system by 2036 (see section 6.2.1 of report). Used in all computation trial definitions. We assume this amount does not increase after 2036.") }}
+        {{ render_field(form.comp_spending_assumption, info_text="The largest amount spent on the computation to develop a single AI system by 2036 (see section 6.2.1 of report). Used in all computation trial definitions. We assume this amount does not increase after 2036.") }}
     <button type='submit'>Submit all</button>
     </div>
     <div class="output">
@@ -168,7 +167,7 @@
 </div>
 
 <h2>Additional inputs that affect all trial definitions</h2>
-<p>{{ render_field(form.virtual_successes, info="This input is not discussed in the blog post, see section 4 of report.") }}</p>
+<p>{{ render_field(form.virtual_successes, info_text="This input is not discussed in the blog post, see section 4 of report.") }}</p>
 <p>{{ render_field(form.rule_out_agi_by) }}</p>
 <button type='submit'>Submit all</button>
 </form>
