@@ -1,5 +1,5 @@
-{% macro info(text, size="large") %}
-  <span aria-label="{{ text }}" data-balloon-pos="right" data-balloon-length="{{ size }}" class="material-icons">info</span>
+{% macro info(text) %}
+    <span title="{{ text }}" class="tooltip_anchor tooltip_is_hoverable material-icons">info</span>
 {% endmacro %}
 
 {% macro render_field(field, info_text=False) %}

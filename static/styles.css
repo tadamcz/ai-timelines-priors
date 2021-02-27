@@ -63,5 +63,16 @@ td, th {
     padding: 5px;
     top: 25px;
     left: 25px;
+}
 
+.tooltip_anchor {
+    cursor: pointer;
+}
+
+.ui-tooltip-content > p {
+    margin-bottom: 1em;
+    margin-top: 0;
+}
+.ui-tooltip-content > p:last-child {
+    margin-bottom: 0;
 }

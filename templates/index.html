@@ -9,8 +9,10 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" type="text/css" href={{url_for('static', filename="balloon.min.css")}}/>
 
-    {# JQuery #}
+    {# JQuery and JQuery UI #}
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src={{url_for('static', filename="jquery-ui.1.12.1-custom.min.js")}}></script>
+    <link rel="stylesheet" href= {{url_for('static', filename='jquery-ui.min.css') }}>
 
     {# Own JS   #}
     <script src={{url_for('static', filename="index.js")}}></script>
@@ -127,7 +129,7 @@
 <table>
     <tr>
         <th>Initial weights of update rules {{ info("These weights need not sum to 1, they can be any non-negative numbers") }}</th>
-        <th>Initial weights {{ info("Normalized","small") }} </th>
+        <th>Initial weights {{ info("Normalized") }} </th>
         <th>Weights in {{ result.update_hyper_from }} </th>
         <th>Probability of AGI by 2036</th>
     </tr>

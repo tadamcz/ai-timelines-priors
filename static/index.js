@@ -43,6 +43,9 @@ $(document).ready(function() {
         window.addEventListener('scroll', onWindowScroll);
     }
 
+    // Create tooltips
+    createTooltips()
+
 
 $(document).on('submit', '.main_form', function(event){
     makeAJAXCall(event)
@@ -163,4 +166,58 @@ function fillHigh() {
     init_weight_agi_impossible_field.val(.1)
 
     $('#main_form').submit()
+}
+
+function createTooltips(){
+    // https://stackoverflow.com/a/58863161/
+
+    $(".tooltip_anchor").each((index, element) => {
+    let $anchor = $(element),
+        $content = $anchor.attr('title');
+
+    let timeoutId = null;
+    function cancelClose() {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+        timeoutId = null;
+      }
+    }
+    function scheduleClose() {
+      cancelClose();
+      timeoutId = setTimeout(() => {
+        $anchor.tooltip("close");
+        timeoutId = null;
+      }, 250)
+    }
+
+    let tooltipOptions = {
+      content: () => $content,
+      // Only the tooltip anchor should get a tooltip.  If we used "*", every child tag would
+      //  also get a tooltip.
+      items: ".tooltip_anchor",
+      position: {
+        my: "center top+10",
+        at: "center bottom",
+        collision: "flipfit",
+      },
+    };
+    if ($anchor.is(".tooltip_is_hoverable")) {
+      $.extend(tooltipOptions, {
+        open: (e) => {
+          let $tooltip = $("[role='tooltip'],.ui-tooltip");
+          $tooltip.on('mouseenter', cancelClose);
+          $tooltip.on('mouseleave', scheduleClose);
+        },
+        tooltipClass: "hoverable_tooltip",
+      });
+
+      // Prevent jquery UI from closing the tooltip of an anchor with a hoverable tooltip.
+      $anchor.on('mouseleave', (e) => {
+        // Instead, schedule a close.
+        scheduleClose();
+        e.stopImmediatePropagation();
+      });
+    }
+    $anchor.tooltip(tooltipOptions);
+  });
 }
