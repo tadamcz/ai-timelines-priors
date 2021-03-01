@@ -86,6 +86,12 @@ function makeAJAXCall(event){
                }
 
            },
+           error: function (response){
+               // Show the user the error
+               $("#main_content").html(
+                   "<p class='errors'>Internal server error. <a href='javascript:location.reload()'>Reload with default values</a>.</p>"
+               )
+           }
          });
 
 }
