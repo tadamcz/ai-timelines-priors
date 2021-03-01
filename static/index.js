@@ -58,7 +58,6 @@ function makeAJAXCall(event){
     if (event) {
         event.preventDefault();
     }
-    console.log("Hey!")
 
     var form = $("#main_form");
     var url = form.attr('action');
@@ -75,8 +74,8 @@ function makeAJAXCall(event){
                // parses the big long string into an array of DOM nodes
                nodes = $.parseHTML(response, keepScripts=true)
 
-               // re-writes the form
-               $("#main_form").replaceWith($(nodes).filter('#main_form'))
+               // re-writes the page
+               $("#main_content").replaceWith($(nodes).filter('#main_content'))
 
                // scroll to any errors
                errors = $('.errors')
@@ -103,6 +102,7 @@ $( window ).on( "load", function (){
 
 $( document ).ajaxComplete(function(){
     defineJQueryObjects()
+    createTooltips()
     moveAxes()
 })
 
@@ -212,6 +212,7 @@ function createTooltips(){
       });
 
       // Prevent jquery UI from closing the tooltip of an anchor with a hoverable tooltip.
+      $anchor.off('mouseleave') // remove any previous event handlers
       $anchor.on('mouseleave', (e) => {
         // Instead, schedule a close.
         scheduleClose();
