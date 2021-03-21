@@ -202,8 +202,8 @@ function createTooltips(){
       //  also get a tooltip.
       items: ".tooltip_anchor",
       position: {
-        my: "center top+10",
-        at: "center bottom",
+        my: "left center",
+        at: "right+3 center",
         collision: "flipfit",
       },
     };
