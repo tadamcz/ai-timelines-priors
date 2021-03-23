@@ -26,8 +26,8 @@ reasonable_growth = validators.number_range(max=1e5, message='Such big numbers w
 
 
 class HyperPriorForm(FlaskForm):
-	rule_out_agi_by = IntegerField(validators=[validators.DataRequired(), validators.number_range(min=2020, max=2099)], label='We can rule out AGI before the end of', default=2020)
-	first_trial_probability = StringField(default='1/300')
+	rule_out_agi_by = IntegerField(validators=[validators.DataRequired(), validators.number_range(min=2020, max=2099)], label='We can rule out AGI being developed before the end of ', default=2020)
+	first_trial_probability = StringField(default='1/300', label='First trial probability')
 	virtual_successes = FloatField(validators=[validators.DataRequired(), is_non_negative, is_non_zero], label='Virtual successes', default=1)
 	regime_start_year = IntegerField(validators=[validators.Optional()], label='Regime start year', default=1956)
 

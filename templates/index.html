@@ -29,10 +29,15 @@
 {% from "_macros.html" import render_field, render_field_nolabel, render_checkbox, table_data, info %}
 {% set p2036string = "Probability of AGI by 2036: " %}
 
-<p>This website lets you provide your own inputs for some of the calculations
-    in the report "Semi-informative priors over AI timelines".</p>
+<p>This website lets you provide your own parameter values for some of the calculations
+    in the report "Semi-informative priors over AI timelines".
+    We recommend that you read about the framework {{ info("
+    <p>AI R&D is modelled as a series of ‘trials’ where each trial has a constant but unknown probability <i>p</i> of developing AGI.</p>
+    <p>We place a prior over <i>p</i> and update the prior when we observe trials that fail to develop AGI.</p>
+    ") }} <a href="https://www.openphilanthropy.org/blog/report-semi-informative-priors#StructureOfTheRest">here</a> before entering your own values.
+</p>
 
-<p>See inputs used in report {{ info("See section 8 of report, or equivalently section 'All things considered pr(AGI by 2036)' of blog post.") }}
+<p>See parameter values used in report {{ info("See <a href='https://www.openphilanthropy.org/semi-informative-priors#8'>section 8</a> of the report.") }}
     : <a href="javascript:fillLow()">Low</a>, <a href="javascript:fillCentral()">Central</a>, <a href="javascript:fillHigh()">High</a></p>
 
 <form method="POST" id="main_form" class="main_form">
@@ -40,9 +45,20 @@
 <h2>Calendar year trial definition</h2>
     <div class="flex update_rule_box">
     <div class="input">
-        {{ render_field(form.first_trial_probability)}}
-        {{ render_field(form.regime_start_year, info_text="Used in calendar year and researcher-year update rules. The computation rules have fixed start times.") }}
-    <button type='submit'>Submit all</button>
+        <p>A trial is a year of calendar time.</p>
+        {{ render_field(form.first_trial_probability, info_text="
+        <p>This input represents how easy you thought AGI would be to develop before efforts began. It gives your odds of success in the first trial.</p>
+        <p>If it equals 1/N then there’s a ~50% chance of developing AGI by the end of the Nth trial.</p>
+        <p>The report constrains this input using analogous historical developments, and favours the range [1/100, 1/1000].</p>
+        <p><a href='https://www.openphilanthropy.org/blog/report-semi-informative-priors#Trial1CalendarYear'>More</a></p>
+        ")}}
+        {{ render_field(form.regime_start_year, info_text="
+        <p>When did serious AI R&D efforts begin? Failure to develop AI before this time is ignored; it isn’t used to update our prior over <i>p</i>.</p>
+        <p>The AI R&D field is widely held to have started with the Dartmouth conference in 1956; however, computational power comparable with the brain
+         only became affordable around 2000.
+        <p>This parameter is used in calendar year and researcher-year update rules. The computation rules have fixed regime start times.</p>
+        <p><a href='https://www.openphilanthropy.org/blog/report-semi-informative-priors#RegimeStartTime'>More</a>, including a sensitivity analysis.</p>") }}
+        <button type='submit'>Submit all</button>
     </div>
     <div class="output">
     {% if result %}
@@ -57,10 +73,15 @@
 <h2>Researcher-year trial definition</h2>
 <div class="flex update_rule_box">
     <div class="input">
-        {{ render_field(form.g_exp, info_text='One calendar year trial with the first trial probability defined above is equivalent to this increase in the number of AI researchers. See section 6.1 of the report.')}}
-        {{ render_field(form.g_act, info_text="After 2036, growth rates return to the typical annual growth for STEM researchers.") }}
+        <p>A trial is a small % increase in the number of AI researchers.
+            If the number of AI researchers grows exponentially, there's a constant number of trials each year.
+            (<a href="https://www.openphilanthropy.org/blog/report-semi-informative-priors#TrialResearchers">More</a>)</p>
 
-    <button type='submit'>Submit all</button>
+        {{ render_field(form.g_exp, info_text='
+        If the number of AI researchers grows this fast, one trial occurs each year. If it grows twice as fast, two trials occur each year. (Trials have the first-trial probability specified above.)
+        ')}}
+        {{ render_field(form.g_act, info_text="After 2036, growth rates return to the typical annual growth for STEM researchers.") }}
+        <button type='submit'>Submit all</button>
     </div>
     <div class="output">
     {% if result %}
@@ -75,10 +96,24 @@
 <h2>Computation trial definition: relative importance of research and computation</h2>
 <div class="flex update_rule_box">
     <div class="input">
+        <p>Under this trial definition, ar trial is a small % increase in the maximum amount of computation used to develop an AI system.
+            If computation grows exponentially, there’s a constant number of trials each year.
+            (<a href="https://www.openphilanthropy.org/blog/report-semi-informative-priors#TrialComputation">More</a>)</p>
+        </p>
+        <p>The regime starts in 1956.</p>
         <div>A 1% increase in the number of researchers is equivalent to a {{ render_field_nolabel(form.relative_imp_res_comp, inline=True)}}% increase in computation
-        {{ info("Or equivalently: one doubling in the number of researchers is equivalent to X doublings in computation.") }}
+        {{ info("
+        <p>Or equivalently: one doubling in the number of researchers is equivalent to this many doublings in computation.</p>
+
+        <p>We can relate this parameter to the trials with the first-trial probability defined above.
+        For example, if typical growth of AI R&D is 4.3%, and this parameter is 5, then each 4.3*5 = 21.5% increase in computation corresponds to a trial.</p>
+        ") }}
         </div>
-        {{ render_field(form.comp_spending_assumption, info_text="The largest amount spent on the computation to develop a single AI system by 2036 (see section 6.2.1 of report). Used in all computation trial definitions. We assume this amount does not increase after 2036.") }}
+        {{ render_field(form.comp_spending_assumption, info_text="
+        <p>The largest amount spent on the computation to develop a single AI system by 2036. We assume this amount does not increase after 2036.</p>
+        <p>This parameter is used in all computation trial definitions.</p>
+        <p>We also assume that the price of computation decreases by a factor of 100 between 2020 and 2036, and thereafter halves every 2.5 years.</p>
+        ") }}
     <button type='submit'>Submit all</button>
     </div>
     <div class="output">
@@ -94,6 +129,12 @@
 <h2>Computation trial definition: lifetime anchor</h2>
 <div class="flex update_rule_box">
     <div class="input">
+        <p>Consider the computation inside a human brain during the first 30 years of life.
+            We calculate the first trial probability by assuming that by the time we’ve used that amount of computation to develop one AI system, there’s
+            a 50% chance that we’ll have developed AGI (this would have been a salient assumption to make in 1956).
+            (<a href="https://www.openphilanthropy.org/blog/report-semi-informative-priors#BioAnchors">More</a>)
+        </p>
+        <p>The regime starts in 1956.</p>
     </div>
     <div class="output">
     {% if result %}
@@ -108,6 +149,14 @@
 <h2>Computation trial definition: evolutionary anchor</h2>
 <div class="flex update_rule_box">
     <div class="input">
+        <p>Consider the total computation needed for the human brain to evolve. We calculate the first trial probability by assuming that by
+            the time we’ve used that amount of computation to develop one AI system, there’s a 50% chance that we’ll have developed AGI
+            (this would have been a salient assumption to make in 1956).
+            (<a href="https://www.openphilanthropy.org/blog/report-semi-informative-priors#BioAnchors">More</a>)
+        </p>
+        <p>The regime starts when the computation needed to run the human brain for two weeks is first used to develop an AI system.
+            This means that many fewer failures have been observed than for the other computation rules.
+        </p>
     </div>
     <div class="output">
     {% if result %}
@@ -122,7 +171,11 @@
 <h2>All trial definitions on one plot</h2>
 <div class="flex"><div class="input"></div><div class="output"> {{result.plot_multiline|safe }}</div></div>
 
-<h2>Hyper-prior update</h2>
+<h2>Hyper-prior update {{ info("
+<p>We assign initial weights to each update rule considered above, and to the hypothesis that AGI is impossible. We update these weights over time based on the failure to develop AGI.</p>
+<p>More precisely, before calculating <i>pr(AGI in year X|no AGI by year X-1)</i>, we update the weights based on the failure to develop AGI by year X-1.</p>
+<p><a href='https://www.openphilanthropy.org/blog/report-semi-informative-priors#HyperPrior'>More</a></p>
+") }}</h2>
 <div>
 
 
@@ -177,8 +230,14 @@
 
 </div>
 
-<h2>Additional inputs that affect all trial definitions</h2>
-<p>{{ render_field(form.virtual_successes, info_text="This input is not discussed in the blog post, see section 4 of report.") }}</p>
+<h2>Additional parameters</h2>
+These parameters affect all trial definitions.
+<p>{{ render_field(form.virtual_successes, info_text="
+    <p>This input is not discussed in the blog post, see <a href='https://www.openphilanthropy.org/semi-informative-priors#5.2'>section 5.2</a> of report.</p>
+    <p>Intuitively, it represents how resilient our prior over <i>p</i> is to changing when we observe failed trials. More virtual successes means you update less from the failure to develop AGI.</p>
+    <p>The report suggests values in the range [0.5, 1] are preferable, mostly based on intuitions about how quickly our estimate of p should fall when we observe failures.</p>
+    <p>Note: above we stated that if the first-trial probability = 1/N then there’s ~50% chance of success in the first N trials. This assumed 1 virtual success. With 0.5 virtual successes, the probability is ~42%.</p>
+") }}</p>
 <p>{{ render_field(form.rule_out_agi_by) }}</p>
 <button type='submit'>Submit all</button>
 </form>
