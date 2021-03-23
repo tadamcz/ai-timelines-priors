@@ -1,3 +1,7 @@
+p {
+    max-width: 50em;
+}
+
 .flex {
     display: flex;
     flex-wrap: wrap;
@@ -75,4 +79,8 @@ td, th {
 }
 .ui-tooltip-content > p:last-child {
     margin-bottom: 0;
+}
+
+.input > p {
+    margin-top: 0;
 }
