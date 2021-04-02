@@ -311,9 +311,12 @@ def show():
 			def calendar_callable(year):
 				return functions.four_param_framework_calendar(forecast_to=year, **kwargs)
 
-			calendar_result = UpdateRuleResult(calendar_callable, kwargs, form.init_weight_calendar.data, form.rule_out_agi_by.data)
+			try:
+				calendar_result = UpdateRuleResult(calendar_callable, kwargs, form.init_weight_calendar.data, form.rule_out_agi_by.data)
+				dict_x_y_pairs_for_multiline_plot['Calendar-year'] = (calendar_result.xs_plot,calendar_result.ys_plot)
+			except Exception:
+				calendar_result = None
 			result.calendar = calendar_result
-			dict_x_y_pairs_for_multiline_plot['Calendar-year'] = (calendar_result.xs_plot,calendar_result.ys_plot)
 
 		if form.researcher_filled():
 			kwargs = {**kwargs_all_rules, **{
@@ -326,9 +329,14 @@ def show():
 			def researcher_callable(year):
 				return functions.four_param_framework_researcher(forecast_to=year, **kwargs)
 
-			researcher_result = UpdateRuleResult(researcher_callable, kwargs, form.init_weight_researcher.data, form.rule_out_agi_by.data)
+			try:
+				researcher_result = UpdateRuleResult(researcher_callable, kwargs, form.init_weight_researcher.data, form.rule_out_agi_by.data)
+				dict_x_y_pairs_for_multiline_plot['Researcher-year'] = (researcher_result.xs_plot, researcher_result.ys_plot)
+			except Exception:
+				researcher_result = None
 			result.researcher = researcher_result
-			dict_x_y_pairs_for_multiline_plot['Researcher-year'] = (researcher_result.xs_plot,researcher_result.ys_plot)
+
+
 
 		if form.computation_relative_res_filled():
 			kwargs = {**kwargs_all_rules, **{
@@ -342,9 +350,13 @@ def show():
 			def computation_callable(year):
 				return functions.four_param_framework_comp(forecast_to=year, **kwargs)
 
-			comp_relative_res = UpdateRuleResult(computation_callable, kwargs, form.init_weight_comp_relative_res.data, form.rule_out_agi_by.data)
+			try:
+				comp_relative_res = UpdateRuleResult(computation_callable, kwargs, form.init_weight_comp_relative_res.data, form.rule_out_agi_by.data)
+				dict_x_y_pairs_for_multiline_plot['Computation vs research'] = (comp_relative_res.xs_plot,comp_relative_res.ys_plot)
+			except Exception:
+				comp_relative_res = None
 			result.comp_relative_res = comp_relative_res
-			dict_x_y_pairs_for_multiline_plot['Computation vs research'] = (comp_relative_res.xs_plot,comp_relative_res.ys_plot)
+
 
 
 		lifetime_kwargs = {**kwargs_all_rules, **{
@@ -375,8 +387,11 @@ def show():
 		agi_impossible.p2036 = to_percentage_strings(0)
 		result.agi_impossible = agi_impossible
 		if form.initial_weights_filled():
-			result.update_hyper_prior()
-			result.create_plot()
+			try:
+				result.update_hyper_prior()
+				result.create_plot()
+			except Exception:
+				pass
 		response_page = render_template('index.html', form=form, result=result)
 	else:
 		response_page = render_template('index.html', form=form, result=None)

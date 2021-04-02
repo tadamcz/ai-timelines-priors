@@ -105,6 +105,8 @@
     {% if result_trial_definition %}
     {{ p2036string }}{{ result_trial_definition.p2036 }} {{ info(cdf_table(result_trial_definition.cdf_iterable)) }}
     {{ result_trial_definition.plot|safe }}
+    {% else %}
+    <div class="errors">There's been an error.</div>
     {% endif %}
 {% endif %}
 </div>
