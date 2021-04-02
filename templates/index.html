@@ -33,8 +33,7 @@
 <div id="loading_indicator">Loading...</div>
 <div id="main_content">
 <h1>Semi-informative priors over AI timelines</h1>
-{% from "_macros.html" import render_field, render_field_nolabel, render_checkbox, table_data, info, cdf_table %}
-{% set p2036string = "Probability of AGI by 2036: " %}
+{% from "_macros.html" import render_field, render_field_nolabel, render_checkbox, table_data, info, cdf_table, output_pane %}
 
 <p>This website lets you provide your own parameter values for some of the calculations
     in the report "Semi-informative priors over AI timelines".
@@ -70,14 +69,7 @@
         <p><a href='https://www.openphilanthropy.org/blog/report-semi-informative-priors#RegimeStartTime'>More</a>, including a sensitivity analysis.</p>") }}
         <button type='submit'>Submit all</button>
     </div>
-    <div class="output">
-    {% if result %}
-        {% if result.calendar %}
-        {{ p2036string }}{{ result.calendar.p2036 }} {{ info(cdf_table(result.calendar.cdf_iterable)) }}
-        {{ result.calendar.plot|safe }}
-        {% endif %}
-    {% endif %}
-    </div>
+    {{ output_pane(result,result.calendar) }}
 </div>
 
 <h2>Researcher-year trial definition</h2>
@@ -93,14 +85,7 @@
         {{ render_field(form.g_act, info_text="After 2036, growth rates return to the typical annual growth for STEM researchers.") }}
         <button type='submit'>Submit all</button>
     </div>
-    <div class="output">
-    {% if result %}
-        {% if result.researcher %}
-        {{ p2036string }}{{ result.researcher.p2036 }} {{ info(cdf_table(result.researcher.cdf_iterable)) }}
-        {{ result.researcher.plot|safe }}
-        {% endif %}
-    {% endif %}
-    </div>
+    {{ output_pane(result,result.researcher) }}
 </div>
 
 <h2>Computation trial definition: relative importance of research and computation</h2>
@@ -126,14 +111,7 @@
         ") }}
     <button type='submit'>Submit all</button>
     </div>
-    <div class="output">
-    {% if result %}
-        {% if result.comp_relative_res %}
-        {{ p2036string }}{{ result.comp_relative_res.p2036 }}  {{ info(cdf_table(result.comp_relative_res.cdf_iterable)) }}
-        {{ result.comp_relative_res.plot|safe }}
-        {% endif %}
-    {% endif %}
-    </div>
+   {{ output_pane(result,result.comp_relative_res) }}
 </div>
 
 <h2>Computation trial definition: lifetime anchor</h2>
@@ -146,14 +124,7 @@
         </p>
         <p>The regime starts in 1956.</p>
     </div>
-    <div class="output">
-    {% if result %}
-        {% if result.lifetime %}
-        {{ p2036string }}{{ result.lifetime.p2036 }}  {{ info(cdf_table(result.lifetime.cdf_iterable)) }}
-        {{ result.lifetime.plot|safe }}
-        {% endif %}
-    {% endif %}
-    </div>
+   {{ output_pane(result,result.lifetime) }}
 </div>
 
 <h2>Computation trial definition: evolutionary anchor</h2>
@@ -168,14 +139,7 @@
             This means that many fewer failures have been observed than for the other computation rules.
         </p>
     </div>
-    <div class="output">
-    {% if result %}
-        {% if result.evolution %}
-        {{ p2036string }}{{ result.evolution.p2036 }} {{ info(cdf_table(result.evolution.cdf_iterable)) }}
-        {{ result.evolution.plot|safe }}
-        {% endif %}
-    {% endif %}
-    </div>
+   {{ output_pane(result,result.evolution) }}
 </div>
 
 <h2>All trial definitions on one plot</h2>

@@ -97,3 +97,15 @@
     {% endfor %}
 </table>
 {% endmacro %}
+
+{% set p2036string = "Probability of AGI by 2036: " %}
+{% macro output_pane(result, result_trial_definition) %}
+<div class="output">
+{% if result %}
+    {% if result_trial_definition %}
+    {{ p2036string }}{{ result_trial_definition.p2036 }} {{ info(cdf_table(result_trial_definition.cdf_iterable)) }}
+    {{ result_trial_definition.plot|safe }}
+    {% endif %}
+{% endif %}
+</div>
+{% endmacro %}
