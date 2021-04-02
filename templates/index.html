@@ -33,7 +33,7 @@
 <div id="loading_indicator">Loading...</div>
 <div id="main_content">
 <h1>Semi-informative priors over AI timelines</h1>
-{% from "_macros.html" import render_field, render_field_nolabel, render_checkbox, table_data, info %}
+{% from "_macros.html" import render_field, render_field_nolabel, render_checkbox, table_data, info, cdf_table %}
 {% set p2036string = "Probability of AGI by 2036: " %}
 
 <p>This website lets you provide your own parameter values for some of the calculations
@@ -73,7 +73,7 @@
     <div class="output">
     {% if result %}
         {% if result.calendar %}
-        {{ p2036string }}{{ result.calendar.p2036 }}
+        {{ p2036string }}{{ result.calendar.p2036 }} {{ info(cdf_table(result.calendar.cdf_iterable)) }}
         {{ result.calendar.plot|safe }}
         {% endif %}
     {% endif %}
@@ -96,7 +96,7 @@
     <div class="output">
     {% if result %}
         {% if result.researcher %}
-        {{ p2036string }}{{ result.researcher.p2036 }}
+        {{ p2036string }}{{ result.researcher.p2036 }} {{ info(cdf_table(result.researcher.cdf_iterable)) }}
         {{ result.researcher.plot|safe }}
         {% endif %}
     {% endif %}
@@ -129,7 +129,7 @@
     <div class="output">
     {% if result %}
         {% if result.comp_relative_res %}
-        {{ p2036string }}{{ result.comp_relative_res.p2036 }}
+        {{ p2036string }}{{ result.comp_relative_res.p2036 }}  {{ info(cdf_table(result.comp_relative_res.cdf_iterable)) }}
         {{ result.comp_relative_res.plot|safe }}
         {% endif %}
     {% endif %}
@@ -149,7 +149,7 @@
     <div class="output">
     {% if result %}
         {% if result.lifetime %}
-        {{ p2036string }}{{ result.lifetime.p2036 }}
+        {{ p2036string }}{{ result.lifetime.p2036 }}  {{ info(cdf_table(result.lifetime.cdf_iterable)) }}
         {{ result.lifetime.plot|safe }}
         {% endif %}
     {% endif %}
@@ -171,7 +171,7 @@
     <div class="output">
     {% if result %}
         {% if result.evolution %}
-        {{ p2036string }}{{ result.evolution.p2036 }}
+        {{ p2036string }}{{ result.evolution.p2036 }} {{ info(cdf_table(result.evolution.cdf_iterable)) }}
         {{ result.evolution.plot|safe }}
         {% endif %}
     {% endif %}
@@ -233,7 +233,7 @@
 <div class="flex">
     <div class="input"></div>
     <div class="output" style="margin-top: 1em">
-        Weighted average probability of AGI by 2036: {{ result.pAGI_2036_hyper }}
+        Weighted average probability of AGI by 2036: {{ result.pAGI_2036_hyper }}  {{ info(cdf_table(result.hyper_cdf_iterable)) }}
         {{ result.plot_hyper|safe }}
     </div>
 </div>

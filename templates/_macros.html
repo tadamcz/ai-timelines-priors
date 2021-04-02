@@ -86,3 +86,14 @@
     {% endif %}
 </td>
 {% endmacro %}
+
+{% macro cdf_table(iterable) %}
+<table>
+    {% for item in iterable %}
+    <TR>
+       <TD>{{item[0]}}</TD>
+       <TD>{{item[1]}}</TD>
+    </TR>
+    {% endfor %}
+</table>
+{% endmacro %}

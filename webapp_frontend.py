@@ -187,6 +187,8 @@ class UpdateRuleResult:
 	def create_plot(self, _callable, x_from_to=(2020, 2100), is_date=True):
 		xs = generate_years_to_forecast(start_end=x_from_to, force_include={2020, self.rule_out_agi_by})
 		ys = [_callable(i) for i in xs]
+		self.cdf_iterable = zip(xs,to_percentage_strings(ys))
+
 		if is_date:
 			xs = [datetime(x, 1, 1) for x in xs]
 		self.plot = plot_helper(xs,ys)
@@ -255,8 +257,10 @@ class HyperPriorResult:
 
 	def create_plot(self):
 		xs = self.pAGI_hyper.keys()
-		xs = [datetime(x, 1, 1) for x in xs]
 		ys = [v['p_forecast_to_hyper'] for v in self.pAGI_hyper.values()]
+		self.hyper_cdf_iterable = zip(xs,to_percentage_strings(ys))
+
+		xs = [datetime(x, 1, 1) for x in xs]
 		self.plot_hyper = plot_helper(xs,ys)
 
 class HashableDict(dict):
