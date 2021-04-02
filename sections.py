@@ -803,6 +803,8 @@ def to_percentage_strings(input):
 		return input
 	if isinstance(input, (float, int)):
 		return round_sig(input * 100, 2, type=str) + "%"
+	if isinstance(input, (list, np.ndarray)):
+		return [to_percentage_strings(i) for i in input]
 
 
 def to_fraction_strings(input):
@@ -827,6 +829,6 @@ def round_sig(x, *args, **kwargs):
 	if isinstance(x, (float, int)):
 		return round_lib(x, *args, **kwargs)
 	if isinstance(x, (list, np.ndarray)):
-		return [round_lib(i, *args, **kwargs) for i in x]
+		return [round_sig(i, *args, **kwargs) for i in x]
 	else:
 		raise TypeError("Must be numeric or list/array of numerics")
