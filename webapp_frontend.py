@@ -153,7 +153,28 @@ def plot_helper(xs,ys):
 	ax.plot(xs, ys)
 	ax.set_ylabel("Pr(AGI)")
 	ax.set_xlabel("Year")
-	ax.yaxis.set_major_formatter(mtick.PercentFormatter(xmax=1))
+
+	# We use FixedFormatter and FixedLocator here to circumvent the limitations and unpredictable behaviour of mpld3.
+	#
+	# mpld3 does not always display the same number of tick marks and decimal places as matplotlib.
+	# PercentFormatter and MaxNLocator have buggy implementations in mpld3 (see also https://github.com/mpld3/mpld3/issues/341)
+	#
+	# We define the tick mark locations and labels explicitly in Python, and hard-code them into FixedFormatter and FixedLocator.
+	# This ensures that the number of tick marks is always the same (10), and let us control the number of decimal places.
+
+	# Option 1: always display 2 significant figures
+	# y_ticks_fixed = np.linspace(0,max(ys)*100,10)
+	# y_ticks_fixed_str = [s+'%' for s in round_sig(y_ticks_fixed,2, type=str)]
+	# ax.yaxis.set_major_locator(mtick.FixedLocator([i/100 for i in y_ticks_fixed]))
+	# ax.yaxis.set_major_formatter(mtick.FixedFormatter(y_ticks_fixed_str))
+
+	# Option 2: always display the same number of digits after the decimal point
+	decimals = 1-max(int(np.log10(max(ys)))+1,0)
+	y_ticks_fixed = np.linspace(0,max(ys)*100,10)
+	y_ticks_fixed_str = [s+'%' for s in round_sig(y_ticks_fixed,decimals=decimals, type=str)]
+	ax.yaxis.set_major_locator(mtick.FixedLocator([i/100 for i in y_ticks_fixed]))
+	ax.yaxis.set_major_formatter(mtick.FixedFormatter(y_ticks_fixed_str))
+
 	mpld3.plugins.clear(fig)  # We only need a very simple plot
 	plot_html = mpld3.fig_to_html(fig)
 	plt.close(fig)  # Otherwise the matplotlib object stays in memory forever
